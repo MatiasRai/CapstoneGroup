@@ -1,0 +1,51 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Registro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- 👇 Título -->
+  <h2 style="text-align: center; margin-bottom: 20px;">Crear cuenta</h2>
+
+  <ion-item>
+    <ion-label position="floating">Nombre</ion-label>
+    <ion-input type="text"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Correo</ion-label>
+    <ion-input type="email"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Contraseña</ion-label>
+    <ion-input type="password"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Celular</ion-label>
+    <ion-input type="tel"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label>Foto de perfil</ion-label>
+    <input type="file" accept="image/*" style="margin-left: 10px;" />
+  </ion-item>
+
+  <!-- 👇 Tipo de discapacidad como select -->
+  <ion-item>
+    <ion-label>Tipo de discapacidad</ion-label>
+    <ion-select placeholder="Selecciona una opción">
+      <ion-select-option value="visual">Visual</ion-select-option>
+      <ion-select-option value="auditiva">Auditiva</ion-select-option>
+      <ion-select-option value="motriz">Motriz</ion-select-option>
+      <ion-select-option value="cognitiva">Cognitiva</ion-select-option>
+      <ion-select-option value="otra">Otra</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-button expand="block" style="margin-top: 20px;">
+    Registrarse
+  </ion-button>
+</ion-content>

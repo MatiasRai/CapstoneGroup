@@ -1,0 +1,66 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Detalles del Servicio</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Información del servicio -->
+  <h2 style="text-align: center; margin-bottom: 20px;">Servicios</h2>
+
+  <ion-item>
+    <ion-label style="display: block; margin-top: 10px;">
+    <ion-label style="text-align: center; margin-bottom: 20px">El Fogon De Pepe</ion-label>
+     <strong>Descripcion :</strong> 5 estrellas<br />
+     <strong>horarios :</strong> Lunes a Viernes de 9:00 a 18:00<br />
+     <strong>Costos :</strong> 5000 CLP<br />
+     <strong>Ubicacion :</strong> Rengifo 845 Esquina Baquedano, Puerto Montt 5502816 Chile<br />
+     <strong>Empresa :</strong> Pepes.inc<br />
+     <strong>Tipo de Discapacidad Permitida :</strong> Visual,movilidad<br />
+    </ion-label>
+  </ion-item>
+
+  <!-- Reseñas -->
+  <h3 style="margin-top: 30px;">Reseñas</h3>
+
+  <!-- Mostrar Reseñas como etiquetas -->
+  <ion-label style="display: block; margin-top: 10px;">
+    <strong>Excelente servicio (2023-09-15)</strong><br />
+    <strong>Valoración:</strong> 5 estrellas<br />
+    <strong>Comentario:</strong> Me encantó el servicio, todo fue muy rápido y profesional.
+  </ion-label>
+
+  <ion-label style="display: block; margin-top: 10px;">
+    <strong>Buen servicio (2023-09-12)</strong><br />
+    <strong>Valoración:</strong> 4 estrellas<br />
+    <strong>Comentario:</strong> El servicio fue bueno, pero hubo un pequeño retraso.
+  </ion-label>
+
+  <!-- Formulario para agregar una nueva reseña (solo la interfaz) -->
+  <h4 style="margin-top: 20px;">Agregar una Reseña</h4>
+  <ion-item>
+    <ion-label position="floating">Título del Usuario</ion-label>
+    <ion-input type="text" ></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Comentario</ion-label>
+    <ion-input type="text"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Valoración</ion-label>
+    <ion-select  value="1">
+      <ion-select-option value="1">1 Estrella</ion-select-option>
+      <ion-select-option value="2">2 Estrellas</ion-select-option>
+      <ion-select-option value="3">3 Estrellas</ion-select-option>
+      <ion-select-option value="4">4 Estrellas</ion-select-option>
+      <ion-select-option value="5">5 Estrellas</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <ion-button expand="block" >
+    Agregar Reseña
+  </ion-button>
+
+</ion-content>
