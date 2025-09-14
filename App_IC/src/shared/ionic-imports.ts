@@ -1,6 +1,7 @@
 import {
   IonApp,
   IonButton,
+  IonButtons,  
   IonInput,
   IonItem,
   IonLabel,
@@ -18,12 +19,13 @@ import {
   IonRow,
   IonCol,
   IonSelect,
-  IonSelectOption
+  IonSelectOption,
 } from '@ionic/angular/standalone';
 
 export const IONIC_IMPORTS = [
   IonApp,
   IonButton,
+  IonButtons,  // Añadir IonButtons aquí
   IonInput,
   IonItem,
   IonLabel,

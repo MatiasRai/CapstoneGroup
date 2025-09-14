@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'folder/inbox',
+    redirectTo: 'menu',
     pathMatch: 'full',
   },
 
@@ -28,11 +28,19 @@ export const routes: Routes = [
     loadComponent: () => import('./publicar-servicio/publicar-servicio.page').then( m => m.PublicarServicioPage)
   },
   {
-    path: 'login-empresa',
-    loadComponent: () => import('./login-empresa/login-empresa.page').then( m => m.LoginEmpresaPage)
-  },
-  {
     path: 'servicio',
     loadComponent: () => import('./servicio/servicio.page').then( m => m.ServicioPage)
+  },
+  {
+    path: 'menu-adm',
+    loadComponent: () => import('./menu-adm/menu-adm.page').then( m => m.MenuADMPage)
+  },
+  {
+    path: 'menu-emp',
+    loadComponent: () => import('./menu-emp/menu-emp.page').then( m => m.MenuEMPPage)
+  },
+  {
+    path: 'login-emp',
+    loadComponent: () => import('./login-emp/login-emp.page').then( m => m.LoginEMPPage)
   },
 ];
