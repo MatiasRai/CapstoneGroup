@@ -10,4 +10,24 @@
       <ion-title size="large">Menu</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <!-- Buscador -->
+  <ion-searchbar [(ngModel)]="searchText" debounce="500" placeholder="Buscar..."></ion-searchbar>
+
+  <!-- Filtros -->
+  <ion-item>
+    <ion-label>Filtrar por categoría</ion-label>
+    <ion-select [(ngModel)]="selectedCategory" placeholder="Seleccionar categoría">
+      <ion-select-option value="restaurante">Restaurantes</ion-select-option>
+      <ion-select-option value="agencia_turismo">Agencia de Turismo</ion-select-option>
+      <ion-select-option value="transporte">Transporte</ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- Listado filtrado -->
+  <ion-list>
+    <ion-item *ngFor="let item of filteredItems()">
+      <ion-label>{{ item.name }}</ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>

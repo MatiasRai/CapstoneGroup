@@ -12,13 +12,16 @@ import { mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutlin
   imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
 })
 export class AppComponent {
-  public appPages = [
-    { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/spam', icon: 'warning' },
+  appPages = [
+    { title: 'Login', url: '/login', icon: 'log-in' },
+    { title: 'Registro', url: '/registro', icon: 'person-add' },
+    { title: 'Menu', url: '/menu', icon: 'menu' },
+    { title: 'Registro Empresa', url: '/registro-empresa', icon: 'business' },
+    { title: 'Publicar Servicio', url: '/publicar-servicio', icon: 'add-circle' },
+    { title: 'Servicio', url: '/servicio', icon: 'clipboard' },
+    { title: 'Menu Admin', url: '/menu-adm', icon: 'apps' },
+    { title: 'Menu Empresa', url: '/menu-emp', icon: 'briefcase' },
+    { title: 'Login Empresa', url: '/login-emp', icon: 'log-in' }
   ];
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
   constructor() {

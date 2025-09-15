@@ -13,8 +13,25 @@ import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 export class MenuPage implements OnInit {
 
   constructor() { }
-
+  searchText: string = '';
+  selectedCategory: string = '';
+  items = [
+    { name: 'Restaurante 1', category: 'restaurante' },
+    { name: 'Agencia de Turismo 1', category: 'agencia_turismo' },
+    { name: 'Transporte 1', category: 'transporte' },
+    { name: 'Restaurante 2', category: 'restaurante' },
+    { name: 'Agencia de Turismo 2', category: 'agencia_turismo' },
+    { name: 'Transporte 2', category: 'transporte' },
+  ];
   ngOnInit() {
+  }
+
+  filteredItems() {
+    return this.items.filter((item) => {
+      const matchesSearch = item.name.toLowerCase().includes(this.searchText.toLowerCase());
+      const matchesCategory = this.selectedCategory ? item.category === this.selectedCategory : true;
+      return matchesSearch && matchesCategory;
+    });
   }
 
 }
