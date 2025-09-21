@@ -1,45 +1,23 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Empresas</ion-title>
+    <ion-title>Usuarios</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <!-- Contenedor de empresas -->
   <ion-list>
-    <!-- Empresa (Itera sobre cada empresa) -->
-    <ion-item *ngFor="let empresa of empresas">
+    <ion-item *ngFor="let u of usuarios">
       <ion-label>
-        <h2>{{ empresa.nombre }}</h2>
-        <p><strong>Descripción:</strong> <label>{{ empresa.descripcion }}</label></p>
-        <p><strong>Teléfono:</strong> <label>{{ empresa.telefono }}</label></p>
-        <p><strong>Correo:</strong> <label>{{ empresa.correo }}</label></p>
-        <p><strong>Horarios:</strong> <label>{{ empresa.horarios }}</label></p>
-        <p><strong>Sitio web:</strong> <label><a href="{{ empresa.sitioWeb }}" target="_blank">{{ empresa.sitioWeb }}</a></label></p>
-        <p><strong>Estado:</strong> <label class="status" [ngClass]="getEstadoClass(empresa.estado)">{{ empresa.estado }}</label></p>
+        <h2>{{ u.nombre }}</h2>
+        <p><strong>Correo:</strong> {{ u.correo }}</p>
+        <p><strong>Celular:</strong> {{ u.celular }}</p>
       </ion-label>
 
-      <!-- Botones de acción -->
       <ion-buttons slot="end">
-        <ion-button color="primary" (click)="changeEstado(empresa.id, 'Aprobado')">Aprobado</ion-button>
-        <ion-button color="warning" (click)="changeEstado(empresa.id, 'Pendiente')">Pendiente</ion-button>
-        <ion-button color="danger" (click)="changeEstado(empresa.id, 'Rechazado')">Rechazado</ion-button>
+        <ion-button color="danger" (click)="eliminarUsuario(u.id_usuario)">
+          Eliminar
+        </ion-button>
       </ion-buttons>
     </ion-item>
   </ion-list>
 </ion-content>
-
-<style>
-  .status {
-    font-weight: bold;
-  }
-  .Aprobado {
-    color: green;
-  }
-  .Pendiente {
-    color: orange;
-  }
-  .Rechazado {
-    color: red;
-  }
-</style>
