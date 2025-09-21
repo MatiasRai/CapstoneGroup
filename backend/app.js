@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql');
-
+const bcrypt = require('bcrypt');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -29,19 +29,63 @@ app.get('/usuarios', (req, res) => {
     res.json(rows);
   });
 });
+// Registrar un nuevo administrador de empresa
+app.post('/adm_empresa', async (req, res) => {
+  const { correo, contrasena } = req.body;
 
-// CREAR
-app.post('/usuarios', (req, res) => {
-  const { nombre, correo } = req.body;
-  db.query(
-    'INSERT INTO usuario (nombre, correo) VALUES (?, ?)',
-    [nombre, correo],
-    (err, result) => {
+  try {
+    // 1️⃣ Hashear contraseña
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+
+    // 2️⃣ Guardar en DB
+    const query = `
+      INSERT INTO adm_empresa (correo, contrasena)
+      VALUES (?, ?)
+    `;
+    db.query(query, [correo, hashedPassword], (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.status(201).json({ id_usuario: result.insertId, nombre, correo });
-    }
-  );
+
+      res.status(201).json({
+        id_adm_empresa: result.insertId,
+        correo,
+        message: '✅ Administrador registrado correctamente'
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ error: '❌ Error al registrar administrador' });
+  }
 });
+
+// Agregar Usuario 
+app.post('/usuarios', (req, res) => {
+  const { nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad } = req.body;
+
+  const query = `
+    INSERT INTO usuario (nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad)
+    VALUES (?, ?, ?, ?, ?, ?)`;
+
+  db.query(query, [nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.status(201).json({
+      id_usuario: result.insertId,
+      nombre,
+      correo,
+      celular,
+      foto_perfil,
+      Discapacidades_id_discapacidad
+    });
+  });
+});
+// OBTENER TODAS LAS DISCAPACIDADES
+app.get('/discapacidades', (req, res) => {
+  db.query('SELECT * FROM discapacidades', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+
 
 // ACTUALIZAR
 app.put('/usuarios/:id', (req, res) => {

@@ -7,17 +7,17 @@ import { Observable } from 'rxjs';
 })
 export class UsuarioService {
   private apiUrl = 'http://localhost:3000/usuarios';
+  
 
   constructor(private http: HttpClient) {}
-
+  ///Usuarios normales ////
   getUsuarios(): Observable<any> {
     return this.http.get(this.apiUrl);
   }
 
-  addUsuario(usuario: any): Observable<any> {
-    return this.http.post(this.apiUrl, usuario);
-  }
-
+  registrarUsuario(usuario: any) {
+  return this.http.post(this.apiUrl, usuario);
+}
   updateUsuario(id: number, usuario: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, usuario);
   }
@@ -25,4 +25,11 @@ export class UsuarioService {
   deleteUsuario(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  getDiscapacidades(): Observable<any[]> {
+  return this.http.get<any[]>('http://localhost:3000/discapacidades');
+}
+ ///Usuarios normales ////
+
+ 
 }
