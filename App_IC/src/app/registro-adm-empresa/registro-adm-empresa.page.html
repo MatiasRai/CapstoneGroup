@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registro Admin Empresa</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h2 style="text-align:center; margin-bottom:20px;">Crear cuenta de administrador</h2>
+
+  <ion-item>
+    <ion-label position="floating">Correo</ion-label>
+    <ion-input [(ngModel)]="admEmpresa.correo" type="email"></ion-input>
+  </ion-item>
+
+  <ion-item>
+    <ion-label position="floating">Contraseña</ion-label>
+    <ion-input [(ngModel)]="admEmpresa.contrasena" type="password"></ion-input>
+  </ion-item>
+
+  <ion-button expand="block" style="margin-top:20px;" (click)="onRegistrar()">
+    Registrarse
+  </ion-button>
+</ion-content>

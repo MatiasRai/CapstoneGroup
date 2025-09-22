@@ -6,12 +6,19 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AdmEmpresaService {
-  private apiUrl = 'http://localhost:3000/adm_empresa'; // 👈 tu backend
+
+  private apiUrlAdm = 'http://localhost:3000/adm_empresa';  // Endpoint para administradores
+  private apiUrlEmpresas = 'http://localhost:3000/empresas'; // Endpoint para empresas
 
   constructor(private http: HttpClient) {}
 
-  // Registrar administrador de empresa
+  // 👉 Registrar un administrador de empresa
   registrarAdmEmpresa(data: any): Observable<any> {
-    return this.http.post(this.apiUrl, data);
+    return this.http.post(this.apiUrlAdm, data);
+  }
+
+  // 👉 Registrar una empresa vinculada a un administrador
+  registrarEmpresa(data: any): Observable<any> {
+    return this.http.post(this.apiUrlEmpresas, data);
   }
 }

@@ -1,44 +1,52 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Registro Empresa</ion-title>
+    <ion-title>Registro de Empresa</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <!-- 👇 Título -->
-  <h2 style="text-align: center; margin-bottom: 20px;">Registro Empresa</h2>
+  <h2 style="text-align: center; margin-bottom: 20px;">Registrar Empresa</h2>
 
-  <ion-item>
-    <ion-label position="floating">Nombre_Empresa</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+  <form (ngSubmit)="onRegistrar()">
+    <ion-item>
+      <ion-label position="floating">Nombre de la Empresa</ion-label>
+      <ion-input [(ngModel)]="empresa.nombre_empresa" name="nombre_empresa" required></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label position="floating">Correo_Empresa</ion-label>
-    <ion-input type="email"></ion-input>
-  </ion-item>
-  
-  <ion-item>
-    <ion-label position="floating">Telefono</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Dirección</ion-label>
+      <ion-input [(ngModel)]="empresa.direccion_empresa" name="direccion_empresa" required></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label position="floating">Descripcion</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Teléfono</ion-label>
+      <ion-input type="tel" [(ngModel)]="empresa.telefono" name="telefono"></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label position="floating">Horarios</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Descripción</ion-label>
+      <ion-input [(ngModel)]="empresa.descripcion_empresa" name="descripcion_empresa"></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label position="floating">Sitio_web</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Horarios</ion-label>
+      <ion-input [(ngModel)]="empresa.horarios" name="horarios"></ion-input>
+    </ion-item>
 
-  <ion-button expand="block" style="margin-top: 20px;">
-    Registrarse
-  </ion-button>
+    <ion-item>
+      <ion-label position="floating">Sitio Web</ion-label>
+      <ion-input [(ngModel)]="empresa.sitio_web" name="sitio_web"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Correo</ion-label>
+      <ion-input type="email" [(ngModel)]="empresa.Correo" name="Correo"></ion-input>
+    </ion-item>
+
+    <!-- Estado no se pide porque ya lo dejamos por defecto como "proceso" en el TS -->
+
+    <ion-button expand="block" type="submit" style="margin-top: 20px;">
+      Registrar Empresa
+    </ion-button>
+  </form>
 </ion-content>
