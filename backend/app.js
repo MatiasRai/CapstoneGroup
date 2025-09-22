@@ -160,6 +160,28 @@ app.delete('/usuarios/:id', (req, res) => {
   });
 });
 
+// Obtener todas las empresas
+app.get('/empresas', (req, res) => {
+  db.query('SELECT * FROM empresas', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Cambiar estado de una empresa
+app.put('/empresas/:id/estado', (req, res) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+
+  db.query(
+    'UPDATE empresas SET estado = ? WHERE id_empresa = ?',
+    [estado, id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'Estado actualizado correctamente' });
+    }
+  );
+});
 
 // Servidor
 app.listen(3000, () => console.log('🚀 Backend en http://localhost:3000'));
