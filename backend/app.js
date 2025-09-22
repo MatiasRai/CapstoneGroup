@@ -29,15 +29,58 @@ app.get('/usuarios', (req, res) => {
     res.json(rows);
   });
 });
-// Registrar un nuevo administrador de empresa
+// Registrar empresa 
+app.post('/empresas', (req, res) => {
+  const {
+    nombre_empresa,
+    direccion_empresa,
+    telefono,
+    descripcion_empresa,
+    horarios,
+    sitio_web,
+    Adm_Empresa_id_adm_Empresa,
+    Correo
+  } = req.body;
+
+  // Estado fijo por defecto
+  const Estado = "Proceso";
+
+  const query = `
+    INSERT INTO empresas 
+    (nombre_empresa, direccion_empresa, telefono, descripcion_empresa, horarios, sitio_web, Adm_Empresa_id_adm_Empresa, Correo, Estado)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(query, [
+    nombre_empresa,
+    direccion_empresa,
+    telefono,
+    descripcion_empresa,
+    horarios,
+    sitio_web,
+    Adm_Empresa_id_adm_Empresa,
+    Correo,
+    Estado
+  ], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.status(201).json({
+      id_empresa: result.insertId,
+      nombre_empresa,
+      Estado,
+      message: '✅ Empresa registrada correctamente (estado por defecto: Proceso)'
+    });
+  });
+});
+
+// 👉 Registrar un nuevo administrador de empresa
 app.post('/adm_empresa', async (req, res) => {
   const { correo, contrasena } = req.body;
 
   try {
-    // 1️⃣ Hashear contraseña
+    // Hashear contraseña antes de guardar
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
-    // 2️⃣ Guardar en DB
     const query = `
       INSERT INTO adm_empresa (correo, contrasena)
       VALUES (?, ?)
