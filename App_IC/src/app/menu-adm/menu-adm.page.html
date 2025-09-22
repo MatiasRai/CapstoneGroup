@@ -1,10 +1,13 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Usuarios</ion-title>
+    <ion-title>Panel Administrador</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="ion-padding">
+
+  <!-- ================= USUARIOS ================= -->
+  <h2>👤 Usuarios</h2>
   <ion-list>
     <ion-item *ngFor="let u of usuarios">
       <ion-label>
@@ -20,4 +23,42 @@
       </ion-buttons>
     </ion-item>
   </ion-list>
+
+  <!-- ================= EMPRESAS ================= -->
+  <h2 style="margin-top:20px;">🏢 Empresas</h2>
+  <ion-list>
+    <ion-item *ngFor="let e of empresas">
+      <ion-label>
+        <h2>{{ e.nombre_empresa }}</h2>
+        <p><strong>Correo:</strong> {{ e.correo }}</p>
+        <p><strong>Teléfono:</strong> {{ e.telefono }}</p>
+        <p><strong>Estado:</strong>  
+          <span [ngClass]="e.estado">{{ e.Estado }}</span>
+        </p>
+      </ion-label>
+
+      <!-- Botones para cambiar estado -->
+      <ion-buttons slot="end">
+        <ion-button color="success" (click)="cambiarEstado(e.id_empresa, 'Aprobado')">Aprobar</ion-button>
+        <ion-button color="warning" (click)="cambiarEstado(e.id_empresa, 'Pendiente')">Pendiente</ion-button>
+        <ion-button color="danger" (click)="cambiarEstado(e.id_empresa, 'Rechazado')">Rechazar</ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
 </ion-content>
+
+<style>
+  .Aprobado {
+    color: green;
+    font-weight: bold;
+  }
+  .Pendiente {
+    color: orange;
+    font-weight: bold;
+  }
+  .Rechazado {
+    color: red;
+    font-weight: bold;
+  }
+</style>

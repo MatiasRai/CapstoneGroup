@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class UsuarioService {
   private apiUrl = 'http://localhost:3000/usuarios';
+  private apiUrlEmpresas = 'http://localhost:3000/empresas'; 
   
 
   constructor(private http: HttpClient) {}
@@ -31,5 +32,13 @@ export class UsuarioService {
 }
  ///Usuarios normales ////
 
+  // ==== EMPRESAS ====
+  getEmpresas(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrlEmpresas);
+  }
+
+  updateEstadoEmpresa(id: number, estado: string): Observable<any> {
+    return this.http.put(`${this.apiUrlEmpresas}/${id}/estado`, { estado });
+  }
  
 }
