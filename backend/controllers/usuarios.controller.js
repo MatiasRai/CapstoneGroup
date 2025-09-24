@@ -1,5 +1,7 @@
 const db = require('../config/db');
+const bcrypt = require('bcrypt');
 
+// Obtener usuarios
 const getUsuarios = (req, res) => {
   db.query('SELECT * FROM usuario', (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -7,26 +9,36 @@ const getUsuarios = (req, res) => {
   });
 };
 
-const createUsuario = (req, res) => {
+// Crear usuario con contraseña hasheada
+const createUsuario = async (req, res) => {
   const { nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad } = req.body;
 
-  db.query(
-    'INSERT INTO usuario (nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad) VALUES (?, ?, ?, ?, ?, ?)',
-    [nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad],
-    (err, result) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.status(201).json({
-        id_usuario: result.insertId,
-        nombre,
-        correo,
-        celular,
-        foto_perfil,
-        Discapacidades_id_discapacidad
-      });
-    }
-  );
+  try {
+    // Hashear contraseña antes de guardarla
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+
+    db.query(
+      'INSERT INTO usuario (nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, correo, hashedPassword, celular, foto_perfil, Discapacidades_id_discapacidad],
+      (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({
+          id_usuario: result.insertId,
+          nombre,
+          correo,
+          celular,
+          foto_perfil,
+          Discapacidades_id_discapacidad,
+          message: '✅ Usuario registrado con contraseña protegida'
+        });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ error: '❌ Error al registrar usuario' });
+  }
 };
 
+// Actualizar usuario
 const updateUsuario = (req, res) => {
   const { id } = req.params;
   const { nombre, correo } = req.body;
@@ -41,6 +53,7 @@ const updateUsuario = (req, res) => {
   );
 };
 
+// Eliminar usuario y sus reseñas
 const deleteUsuario = (req, res) => {
   const { id } = req.params;
 
