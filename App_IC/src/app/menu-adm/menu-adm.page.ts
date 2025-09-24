@@ -6,7 +6,7 @@ import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { UsuarioService } from 'src/app/services/usuario.service';
 
 @Component({
-  selector: 'app-menu-adm',
+  selector: 'app-menu-adm', 
   templateUrl: './menu-adm.page.html',
   styleUrls: ['./menu-adm.page.scss'],
   standalone: true,

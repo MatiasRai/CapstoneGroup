@@ -19,6 +19,7 @@ import {
   IonRow,
   IonCol,
   IonSelect,
+  IonMenuButton,
   IonSelectOption,
 } from '@ionic/angular/standalone';
 
@@ -29,6 +30,7 @@ export const IONIC_IMPORTS = [
   IonInput,
   IonItem,
   IonLabel,
+  IonMenuButton,
   IonList,
   IonContent,
   IonHeader,
@@ -43,5 +45,6 @@ export const IONIC_IMPORTS = [
   IonRow,
   IonCol,
   IonSelect,
-  IonSelectOption
+  IonSelectOption,
+  IonList
 ];

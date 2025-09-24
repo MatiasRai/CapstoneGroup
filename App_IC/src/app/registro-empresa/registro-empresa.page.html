@@ -1,5 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
+    <!-- 👇 Botón hamburguesa -->
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
     <ion-title>Registro de Empresa</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -43,7 +48,7 @@
       <ion-input type="email" [(ngModel)]="empresa.Correo" name="Correo"></ion-input>
     </ion-item>
 
-    <!-- Estado no se pide porque ya lo dejamos por defecto como "proceso" en el TS -->
+    <!-- Estado no se pide porque ya lo dejas por defecto en el backend -->
 
     <ion-button expand="block" type="submit" style="margin-top: 20px;">
       Registrar Empresa

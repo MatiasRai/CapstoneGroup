@@ -1,5 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
+    <!-- 👇 Botón hamburguesa -->
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
     <ion-title>Registro</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -41,19 +46,19 @@
   </ion-item>
 
   <!-- Tipo de discapacidad (dinámico desde BD) -->
-<ion-item>
-  <ion-label>Tipo de discapacidad</ion-label>
-  <ion-select 
-    placeholder="Selecciona una opción"
-    [(ngModel)]="usuario.Discapacidades_id_discapacidad">
-    
-    <ion-select-option 
-      *ngFor="let d of discapacidades" 
-      [value]="d.id_discapacidad">
-      {{ d.tipo_discapacidad }}
-    </ion-select-option>
-  </ion-select>
-</ion-item>
+  <ion-item>
+    <ion-label>Tipo de discapacidad</ion-label>
+    <ion-select 
+      placeholder="Selecciona una opción"
+      [(ngModel)]="usuario.Discapacidades_id_discapacidad">
+      
+      <ion-select-option 
+        *ngFor="let d of discapacidades" 
+        [value]="d.id_discapacidad">
+        {{ d.tipo_discapacidad }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
 
   <!-- Botón de registro -->
   <ion-button expand="block" style="margin-top: 20px;" (click)="onRegistrar()">

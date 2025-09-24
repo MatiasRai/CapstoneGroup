@@ -1,5 +1,10 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
+    <!-- 👇 Botón hamburguesa -->
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+
     <ion-title>Detalles del Servicio</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -10,13 +15,13 @@
 
   <ion-item>
     <ion-label style="display: block; margin-top: 10px;">
-    <ion-label style="text-align: center; margin-bottom: 20px">El Fogon De Pepe</ion-label>
-     <strong>Descripcion :</strong> 5 estrellas<br />
-     <strong>horarios :</strong> Lunes a Viernes de 9:00 a 18:00<br />
-     <strong>Costos :</strong> 5000 CLP<br />
-     <strong>Ubicacion :</strong> Rengifo 845 Esquina Baquedano, Puerto Montt 5502816 Chile<br />
-     <strong>Empresa :</strong> Pepes.inc<br />
-     <strong>Tipo de Discapacidad Permitida :</strong> Visual,movilidad<br />
+      <ion-label style="text-align: center; margin-bottom: 20px">El Fogon De Pepe</ion-label>
+      <strong>Descripcion :</strong> 5 estrellas<br />
+      <strong>Horarios :</strong> Lunes a Viernes de 9:00 a 18:00<br />
+      <strong>Costos :</strong> 5000 CLP<br />
+      <strong>Ubicación :</strong> Rengifo 845 Esquina Baquedano, Puerto Montt 5502816 Chile<br />
+      <strong>Empresa :</strong> Pepes.inc<br />
+      <strong>Tipo de Discapacidad Permitida :</strong> Visual, movilidad<br />
     </ion-label>
   </ion-item>
 
@@ -40,7 +45,7 @@
   <h4 style="margin-top: 20px;">Agregar una Reseña</h4>
   <ion-item>
     <ion-label position="floating">Título del Usuario</ion-label>
-    <ion-input type="text" ></ion-input>
+    <ion-input type="text"></ion-input>
   </ion-item>
 
   <ion-item>
@@ -50,7 +55,7 @@
 
   <ion-item>
     <ion-label position="floating">Valoración</ion-label>
-    <ion-select  value="1">
+    <ion-select value="1">
       <ion-select-option value="1">1 Estrella</ion-select-option>
       <ion-select-option value="2">2 Estrellas</ion-select-option>
       <ion-select-option value="3">3 Estrellas</ion-select-option>
@@ -59,8 +64,7 @@
     </ion-select>
   </ion-item>
 
-  <ion-button expand="block" >
+  <ion-button expand="block">
     Agregar Reseña
   </ion-button>
-
 </ion-content>
