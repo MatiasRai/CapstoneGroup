@@ -1,67 +1,116 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <!-- 👇 Botón hamburguesa -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
     <ion-title>Registro</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <!-- 👇 Título -->
   <h2 style="text-align: center; margin-bottom: 20px;">Crear cuenta</h2>
 
-  <!-- Nombre -->
-  <ion-item>
-    <ion-label position="floating">Nombre</ion-label>
-    <ion-input type="text" [(ngModel)]="usuario.nombre"></ion-input>
-  </ion-item>
+  <form #registroForm="ngForm" (ngSubmit)="onRegistrar()">
 
-  <!-- Correo -->
-  <ion-item>
-    <ion-label position="floating">Correo</ion-label>
-    <ion-input type="email" [(ngModel)]="usuario.correo"></ion-input>
-  </ion-item>
+    <!-- Nombre (solo letras y espacios) -->
+    <ion-item>
+      <ion-label position="floating">Nombre</ion-label>
+      <ion-input 
+        type="text" 
+        [(ngModel)]="usuario.nombre" 
+        name="nombre" 
+        required 
+        minlength="3" 
+        pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$">
+      </ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="registroForm.submitted && !usuario.nombre">
+      El nombre es obligatorio.
+    </ion-note>
+    <ion-note color="danger" *ngIf="registroForm.submitted && usuario.nombre && !registroForm.controls['nombre']?.valid">
+      Solo se permiten letras y espacios.
+    </ion-note>
 
-  <!-- Contraseña -->
-  <ion-item>
-    <ion-label position="floating">Contraseña</ion-label>
-    <ion-input type="password" [(ngModel)]="usuario.contrasena"></ion-input>
-  </ion-item>
+    <!-- Correo (formato válido con @ y dominio) -->
+    <ion-item>
+      <ion-label position="floating">Correo</ion-label>
+      <ion-input 
+        type="email" 
+        [(ngModel)]="usuario.correo" 
+        name="correo" 
+        required
+        pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(cl|com|org|net)$">
+      </ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="registroForm.submitted && !usuario.correo">
+      El correo es obligatorio.
+    </ion-note>
+    <ion-note color="danger" *ngIf="registroForm.submitted && usuario.correo && !registroForm.controls['correo']?.valid">
+      Ingresa un correo válido (ejemplo: usuario@gmail.com o usuario@dominio.cl).
+    </ion-note>
 
-  <!-- Celular -->
-  <ion-item>
-    <ion-label position="floating">Celular</ion-label>
-    <ion-input type="tel" [(ngModel)]="usuario.celular"></ion-input>
-  </ion-item>
+    <!-- Contraseña -->
+    <ion-item>
+      <ion-label position="floating">Contraseña</ion-label>
+      <ion-input 
+        type="password" 
+        [(ngModel)]="usuario.contrasena" 
+        name="contrasena" 
+        required 
+        minlength="6">
+      </ion-input>
+    </ion-item>
+    <ion-note color="danger" *ngIf="registroForm.submitted && (!usuario.contrasena || usuario.contrasena.length < 6)">
+      La contraseña debe tener al menos 6 caracteres.
+    </ion-note>
 
-  <!-- Foto de perfil -->
-  <ion-item>
-    <ion-label>Foto de perfil</ion-label>
-    <input type="file" accept="image/*" 
-           (change)="onFileSelected($event)"
-           style="margin-left: 10px;" />
-  </ion-item>
+    <!-- Celular (opcional, solo números 9–12 dígitos) -->
+    <ion-item>
+      <ion-label position="floating">Celular (opcional)</ion-label>
+      <ion-input 
+        type="tel" 
+        [(ngModel)]="usuario.celular" 
+        name="celular" 
+        pattern="^[0-9]{9,12}$">
+      </ion-input>
+    </ion-item>
+    <ion-note color="medium">
+      Este campo es opcional, pero si lo completas solo se permiten números (9 a 12 dígitos).
+    </ion-note>
+    <ion-note color="danger" *ngIf="registroForm.submitted && usuario.celular && !registroForm.controls['celular']?.valid">
+      El número debe tener entre 9 y 12 dígitos, sin letras.
+    </ion-note>
 
-  <!-- Tipo de discapacidad (dinámico desde BD) -->
-  <ion-item>
-    <ion-label>Tipo de discapacidad</ion-label>
-    <ion-select 
-      placeholder="Selecciona una opción"
-      [(ngModel)]="usuario.Discapacidades_id_discapacidad">
-      
-      <ion-select-option 
-        *ngFor="let d of discapacidades" 
-        [value]="d.id_discapacidad">
-        {{ d.tipo_discapacidad }}
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
+    <!-- Foto de perfil (opcional) -->
+    <ion-item>
+      <ion-label>Foto de perfil (opcional)</ion-label>
+      <input type="file" accept="image/*" (change)="onFileSelected($event)" style="margin-left: 10px;" />
+    </ion-item>
+    <ion-note color="medium">
+      Este campo es opcional.
+    </ion-note>
 
-  <!-- Botón de registro -->
-  <ion-button expand="block" style="margin-top: 20px;" (click)="onRegistrar()">
-    Registrarse
-  </ion-button>
+    <!-- Tipo de discapacidad -->
+    <ion-item>
+      <ion-label>Tipo de discapacidad</ion-label>
+      <ion-select 
+        placeholder="Selecciona una opción"
+        [(ngModel)]="usuario.Discapacidades_id_discapacidad"
+        name="discapacidad"
+        required>
+        
+        <ion-select-option *ngFor="let d of discapacidades" [value]="d.id_discapacidad">
+          {{ d.tipo_discapacidad }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-note color="danger" *ngIf="registroForm.submitted && !usuario.Discapacidades_id_discapacidad">
+      Selecciona un tipo de discapacidad.
+    </ion-note>
+
+    <!-- Botón de registro -->
+    <ion-button expand="block" type="submit" style="margin-top: 20px;" [disabled]="!registroForm.valid">
+      Registrarse
+    </ion-button>
+  </form>
 </ion-content>
