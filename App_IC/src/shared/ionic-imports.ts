@@ -1,11 +1,12 @@
 import {
   IonApp,
   IonButton,
-  IonButtons,  
+  IonButtons,
   IonInput,
   IonItem,
   IonLabel,
   IonList,
+  IonListHeader,   // 👈 falta este
   IonContent,
   IonHeader,
   IonTitle,
@@ -20,20 +21,26 @@ import {
   IonCol,
   IonNote,
   IonSelect,
-  IonMenuButton,
   IonSelectOption,
+  IonMenuButton,
+  IonSearchbar,
+  IonSplitPane,
+  IonMenu,
+  IonMenuToggle,
+  IonRouterOutlet
 } from '@ionic/angular/standalone';
 
 export const IONIC_IMPORTS = [
   IonApp,
   IonButton,
-  IonButtons,  // Añadir IonButtons aquí
+  IonButtons,
   IonInput,
   IonItem,
   IonLabel,
   IonNote,
   IonMenuButton,
   IonList,
+  IonListHeader,   // 👈 agregado aquí también
   IonContent,
   IonHeader,
   IonTitle,
@@ -48,5 +55,9 @@ export const IONIC_IMPORTS = [
   IonCol,
   IonSelect,
   IonSelectOption,
-  IonList
+  IonSearchbar,
+  IonSplitPane,
+  IonMenu,
+  IonMenuToggle,
+  IonRouterOutlet
 ];

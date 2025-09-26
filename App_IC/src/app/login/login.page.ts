@@ -5,6 +5,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonLabel
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { AdmEmpresaService } from 'src/app/services/adm-empresa.service';
 import { ToastController } from '@ionic/angular';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,8 @@ export class LoginPage {
 
   constructor(
     private loginService: AdmEmpresaService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private authService: AuthService
   ) {}
 
   async presentToast(message: string, color: string) {
@@ -42,16 +44,17 @@ export class LoginPage {
 
     this.loginService.login(this.credenciales).subscribe({
       next: (res) => {
+        this.authService.login(res); // ✅ guardamos el usuario
         this.presentToast(res.message, 'success');
         console.log('✅ Usuario logeado:', res);
 
         // Redirección según el rol
         if (res.role === 'adm_empresa') {
-          console.log('👉 Ir a dashboard empresa');
+          window.location.href = '/menu-emp';
         } else if (res.role === 'adm') {
-          console.log('👉 Ir a dashboard administrador sistema');
+          window.location.href = '/menu-adm';
         } else {
-          console.log('👉 Ir a página de usuario normal');
+          window.location.href = '/menu';
         }
       },
       error: (err) => {

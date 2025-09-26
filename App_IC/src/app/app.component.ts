@@ -1,17 +1,41 @@
-
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutline, heartSharp, archiveOutline, archiveSharp, trashOutline, trashSharp, warningOutline, warningSharp, bookmarkOutline, bookmarkSharp } from 'ionicons/icons';
+import {
+  mailOutline,
+  mailSharp,
+  paperPlaneOutline,
+  paperPlaneSharp,
+  heartOutline,
+  heartSharp,
+  archiveOutline,
+  archiveSharp,
+  trashOutline,
+  trashSharp,
+  warningOutline,
+  warningSharp,
+  bookmarkOutline,
+  bookmarkSharp, logOut } from 'ionicons/icons';
+
+import { IONIC_IMPORTS } from 'src/shared/ionic-imports'; // 👈 solo Ionic aquí
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
+  standalone: true,
+  imports: [
+    CommonModule,        // 👈 Para *ngIf y *ngFor
+    RouterLink,
+    RouterLinkActive,
+    ...IONIC_IMPORTS     // 👈 Todos los componentes de Ionic
+  ],
 })
 export class AppComponent {
+  currentUser: any = null;
+
   appPages = [
     { title: 'Login', url: '/login', icon: 'log-in' },
     { title: 'Registro', url: '/registro', icon: 'person-add' },
@@ -20,11 +44,21 @@ export class AppComponent {
     { title: 'Publicar Servicio', url: '/publicar-servicio', icon: 'add-circle' },
     { title: 'Servicio', url: '/servicio', icon: 'clipboard' },
     { title: 'Menu Admin', url: '/menu-adm', icon: 'apps' },
-    { title: 'Menu Empresa', url: '/menu-emp', icon: 'briefcase' },
-    { title: 'Login Empresa', url: '/login-emp', icon: 'log-in' }
+    { title: 'Menu Empresa', url: '/menu-emp', icon: 'briefcase' }
   ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {
-    addIcons({ mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutline, heartSharp, archiveOutline, archiveSharp, trashOutline, trashSharp, warningOutline, warningSharp, bookmarkOutline, bookmarkSharp });
+
+  labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
+
+  constructor(private authService: AuthService) {
+    addIcons({logOut,mailOutline,mailSharp,paperPlaneOutline,paperPlaneSharp,heartOutline,heartSharp,archiveOutline,archiveSharp,trashOutline,trashSharp,warningOutline,warningSharp,bookmarkOutline,bookmarkSharp});
+  }
+
+  ngOnInit() {
+    this.currentUser = this.authService.getUser();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.currentUser = null;
   }
 }
