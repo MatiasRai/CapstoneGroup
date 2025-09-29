@@ -1,0 +1,175 @@
+// Variables de color y estilo
+$primary-color: #007bff; // Azul brillante
+$secondary-color: #4caf50; // Color para el botón y los enlaces
+$background-color: #f4f7fa; // Fondo gris suave
+$text-color: #333; // Color de texto oscuro
+$border-radius: 8px; // Bordes redondeados
+$input-padding: 16px 18px; // Padding en los inputs
+$button-padding: 14px 20px; // Padding en el botón
+
+// Fondo general de la página
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: $background-color;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+// Estilo del contenedor principal
+ion-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+  height: 100%;
+}
+
+// Estilo del formulario de registro
+form {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: $border-radius;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+// Animación para el formulario
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Título de la página de registro
+h2 {
+  font-size: 2.2rem;
+  color: $primary-color;
+  margin-bottom: 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+// Estilo de los elementos de formulario
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-top: 10px;
+  --inner-padding-bottom: 10px;
+  --border-radius: $border-radius;
+  margin-bottom: 20px;
+}
+
+ion-label {
+  font-size: 1rem;
+  color: $text-color;
+}
+
+// Estilo de los campos de entrada (ion-input)
+ion-input {
+  font-size: 1rem;
+  padding: $input-padding;
+  background-color: #fafafa;
+  border-radius: $border-radius;
+  color: $text-color;
+  --highlight-color: $primary-color;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #ddd;
+  width: 100%;
+  height: 50px;
+
+  // Estilos para el borde al enfocar el input
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 5px 2px rgba(0, 123, 255, 0.5);
+  }
+}
+
+// Estilo para el enlace de "Celular" y "Foto de perfil"
+ion-item ion-label {
+  font-size: 0.9rem;
+  color: $text-color;
+  margin-top: 10px;
+}
+
+ion-item ion-input {
+  font-size: 0.9rem;
+  padding: 12px;
+}
+
+// Estilo para el botón de registro
+ion-button {
+  --background: $primary-color;
+  --color: white;
+  font-size: 1.1rem;
+  padding: $button-padding;
+  border-radius: $border-radius;
+  width: 100%;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    --background: darken($primary-color, 10%);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// Estilo para el campo de "Tipo de discapacidad"
+ion-select {
+  --background: #fafafa;
+  --border-radius: $border-radius;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  font-size: 1rem;
+  color: $text-color;
+}
+
+// Estilo para el input de tipo file (Foto de perfil)
+input[type="file"] {
+  font-size: 0.9rem;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+  background-color: #fafafa;
+}
+
+// Responsividad: Ajustes para pantallas pequeñas
+@media (max-width: 600px) {
+  ion-content {
+    padding: 15px;
+  }
+
+  form {
+    padding: 20px;
+    width: 100%;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  ion-input {
+    padding: 14px;
+  }
+
+  ion-button {
+    padding: 12px 16px;
+  }
+}

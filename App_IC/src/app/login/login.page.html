@@ -8,27 +8,29 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <h2 style="text-align: center; margin-bottom: 20px;">Iniciar sesión</h2>
-
   <form (ngSubmit)="onLogin()">
+    <h2 style="text-align: center;">Iniciar sesión</h2>
+
+    <!-- Campo de Correo -->
     <ion-item>
       <ion-label position="floating">Correo</ion-label>
-      <ion-input type="email" [(ngModel)]="credenciales.correo" name="correo" required></ion-input>
+      <ion-input type="email" [(ngModel)]="credenciales.correo" name="correo" placeholder="ejemplo@dominio.com" required></ion-input>
     </ion-item>
 
+    <!-- Campo de Contraseña -->
     <ion-item>
       <ion-label position="floating">Contraseña</ion-label>
-      <ion-input type="password" [(ngModel)]="credenciales.contrasena" name="contrasena" required></ion-input>
+      <ion-input type="password" [(ngModel)]="credenciales.contrasena" name="contrasena" placeholder="********" required></ion-input>
     </ion-item>
 
-    <div style="text-align: center; margin: 8px 0;">
-      <a style="color: var(--ion-color-primary); text-decoration: none; font-size: 15px;">
-        ¿Olvidaste tu contraseña?
-      </a>
+    <!-- Enlace de 'Olvidaste tu contraseña?' -->
+    <div style="text-align: center; margin-top: 10px;">
+      <a href="#">¿Olvidaste tu contraseña?</a>
     </div>
 
-    <ion-button expand="block" style="margin-top: 20px;" type="submit">
-      Iniciar Sesión
+    <!-- Botón de Iniciar Sesión -->
+    <ion-button expand="block" type="submit" class="login-button">
+      Iniciar sesión <!-- El texto debe ir aquí dentro -->
     </ion-button>
   </form>
 </ion-content>
