@@ -55,7 +55,7 @@ const updateEstadoEmpresa = (req, res) => {
   );
 };
 
-// 🔹 Nuevo: Obtener empresa por ID del administrador logeado
+// 🔹 Obtener empresa por ID del administrador logeado
 const getEmpresaByAdm = (req, res) => {
   const { id_adm_empresa } = req.params;
 
@@ -75,9 +75,32 @@ const getEmpresaByAdm = (req, res) => {
   });
 };
 
+// 🔹 Nuevo: Obtener servicios por ID del administrador
+const getServiciosByAdm = (req, res) => {
+  const { id_adm_empresa } = req.params;
+
+  const query = `
+    SELECT s.nombre_servicio, s.descripcion_servicio, s.horario_disponible, s.costo_servicio
+    FROM servicios s
+    INNER JOIN empresas e ON s.Empresas_id_empresa = e.id_empresa
+    WHERE e.Adm_Empresa_id_adm_Empresa = ?;
+  `;
+
+  db.query(query, [id_adm_empresa], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (rows.length === 0)
+      return res.status(404).json({ message: '⚠️ No hay servicios registrados para esta empresa' });
+
+    res.json(rows);
+  });
+};
+
+
 module.exports = {
   getEmpresas,
   createEmpresa,
   updateEstadoEmpresa,
-  getEmpresaByAdm, // 👈 exporta la nueva función
+  getEmpresaByAdm,
+  getServiciosByAdm,
 };

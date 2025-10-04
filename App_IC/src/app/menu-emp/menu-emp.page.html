@@ -5,11 +5,14 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- 🏢 Datos de la Empresa -->
   <ng-container *ngIf="empresa; else cargando">
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ empresa.nombre_empresa }}</ion-card-title>
-        <ion-card-subtitle>{{ empresa.estado || empresa.Estado }}</ion-card-subtitle>
+        <ion-card-subtitle>
+          {{ empresa.estado || empresa.Estado }}
+        </ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>
@@ -19,15 +22,52 @@
         <p><strong>Descripción:</strong> {{ empresa.descripcion_empresa }}</p>
         <p><strong>Horarios:</strong> {{ empresa.horarios }}</p>
 
-        <ion-button color="secondary" expand="block" (click)="ngOnInit()">
+        <ion-button color="secondary" expand="block" (click)="recargarDatos()">
           🔄 Actualizar datos
         </ion-button>
       </ion-card-content>
     </ion-card>
+
+    <!-- 🧾 Servicios Asociados -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Servicios Ofrecidos</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <ng-container *ngIf="servicios && servicios.length > 0; else sinServicios">
+          <ion-list>
+            <ion-item *ngFor="let s of servicios">
+              <ion-label>
+                <h2><strong>{{ s.nombre_servicio }}</strong></h2>
+                <p>{{ s.descripcion_servicio }}</p>
+                <p>
+                  <strong>Horario disponible:</strong>
+                  {{ s.horario_disponible }}
+                </p>
+                <p>
+                  <strong>Costo:</strong>
+                  {{ s.costo_servicio | currency : "CLP" }}
+                </p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ng-container>
+
+        <ng-template #sinServicios>
+          <p style="text-align: center; color: gray; margin-top: 1rem;">
+            ⚠️ No hay servicios registrados para esta empresa.
+          </p>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
   </ng-container>
 
+  <!-- 🔄 Cargando -->
   <ng-template #cargando>
-    <ion-spinner name="crescent"></ion-spinner>
-    <p style="text-align:center;">Cargando datos de la empresa...</p>
+    <div style="text-align: center; margin-top: 2rem;">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando datos de la empresa...</p>
+    </div>
   </ng-template>
 </ion-content>
