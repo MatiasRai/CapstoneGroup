@@ -1,75 +1,33 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Información de Empresa</ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>Mi Empresa</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <!-- Contenedor de la empresa -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ empresa.nombre_empresa }}</ion-card-title>
-    </ion-card-header>
+<ion-content class="ion-padding">
+  <ng-container *ngIf="empresa; else cargando">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ empresa.nombre_empresa }}</ion-card-title>
+        <ion-card-subtitle>{{ empresa.estado || empresa.Estado }}</ion-card-subtitle>
+      </ion-card-header>
 
-    <ion-card-content>
-      <!-- Mostrar los campos editables solo si el modo de edición está activado -->
-      <ion-item>
-        <ion-label position="stacked"><strong>Nombre de la empresa:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.nombre_empresa" [readonly]="!editMode"></ion-input>
-      </ion-item>
+      <ion-card-content>
+        <p><strong>Dirección:</strong> {{ empresa.direccion_empresa }}</p>
+        <p><strong>Teléfono:</strong> {{ empresa.telefono }}</p>
+        <p><strong>Correo:</strong> {{ empresa.Correo }}</p>
+        <p><strong>Descripción:</strong> {{ empresa.descripcion_empresa }}</p>
+        <p><strong>Horarios:</strong> {{ empresa.horarios }}</p>
 
-      <ion-item>
-        <ion-label position="stacked"><strong>Dirección:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.direccion_empresa" [readonly]="!editMode"></ion-input>
-      </ion-item>
+        <ion-button color="secondary" expand="block" (click)="ngOnInit()">
+          🔄 Actualizar datos
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
 
-      <ion-item>
-        <ion-label position="stacked"><strong>Teléfono:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.telefono" [readonly]="!editMode"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked"><strong>Descripción:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.descripcion_empresa" [readonly]="!editMode"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked"><strong>Horarios:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.horarios" [readonly]="!editMode"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked"><strong>Sitio Web:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.sitio_web" [readonly]="!editMode"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked"><strong>Correo:</strong></ion-label>
-        <ion-input [(ngModel)]="empresa.correo" [readonly]="!editMode"></ion-input>
-      </ion-item>
-
-      <!-- Botones para activar edición y guardar cambios -->
-      <ion-buttons>
-        <ion-button *ngIf="!editMode" color="primary" (click)="edit()">Editar</ion-button>
-        <ion-button *ngIf="editMode" color="success" (click)="save()">Guardar</ion-button>
-        <ion-button *ngIf="editMode" color="danger" (click)="cancel()">Cancelar</ion-button>
-      </ion-buttons>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Ejemplo de reseñas -->
-  <ion-label style="display: block; margin-top: 10px;">
-    <strong>Buen servicio (2023-09-12)</strong><br />
-    <strong>Valoración:</strong> 4 estrellas<br />
-    <strong>Comentario:</strong> El servicio fue bueno, pero hubo un pequeño retraso.
-  </ion-label>
-
-  <ion-label style="display: block; margin-top: 10px;">
-    <strong>Excelente servicio (2023-09-15)</strong><br />
-    <strong>Valoración:</strong> 5 estrellas<br />
-    <strong>Comentario:</strong> Me encantó el servicio, todo fue muy rápido y profesional.
-  </ion-label>
+  <ng-template #cargando>
+    <ion-spinner name="crescent"></ion-spinner>
+    <p style="text-align:center;">Cargando datos de la empresa...</p>
+  </ng-template>
 </ion-content>

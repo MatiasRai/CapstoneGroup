@@ -1,5 +1,6 @@
 const db = require('../config/db');
 
+// 🔹 Obtener todas las empresas
 const getEmpresas = (req, res) => {
   db.query('SELECT * FROM empresas', (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -7,6 +8,7 @@ const getEmpresas = (req, res) => {
   });
 };
 
+// 🔹 Crear nueva empresa
 const createEmpresa = (req, res) => {
   const {
     nombre_empresa,
@@ -19,10 +21,12 @@ const createEmpresa = (req, res) => {
     Correo
   } = req.body;
 
-  const Estado = "Proceso";
+  const Estado = "Proceso"; // estado por defecto
 
   db.query(
-    'INSERT INTO empresas (nombre_empresa, direccion_empresa, telefono, descripcion_empresa, horarios, sitio_web, Adm_Empresa_id_adm_Empresa, Correo, Estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    `INSERT INTO empresas 
+     (nombre_empresa, direccion_empresa, telefono, descripcion_empresa, horarios, sitio_web, Adm_Empresa_id_adm_Empresa, Correo, Estado)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [nombre_empresa, direccion_empresa, telefono, descripcion_empresa, horarios, sitio_web, Adm_Empresa_id_adm_Empresa, Correo, Estado],
     (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -36,6 +40,7 @@ const createEmpresa = (req, res) => {
   );
 };
 
+// 🔹 Actualizar el estado de una empresa
 const updateEstadoEmpresa = (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
@@ -45,9 +50,34 @@ const updateEstadoEmpresa = (req, res) => {
     [estado, id],
     (err) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'Estado actualizado correctamente' });
+      res.json({ message: '✅ Estado actualizado correctamente' });
     }
   );
 };
 
-module.exports = { getEmpresas, createEmpresa, updateEstadoEmpresa };
+// 🔹 Nuevo: Obtener empresa por ID del administrador logeado
+const getEmpresaByAdm = (req, res) => {
+  const { id_adm_empresa } = req.params;
+
+  const query = `
+    SELECT e.*
+    FROM empresas e
+    INNER JOIN adm_empresa a ON e.Adm_Empresa_id_adm_Empresa = a.id_adm_empresa
+    WHERE e.Adm_Empresa_id_adm_Empresa = ?;
+  `;
+
+  db.query(query, [id_adm_empresa], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (rows.length === 0)
+      return res.status(404).json({ message: '⚠️ Empresa no encontrada para este administrador' });
+
+    res.json(rows[0]);
+  });
+};
+
+module.exports = {
+  getEmpresas,
+  createEmpresa,
+  updateEstadoEmpresa,
+  getEmpresaByAdm, // 👈 exporta la nueva función
+};

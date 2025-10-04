@@ -20,24 +20,24 @@ const login = async (req, res) => {
         let match = false;
 
         if (isBcryptHash(admEmpresa.contrasena)) {
-          // bcrypt normal
           match = await bcrypt.compare(contrasena, admEmpresa.contrasena);
         } else {
-          // verificar MD5 o texto plano
           const md5 = crypto.createHash('md5').update(contrasena).digest('hex');
           if (md5 === admEmpresa.contrasena || contrasena === admEmpresa.contrasena) {
             match = true;
-            // 🚀 migrar a bcrypt
             const newHash = await bcrypt.hash(contrasena, 10);
-            db.query('UPDATE adm_empresa SET contrasena=? WHERE id_adm_empresa=?',
-              [newHash, admEmpresa.id_adm_empresa]);
+            db.query(
+              'UPDATE adm_empresa SET contrasena=? WHERE id_adm_Empresa=?',
+              [newHash, admEmpresa.id_adm_Empresa]
+            );
           }
         }
 
         if (match) {
+          console.log('✅ Login correcto (adm_empresa), ID:', admEmpresa.id_adm_Empresa);
           return res.json({
             role: 'adm_empresa',
-            id: admEmpresa.id_adm_empresa,
+            id: admEmpresa.id_adm_Empresa, // 👈 corregido
             correo: admEmpresa.correo,
             message: '✅ Login correcto (Administrador de Empresa, migrado si era MD5)'
           });
@@ -59,12 +59,12 @@ const login = async (req, res) => {
             if (md5 === usuario.contrasena || contrasena === usuario.contrasena) {
               match = true;
               const newHash = await bcrypt.hash(contrasena, 10);
-              db.query('UPDATE usuario SET contrasena=? WHERE id_usuario=?',
-                [newHash, usuario.id_usuario]);
+              db.query('UPDATE usuario SET contrasena=? WHERE id_usuario=?', [newHash, usuario.id_usuario]);
             }
           }
 
           if (match) {
+            console.log('✅ Login correcto (usuario), ID:', usuario.id_usuario);
             return res.json({
               role: 'usuario',
               id: usuario.id_usuario,
@@ -89,12 +89,12 @@ const login = async (req, res) => {
               if (md5 === adm.contrasena || contrasena === adm.contrasena) {
                 match = true;
                 const newHash = await bcrypt.hash(contrasena, 10);
-                db.query('UPDATE adm SET contrasena=? WHERE id_adm=?',
-                  [newHash, adm.id_adm]);
+                db.query('UPDATE adm SET contrasena=? WHERE id_adm=?', [newHash, adm.id_adm]);
               }
             }
 
             if (match) {
+              console.log('✅ Login correcto (adm), ID:', adm.id_adm);
               return res.json({
                 role: 'adm',
                 id: adm.id_adm,
@@ -110,6 +110,7 @@ const login = async (req, res) => {
       });
     });
   } catch (error) {
+    console.error('❌ Error en el servidor:', error);
     res.status(500).json({ error: '❌ Error en el servidor' });
   }
 };

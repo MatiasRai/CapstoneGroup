@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonInput, IonButtons, IonButton } from '@ionic/angular/standalone';
+import { HttpClient } from '@angular/common/http';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 
 @Component({
@@ -9,55 +9,25 @@ import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
   templateUrl: './menu-emp.page.html',
   styleUrls: ['./menu-emp.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IONIC_IMPORTS]
+  imports: [CommonModule, FormsModule, IONIC_IMPORTS] // ✅ limpio y sin duplicados
 })
 export class MenuEMPPage implements OnInit {
+  empresa: any = null;
 
-  constructor() { }
+  constructor(private http: HttpClient) {}
 
-  // Información de la empresa
-  empresa = {
-    nombre_empresa: 'Empresa XYZ',
-    direccion_empresa: 'Calle Ficticia 123, Ciudad, País',
-    telefono: '(555) 123-4567',
-    descripcion_empresa: 'Empresa dedicada a la venta de productos electrónicos.',
-    horarios: 'Lunes a Viernes, 9:00 AM - 6:00 PM',
-    sitio_web: 'https://www.empresa.xyz',
-    correo: 'contacto@empresa.xyz'
-  };
+  ngOnInit() {
+    const usuario = JSON.parse(localStorage.getItem('usuarioLogeado') || '{}');
 
-  // Modo de edición
-  editMode = false;
-
-  ngOnInit() {}
-
-  // Activar modo de edición
-  edit() {
-    this.editMode = true;
-  }
-
-  // Guardar los cambios (solo en la UI por ahora)
-  save() {
-    console.log('Cambios guardados:', this.empresa);
-    this.editMode = false;
-  }
-
-  // Cancelar la edición y restaurar los datos originales
-  cancel() {
-    this.editMode = false;
-    this.resetData();
-  }
-
-  // Restaurar los datos originales en caso de cancelación
-  resetData() {
-    this.empresa = {
-      nombre_empresa: 'Empresa XYZ',
-      direccion_empresa: 'Calle Ficticia 123, Ciudad, País',
-      telefono: '(555) 123-4567',
-      descripcion_empresa: 'Empresa dedicada a la venta de productos electrónicos.',
-      horarios: 'Lunes a Viernes, 9:00 AM - 6:00 PM',
-      sitio_web: 'https://www.empresa.xyz',
-      correo: 'contacto@empresa.xyz'
-    };
+    if (usuario?.id) {
+      this.http
+        .get(`http://localhost:3000/api/v1/empresas/admin/${usuario.id}`)
+        .subscribe({
+          next: (res) => (this.empresa = res),
+          error: (err) => console.error('Error al obtener empresa:', err)
+        });
+    } else {
+      console.warn('⚠️ No se encontró usuario logeado en localStorage');
+    }
   }
 }

@@ -6,8 +6,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UsuarioService {
-  private apiUrl = 'http://localhost:3000/usuarios';
-  private apiUrlEmpresas = 'http://localhost:3000/empresas'; 
+  private apiUrl = 'http://localhost:3000/api/v1/usuarios';       // ✅ Endpoint para usuarios
+  private apiUrlEmpresas = 'http://localhost:3000/api/v1/empresas'; // ✅ Endpoint para empresas
+
   
 
   constructor(private http: HttpClient) {}
@@ -28,7 +29,7 @@ export class UsuarioService {
   }
 
   getDiscapacidades(): Observable<any[]> {
-  return this.http.get<any[]>('http://localhost:3000/discapacidades');
+  return this.http.get<any[]>('http://localhost:3000/api/v1/discapacidades');
 }
  ///Usuarios normales ////
 

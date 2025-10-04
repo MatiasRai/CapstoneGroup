@@ -7,9 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class AdmEmpresaService {
 
-  private apiUrlAdm = 'http://localhost:3000/adm_empresa';  // Endpoint para administradores
-  private apiUrlEmpresas = 'http://localhost:3000/empresas'; // Endpoint para empresas
-  private apiUrl = 'http://localhost:3000/login';
+private apiUrlAdm = 'http://localhost:3000/api/v1/adm_empresa';  // ✅ Endpoint para administradores de empresa
+private apiUrlEmpresas = 'http://localhost:3000/api/v1/empresas'; // ✅ Endpoint para empresas
+private apiUrl = 'http://localhost:3000/api/v1/login';            // ✅ Endpoint para login
   constructor(private http: HttpClient) {}
 
   // 👉 Registrar un administrador de empresa

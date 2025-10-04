@@ -6,7 +6,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonListHeader,   // 👈 falta este
+  IonListHeader,
   IonContent,
   IonHeader,
   IonTitle,
@@ -14,6 +14,7 @@ import {
   IonCard,
   IonCardHeader,
   IonCardTitle,
+  IonCardSubtitle,  // 👈 agregado
   IonCardContent,
   IonIcon,
   IonGrid,
@@ -27,7 +28,8 @@ import {
   IonSplitPane,
   IonMenu,
   IonMenuToggle,
-  IonRouterOutlet
+  IonRouterOutlet,
+  IonSpinner,       // 👈 agregado
 } from '@ionic/angular/standalone';
 
 export const IONIC_IMPORTS = [
@@ -37,10 +39,8 @@ export const IONIC_IMPORTS = [
   IonInput,
   IonItem,
   IonLabel,
-  IonNote,
-  IonMenuButton,
   IonList,
-  IonListHeader,   // 👈 agregado aquí también
+  IonListHeader,
   IonContent,
   IonHeader,
   IonTitle,
@@ -48,16 +48,20 @@ export const IONIC_IMPORTS = [
   IonCard,
   IonCardHeader,
   IonCardTitle,
+  IonCardSubtitle,  // 👈 agregado
   IonCardContent,
   IonIcon,
   IonGrid,
   IonRow,
   IonCol,
+  IonNote,
   IonSelect,
   IonSelectOption,
+  IonMenuButton,
   IonSearchbar,
   IonSplitPane,
   IonMenu,
   IonMenuToggle,
-  IonRouterOutlet
+  IonRouterOutlet,
+  IonSpinner,       // 👈 agregado
 ];
