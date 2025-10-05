@@ -141,7 +141,7 @@ ion-select {
 }
 
 // Estilo para el input de tipo file (Foto de perfil)
-input[type="file"] {
+input[type='file'] {
   font-size: 0.9rem;
   padding: 10px;
   border: 1px solid #ddd;
@@ -172,4 +172,35 @@ input[type="file"] {
   ion-button {
     padding: 12px 16px;
   }
+}
+
+/* 🌍 === ESTILO DEL MAPA LEAFLET === */
+#map {
+  width: 100%;
+  height: 300px;
+  border-radius: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Asegurar que los controles del mapa (zoom, attribution) se vean bien */
+.leaflet-control {
+  border-radius: 8px !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Mejorar el popup del marcador */
+.leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  padding: 8px;
+  background: #ffffff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content {
+  color: $text-color;
+  font-size: 0.95rem;
+  font-weight: 500;
 }

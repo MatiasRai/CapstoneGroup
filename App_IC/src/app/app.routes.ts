@@ -22,8 +22,8 @@ export const routes: Routes = [
   // 👤 Usuario normal
   {
     path: 'menu',
-    loadComponent: () => import('./menu/menu.page').then(m => m.MenuPage),
-    canActivate: [AuthUserGuard]
+    loadComponent: () => import('./menu/menu.page').then(m => m.MenuPage)
+    
   },
   {
     path: 'publicar-servicio',

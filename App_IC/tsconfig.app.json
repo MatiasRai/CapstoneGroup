@@ -3,13 +3,16 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": ["jest"]   // ✅ Se agregan los tipos de Jest para evitar errores en tests
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts"
+    "src/polyfills.ts",
+    "src/declarations.d.ts"   // ✅ Permite importar imágenes como módulos
   ],
   "include": [
-    "src/**/*.d.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "!src/**/*.spec.ts"       // ✅ Se excluyen los archivos de test (.spec.ts)
   ]
 }
