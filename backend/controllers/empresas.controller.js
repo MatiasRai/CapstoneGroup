@@ -78,43 +78,73 @@ const getEmpresaByAdm = (req, res) => {
 const getServiciosByEmpresa = (req, res) => {
   const { id_adm_empresa } = req.params;
 
-const query = `
-  SELECT 
-    s.id_servicio,
-    s.nombre_servicio,
-    s.descripcion_servicio,
-    s.horario_disponible,
-    s.costo_servicio,
-    l.nombre_lugar,
-    l.direccion_lugar,
-    c.nombre_categoria AS categoria_lugar,
-    d.nombre_discapacidad
-  FROM servicios s
-  INNER JOIN empresas e 
-    ON s.Empresas_id_empresa = e.id_empresa
-  LEFT JOIN lugares l 
-    ON s.Lugares_id_lugar = l.id_lugar
-  LEFT JOIN categoria_lugar c 
-    ON l.Categoria_Lugar_id_categoria = c.id_categoria
-  LEFT JOIN tipos_discapacidad d 
-    ON s.id_discapacidad = d.id_discapacidad
-  WHERE e.Adm_Empresa_id_adm_Empresa = ?;
-`;
-
+  const query = `
+    SELECT 
+      s.id_servicio,
+      s.nombre_servicio,
+      s.descripcion_servicio,
+      s.horario_disponible,
+      s.costo_servicio,
+      l.nombre_lugar,
+      l.direccion_lugar,
+      c.nombre_categoria AS categoria_lugar,
+      d.nombre_discapacidad,
+      r.id_resena,
+      r.valoracion,
+      r.comentarios,
+      r.fecha_resena
+    FROM servicios s
+    INNER JOIN empresas e 
+      ON s.Empresas_id_empresa = e.id_empresa
+    LEFT JOIN lugares l 
+      ON s.Lugares_id_lugar = l.id_lugar
+    LEFT JOIN categoria_lugar c 
+      ON l.Categoria_Lugar_id_categoria = c.id_categoria
+    LEFT JOIN tipos_discapacidad d 
+      ON s.id_discapacidad = d.id_discapacidad
+    LEFT JOIN resenas r
+      ON r.Lugares_id_lugar = l.id_lugar
+    WHERE e.Adm_Empresa_id_adm_Empresa = ?;
+  `;
 
   db.query(query, [id_adm_empresa], (err, rows) => {
     if (err) {
-      console.error("❌ Error en getServiciosByEmpresa:", err);
+      console.error('❌ Error en getServiciosByEmpresa:', err);
       return res.status(500).json({ error: err.message });
     }
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: '⚠️ No hay servicios registrados para esta empresa' });
+    // Agrupar servicios y reseñas
+    const servicios = {};
+    for (const row of rows) {
+      if (!servicios[row.id_servicio]) {
+        servicios[row.id_servicio] = {
+          id_servicio: row.id_servicio,
+          nombre_servicio: row.nombre_servicio,
+          descripcion_servicio: row.descripcion_servicio,
+          horario_disponible: row.horario_disponible,
+          costo_servicio: row.costo_servicio,
+          nombre_lugar: row.nombre_lugar,
+          direccion_lugar: row.direccion_lugar,
+          categoria_lugar: row.categoria_lugar,
+          nombre_discapacidad: row.nombre_discapacidad,
+          resenas: [] // 👈 Aquí se guardarán las reseñas
+        };
+      }
+
+      if (row.id_resena) {
+        servicios[row.id_servicio].resenas.push({
+          id_resena: row.id_resena,
+          valoracion: row.valoracion,
+          comentarios: row.comentarios,
+          fecha_resena: row.fecha_resena
+        });
+      }
     }
 
-    res.json(rows);
+    res.json(Object.values(servicios));
   });
 };
+
 
 
 module.exports = {
