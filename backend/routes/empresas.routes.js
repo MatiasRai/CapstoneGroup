@@ -5,7 +5,7 @@ const {
   createEmpresa,
   updateEstadoEmpresa,
   getEmpresaByAdm,
-  getServiciosByAdm
+  getServiciosByEmpresa
 } = require('../controllers/empresas.controller');
 
 // 🔹 Obtener todas las empresas
@@ -21,7 +21,7 @@ router.put('/:id/estado', updateEstadoEmpresa);
 router.get('/admin/:id_adm_empresa', getEmpresaByAdm);
 
 // 🔹 Obtener servicios de una empresa según su administrador
-router.get('/admin/:id_adm_empresa/servicios', getServiciosByAdm);
+router.get('/admin/:id_adm_empresa/servicios', getServiciosByEmpresa);
 
 
 module.exports = router;

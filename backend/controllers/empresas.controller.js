@@ -75,22 +75,42 @@ const getEmpresaByAdm = (req, res) => {
   });
 };
 
-// 🔹 Nuevo: Obtener servicios por ID del administrador
-const getServiciosByAdm = (req, res) => {
+const getServiciosByEmpresa = (req, res) => {
   const { id_adm_empresa } = req.params;
 
-  const query = `
-    SELECT s.nombre_servicio, s.descripcion_servicio, s.horario_disponible, s.costo_servicio
-    FROM servicios s
-    INNER JOIN empresas e ON s.Empresas_id_empresa = e.id_empresa
-    WHERE e.Adm_Empresa_id_adm_Empresa = ?;
-  `;
+const query = `
+  SELECT 
+    s.id_servicio,
+    s.nombre_servicio,
+    s.descripcion_servicio,
+    s.horario_disponible,
+    s.costo_servicio,
+    l.nombre_lugar,
+    l.direccion_lugar,
+    c.nombre_categoria AS categoria_lugar,
+    d.nombre_discapacidad
+  FROM servicios s
+  INNER JOIN empresas e 
+    ON s.Empresas_id_empresa = e.id_empresa
+  LEFT JOIN lugares l 
+    ON s.Lugares_id_lugar = l.id_lugar
+  LEFT JOIN categoria_lugar c 
+    ON l.Categoria_Lugar_id_categoria = c.id_categoria
+  LEFT JOIN tipos_discapacidad d 
+    ON s.id_discapacidad = d.id_discapacidad
+  WHERE e.Adm_Empresa_id_adm_Empresa = ?;
+`;
+
 
   db.query(query, [id_adm_empresa], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error("❌ Error en getServiciosByEmpresa:", err);
+      return res.status(500).json({ error: err.message });
+    }
 
-    if (rows.length === 0)
+    if (rows.length === 0) {
       return res.status(404).json({ message: '⚠️ No hay servicios registrados para esta empresa' });
+    }
 
     res.json(rows);
   });
@@ -102,5 +122,5 @@ module.exports = {
   createEmpresa,
   updateEstadoEmpresa,
   getEmpresaByAdm,
-  getServiciosByAdm,
+  getServiciosByEmpresa,
 };

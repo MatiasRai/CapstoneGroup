@@ -5,14 +5,11 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- 🏢 Datos de la Empresa -->
   <ng-container *ngIf="empresa; else cargando">
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ empresa.nombre_empresa }}</ion-card-title>
-        <ion-card-subtitle>
-          {{ empresa.estado || empresa.Estado }}
-        </ion-card-subtitle>
+        <ion-card-subtitle>{{ empresa.estado || empresa.Estado }}</ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>
@@ -28,34 +25,31 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- 🧾 Servicios Asociados -->
+    <!-- 🧾 Sección de Servicios con Lugar y Categoría -->
     <ion-card>
       <ion-card-header>
-        <ion-card-title>Servicios Ofrecidos</ion-card-title>
+        <ion-card-title>🧾 Servicios de la Empresa</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
-        <ng-container *ngIf="servicios && servicios.length > 0; else sinServicios">
+        <ng-container *ngIf="servicios.length > 0; else sinServicios">
           <ion-list>
-            <ion-item *ngFor="let s of servicios">
-              <ion-label>
-                <h2><strong>{{ s.nombre_servicio }}</strong></h2>
-                <p>{{ s.descripcion_servicio }}</p>
-                <p>
-                  <strong>Horario disponible:</strong>
-                  {{ s.horario_disponible }}
-                </p>
-                <p>
-                  <strong>Costo:</strong>
-                  {{ s.costo_servicio | currency : "CLP" }}
-                </p>
-              </ion-label>
-            </ion-item>
+                <ion-item *ngFor="let s of servicios">
+                  <ion-label>
+                    <h2><strong>{{ s.nombre_servicio }}</strong></h2>
+                    <p>{{ s.descripcion_servicio }}</p>
+                    <p><strong>Horario disponible:</strong> {{ s.horario_disponible }}</p>
+                    <p><strong>Costo:</strong> {{ s.costo_servicio | currency:'CLP' }}</p>
+                    <p><strong>Lugar:</strong> {{ s.nombre_lugar }} - {{ s.direccion_lugar }}</p>
+                    <p><strong>Categoría:</strong> {{ s.categoria_lugar }}</p>
+                    <p><strong>Tipo de discapacidad:</strong> {{ s.nombre_discapacidad || 'No especificado' }}</p>
+                  </ion-label>
+                </ion-item>
           </ion-list>
         </ng-container>
 
         <ng-template #sinServicios>
-          <p style="text-align: center; color: gray; margin-top: 1rem;">
+          <p style="text-align: center; color: gray;">
             ⚠️ No hay servicios registrados para esta empresa.
           </p>
         </ng-template>
@@ -63,9 +57,8 @@
     </ion-card>
   </ng-container>
 
-  <!-- 🔄 Cargando -->
   <ng-template #cargando>
-    <div style="text-align: center; margin-top: 2rem;">
+    <div style="text-align:center; margin-top: 2rem;">
       <ion-spinner name="crescent"></ion-spinner>
       <p>Cargando datos de la empresa...</p>
     </div>
