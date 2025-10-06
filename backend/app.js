@@ -13,3 +13,4 @@ app.use('/api/v1/discapacidades', require('./routes/discapacidades.routes'));
 app.use('/api/v1/login', require('./routes/login.routes'));
 
 app.listen(3000, () => console.log('🚀 Backend corriendo en http://localhost:3000'));
+
