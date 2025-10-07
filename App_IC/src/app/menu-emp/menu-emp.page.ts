@@ -24,7 +24,7 @@ export class MenuEMPPage implements OnInit {
 
   // 🔄 Cargar empresa y sus servicios
   recargarDatos() {
-    const usuario = JSON.parse(localStorage.getItem('usuarioLogeado') || '{}');
+    const usuario = JSON.parse(localStorage.getItem('user') || '{}');
     if (!usuario?.id) {
       console.warn('⚠️ No se encontró usuario logeado en localStorage');
       return;
