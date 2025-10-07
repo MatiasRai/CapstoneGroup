@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rutas con prefijo /api/v1
+// Rutas con prefijo de /api/v1
 app.use('/api/v1/usuarios', require('./routes/usuarios.routes'));
 app.use('/api/v1/empresas', require('./routes/empresas.routes'));
 app.use('/api/v1/adm_empresa', require('./routes/adm.routes'));
