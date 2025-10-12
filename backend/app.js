@@ -11,6 +11,10 @@ app.use('/api/v1/empresas', require('./routes/empresas.routes'));
 app.use('/api/v1/adm_empresa', require('./routes/adm.routes'));
 app.use('/api/v1/discapacidades', require('./routes/discapacidades.routes'));
 app.use('/api/v1/login', require('./routes/login.routes'));
+app.use('/api/v1/rutas', require('./routes/rutas.routes')); // ✅ Nueva ruta para rutas_recomendadas
 
-app.listen(3000, () => console.log('🚀 Backend corriendo en http://localhost:3000'));
+app.listen(3000, () => {
+  console.log('🚀 Backend corriendo en http://localhost:3000');
+});
+
 

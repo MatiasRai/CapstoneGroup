@@ -31,12 +31,18 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
+              },
+              {
+                "glob": "**/*.svg",
+                "input": "node_modules/ionicons/dist/ionicons/svg",
+                "output": "svg"
               }
             ],
             "styles": [
               "src/global.scss",
               "src/theme/variables.scss",
-              "node_modules/leaflet/dist/leaflet.css"
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/ionicons/dist/collection/components/icon/icon.css"
             ],
             "scripts": [],
             "browser": "src/main.ts"
@@ -109,12 +115,18 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
+              },
+              {
+                "glob": "**/*.svg",
+                "input": "node_modules/ionicons/dist/ionicons/svg",
+                "output": "svg"
               }
             ],
             "styles": [
               "src/global.scss",
               "src/theme/variables.scss",
-              "node_modules/leaflet/dist/leaflet.css"
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/ionicons/dist/collection/components/icon/icon.css"
             ],
             "scripts": []
           },

@@ -1,7 +1,8 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
+import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
 
 @Component({
@@ -9,31 +10,29 @@ import * as L from 'leaflet';
   templateUrl: './menu.page.html',
   styleUrls: ['./menu.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IONIC_IMPORTS]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IONIC_IMPORTS]
 })
 export class MenuPage implements OnInit, AfterViewInit {
-  searchText: string = '';
-  selectedCategory: string = '';
+  form!: FormGroup;
   private map!: L.Map;
+  private polyline!: L.Polyline;
+  coordenadas: { lat: number; lng: number }[] = [];
 
-  // 📍 Datos de ejemplo con coordenadas [lat, lng]
-  items: { name: string; category: string; coords: [number, number] }[] = [
-    { name: 'Restaurante 1', category: 'restaurante', coords: [-41.4689, -72.9411] },
-    { name: 'Agencia de Turismo 1', category: 'agencia_turismo', coords: [-41.4705, -72.9350] },
-    { name: 'Transporte 1', category: 'transporte', coords: [-41.4720, -72.9480] },
-    { name: 'Restaurante 2', category: 'restaurante', coords: [-41.4665, -72.9390] },
-    { name: 'Agencia de Turismo 2', category: 'agencia_turismo', coords: [-41.4710, -72.9440] },
-    { name: 'Transporte 2', category: 'transporte', coords: [-41.4690, -72.9370] }
-  ];
+  constructor(private fb: FormBuilder, private http: HttpClient) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.form = this.fb.group({
+      nombre_ruta: [''],
+      descripcion_ruta: ['']
+    });
+  }
 
   ngAfterViewInit(): void {
     this.fixLeafletIcons();
     this.initMap();
   }
 
-  // 🧭 Soluciona los errores 404 de los íconos de Leaflet
+  // 🔧 Corrige los íconos de Leaflet
   private fixLeafletIcons(): void {
     const iconDefault = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -46,49 +45,49 @@ export class MenuPage implements OnInit, AfterViewInit {
       shadowSize: [41, 41]
     });
 
-    // Asigna el ícono corregido globalmente
     L.Marker.prototype.options.icon = iconDefault;
   }
 
-  // 🗺️ Inicializar el mapa Leaflet
+  // 🗺️ Inicializar mapa y eventos de clic
   private initMap(): void {
     this.map = L.map('map', {
       center: [-41.4689, -72.9411],
       zoom: 13
     });
 
-    // 🌍 Cargar los tiles de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
-    this.addMarkers();
-  }
+    this.polyline = L.polyline([], { color: 'blue' }).addTo(this.map);
 
-  // 🔎 Filtrar elementos y actualizar el mapa
-  filteredItems() {
-    const result = this.items.filter((item) => {
-      const matchesSearch = item.name.toLowerCase().includes(this.searchText.toLowerCase());
-      const matchesCategory = this.selectedCategory ? item.category === this.selectedCategory : true;
-      return matchesSearch && matchesCategory;
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      const punto = { lat: e.latlng.lat, lng: e.latlng.lng };
+      this.coordenadas.push(punto);
+      this.polyline.addLatLng(e.latlng);
     });
-
-    if (this.map) {
-      // Limpiar marcadores anteriores (manteniendo el tile base)
-      this.map.eachLayer((layer) => {
-        if (layer instanceof L.Marker) this.map.removeLayer(layer);
-      });
-      this.addMarkers(result);
-    }
-
-    return result;
   }
 
-  // 📍 Agregar marcadores al mapa
-  private addMarkers(data = this.items): void {
-    data.forEach((item) => {
-      const marker = L.marker(item.coords).addTo(this.map);
-      marker.bindPopup(`<b>${item.name}</b><br>Categoría: ${item.category}`);
+  // 📤 Enviar ruta al backend
+  registrarRuta(): void {
+    const data = {
+      ...this.form.value,
+      id_tipo_ruta: 1, // Ajusta según tu lógica de tipos
+      id_usuario: 2,   // Reemplaza con el usuario real (si tienes login)
+      coordenadas: this.coordenadas
+    };
+
+    this.http.post('http://localhost:3000/api/v1/rutas', data).subscribe({
+      next: (res) => {
+        alert('Ruta registrada con éxito');
+        this.form.reset();
+        this.coordenadas = [];
+        this.polyline.setLatLngs([]);
+      },
+      error: (err) => {
+        console.error('Error al registrar ruta', err);
+        alert('Error al registrar la ruta');
+      }
     });
   }
 }
