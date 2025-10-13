@@ -2,17 +2,18 @@ const express = require('express');
 const router = express.Router();
 const rutasController = require('../controllers/rutasController');
 
-// ✅ Ruta de prueba (para verificar conexión con el backend)
-router.get('/', (req, res) => {
-  res.send('✅ Endpoint /api/v1/rutas activo');
-});
-
-// 🗺️ Crear una nueva ruta con coordenadas
+// 📍 Crear nueva ruta
 router.post('/', rutasController.crearRuta);
 
-// 🔍 Obtener rutas filtradas (tipo, longitud, discapacidad)
+// 🔍 Obtener rutas filtradas (usada por el frontend)
 router.get('/filtrar', rutasController.obtenerRutasFiltradas);
 
+// ✅ Endpoint base opcional (solo diagnóstico, devuelve JSON)
+router.get('/', (req, res) => {
+  res.json({ message: '✅ Endpoint /api/v1/rutas activo' });
+});
+
 module.exports = router;
+
 
 

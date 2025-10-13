@@ -1,26 +1,111 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Registrar Ruta</ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>Rutas Accesibles</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <form [formGroup]="form" (ngSubmit)="registrarRuta()" class="ion-padding">
-    <ion-item>
-      <ion-label position="floating">Nombre de la ruta</ion-label>
-      <ion-input type="text" formControlName="nombre_ruta"></ion-input>
-    </ion-item>
+<ion-content [fullscreen]="true" class="ion-padding">
 
-    <ion-item>
-      <ion-label position="floating">Descripción</ion-label>
-      <ion-textarea formControlName="descripcion_ruta"></ion-textarea>
-    </ion-item>
+  <!-- 🔍 FILTROS -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Filtrar rutas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
 
-    <ion-button expand="full" type="submit" class="ion-margin-top">Registrar Ruta</ion-button>
-  </form>
+      <ion-item>
+        <ion-label>Tipo de Ruta</ion-label>
+        <ion-select [(ngModel)]="filtros.tipo_ruta" interface="popover">
+          <ion-select-option value="">Todos</ion-select-option>
+          <ion-select-option *ngFor="let tipo of tiposRuta" [value]="tipo.nombre_tipo_ruta">
+            {{ tipo.nombre_tipo_ruta }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
 
-  <div id="map" style="height: 300px; width: 100%; margin: 16px 0; border-radius: 10px; overflow: hidden;"></div>
+      <ion-item>
+        <ion-label position="floating">Longitud máxima (km)</ion-label>
+        <ion-input type="number" [(ngModel)]="filtros.max_longitud"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Discapacidad</ion-label>
+        <ion-select [(ngModel)]="filtros.id_discapacidad" interface="popover">
+          <ion-select-option value="">Todas</ion-select-option>
+          <ion-select-option *ngFor="let disc of discapacidades" [value]="disc.id_discapacidad">
+            {{ disc.nombre_discapacidad }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-button expand="block" color="primary" class="ion-margin-top" (click)="aplicarFiltros()">
+        Aplicar Filtros
+      </ion-button>
+
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 📝 FORMULARIO DE NUEVA RUTA -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Registrar nueva ruta</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="form" (ngSubmit)="registrarRuta()">
+        <ion-item>
+          <ion-label position="floating">Nombre de la ruta</ion-label>
+          <ion-input formControlName="nombre_ruta" required></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Descripción</ion-label>
+          <ion-textarea formControlName="descripcion_ruta"></ion-textarea>
+        </ion-item>
+
+        <ion-button expand="block" color="success" type="submit" class="ion-margin-top">
+          Registrar Ruta
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 🗺️ MAPA INTERACTIVO -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Mapa Interactivo</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div id="map" style="height: 400px; border-radius: 10px; margin-bottom: 10px;"></div>
+
+      <!-- 🔘 BOTÓN LIMPIAR MAPA -->
+      <ion-button expand="block" color="medium" (click)="limpiarMapa()">
+        Limpiar Mapa
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 🧭 RUTAS RECOMENDADAS -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Rutas Recomendadas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list *ngIf="rutas.length > 0; else noRutas">
+        <ion-item *ngFor="let ruta of rutas" button (click)="verRutaEnMapa(ruta)">
+          <ion-label>
+            <h2>{{ ruta.nombre_ruta }}</h2>
+            <p>{{ ruta.descripcion_ruta }}</p>
+            <p><strong>Tipo:</strong> {{ ruta.nombre_tipo_ruta }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+
+      <ng-template #noRutas>
+        <ion-item>
+          <ion-label class="ion-text-center">No se encontraron rutas.</ion-label>
+        </ion-item>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>
