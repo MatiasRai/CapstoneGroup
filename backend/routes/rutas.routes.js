@@ -2,13 +2,16 @@ const express = require('express');
 const router = express.Router();
 const rutasController = require('../controllers/rutasController');
 
-// Ruta POST para registrar rutas
+// ✅ Ruta de prueba (para verificar conexión con el backend)
+router.get('/', (req, res) => {
+  res.send('✅ Endpoint /api/v1/rutas activo');
+});
+
+// 🗺️ Crear una nueva ruta con coordenadas
 router.post('/', rutasController.crearRuta);
 
-// (Opcional) Ruta GET para probar desde el navegador
-router.get('/', (req, res) => {
-  res.send('✅ Ruta /api/v1/rutas activa');
-});
+// 🔍 Obtener rutas filtradas (tipo, longitud, discapacidad)
+router.get('/filtrar', rutasController.obtenerRutasFiltradas);
 
 module.exports = router;
 
