@@ -174,24 +174,51 @@ input[type='file'] {
   }
 }
 
-/* 🌍 === ESTILO DEL MAPA LEAFLET === */
+// === ESTILOS PARA EL MAPA ===
 #map {
   width: 100%;
-  height: 300px;
+  height: 400px;
   border-radius: 10px;
-  margin-top: 10px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1; // 👈 IMPORTANTE
+  position: relative; // 👈 IMPORTANTE
 }
 
-/* Asegurar que los controles del mapa (zoom, attribution) se vean bien */
+// Asegurar que los tiles de Leaflet carguen bien
+.leaflet-container {
+  background: #f0f0f0 !important;
+  z-index: 1 !important;
+}
+
+.leaflet-tile-pane {
+  z-index: 1 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 2 !important;
+}
+
+.leaflet-shadow-pane {
+  z-index: 3 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 4 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 5 !important;
+}
+
+// Controles del mapa
 .leaflet-control {
   border-radius: 8px !important;
   background-color: rgba(255, 255, 255, 0.9) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Mejorar el popup del marcador */
+// Mejorar el popup del marcador
 .leaflet-popup-content-wrapper {
   border-radius: 10px;
   padding: 8px;
@@ -200,7 +227,36 @@ input[type='file'] {
 }
 
 .leaflet-popup-content {
-  color: $text-color;
+  color: #333;
   font-size: 0.95rem;
   font-weight: 500;
+}
+
+// === ESTILOS PARA LA BARRA DE GRABACIÓN ===
+ion-toolbar[color="danger"] {
+  --background: #eb445a;
+}
+
+// === ESTILOS GENERALES ===
+ion-content {
+  --background: #f4f7fa;
+}
+
+ion-card {
+  margin: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+// Texto en la barra de grabación
+ion-text h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+ion-text p {
+  font-size: 0.8rem;
+  margin: 0;
+  opacity: 0.9;
 }

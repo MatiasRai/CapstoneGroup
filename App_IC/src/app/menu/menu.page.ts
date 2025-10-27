@@ -126,15 +126,19 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // 📍 Obtener ubicación actual del dispositivo
-  async getCurrentPosition() {
-    try {
-      const coordinates = await Geolocation.getCurrentPosition();
-      this.currentLocation = [
-        coordinates.coords.latitude,
-        coordinates.coords.longitude
-      ];
-      console.log('📍 Ubicación actual:', this.currentLocation);
+    async getCurrentPosition() {
+      try {
+        const coordinates = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+        this.currentLocation = [
+          coordinates.coords.latitude,
+          coordinates.coords.longitude
+        ];
+        console.log('📍 Ubicación actual REAL:', this.currentLocation);
+        console.log('📏 Precisión:', coordinates.coords.accuracy, 'metros');
       
       if (this.map) {
         this.map.setView(this.currentLocation, 15);
@@ -288,14 +292,22 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       this.totalDistance = 0;
       this.startTime = Date.now();
 
-      // Obtener posición inicial
-      const position = await Geolocation.getCurrentPosition();
+      // Obtener posición inicial CON ALTA PRECISIÓN
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+
       const startPoint = {
         latitud: position.coords.latitude,
         longitud: position.coords.longitude,
         timestamp: Date.now()
       };
-      
+
+      console.log('📍 Posición de inicio obtenida:', startPoint.latitud, startPoint.longitud);
+      console.log('📏 Precisión GPS:', position.coords.accuracy, 'metros');
+
       this.recordedPoints.push(startPoint);
       this.currentLocation = [startPoint.latitud, startPoint.longitud];
 
