@@ -29,7 +29,8 @@ import {
   IonMenu,
   IonMenuToggle,
   IonRouterOutlet,
-  IonSpinner,       // 👈 agregado
+  IonSpinner,
+  IonText,       // 👈 agregado
 } from '@ionic/angular/standalone';
 
 export const IONIC_IMPORTS = [
@@ -63,5 +64,6 @@ export const IONIC_IMPORTS = [
   IonMenu,
   IonMenuToggle,
   IonRouterOutlet,
-  IonSpinner,       // 👈 agregado
+  IonSpinner,
+  IonText,       // 👈 agregado
 ];
