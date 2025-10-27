@@ -1,34 +1,144 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <!-- 👇 Botón hamburguesa -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Menu</ion-title>
+    <ion-title>Rutas Accesibles</ion-title>
+    
+    <ion-buttons slot="end">
+      <ion-button (click)="verMisRutas()">
+        <ion-icon slot="icon-only" name="map"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Barra de grabación en tiempo real -->
+  <ion-toolbar *ngIf="isRecording" color="danger">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="4">
+          <div style="text-align: center;">
+            <ion-text>
+              <h3 style="margin: 0;">{{ totalDistance.toFixed(2) }}</h3>
+              <p style="margin: 0; font-size: 12px;">km</p>
+            </ion-text>
+          </div>
+        </ion-col>
+        <ion-col size="4">
+          <div style="text-align: center;">
+            <ion-text>
+              <h3 style="margin: 0;">{{ elapsedTime }}</h3>
+              <p style="margin: 0; font-size: 12px;">tiempo</p>
+            </ion-text>
+          </div>
+        </ion-col>
+        <ion-col size="4">
+          <div style="text-align: center;">
+            <ion-text>
+              <h3 style="margin: 0;">{{ recordedPoints.length }}</h3>
+              <p style="margin: 0; font-size: 12px;">puntos</p>
+            </ion-text>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <!-- Buscador -->
-  <ion-searchbar [(ngModel)]="searchText" debounce="500" placeholder="Buscar..."></ion-searchbar>
+  
+  <!-- 🗺️ Mapa principal -->
+  <div id="map" style="height: 400px; width: 100%; border-radius: 10px; overflow: hidden;"></div>
 
-  <!-- Filtros -->
-  <ion-item>
-    <ion-label>Filtrar por categoría</ion-label>
-    <ion-select [(ngModel)]="selectedCategory" placeholder="Seleccionar categoría">
-      <ion-select-option value="restaurante">Restaurantes</ion-select-option>
-      <ion-select-option value="agencia_turismo">Agencia de Turismo</ion-select-option>
-      <ion-select-option value="transporte">Transporte</ion-select-option>
-    </ion-select>
-  </ion-item>
+  <!-- 🎬 Controles de grabación -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="navigate-circle" style="vertical-align: middle;"></ion-icon>
+        Grabar Mi Ruta
+      </ion-card-title>
+      <ion-card-subtitle>
+        {{ isRecording ? '🔴 GRABANDO... Camina y tu ruta se guardará automáticamente' : 'Comparte tus rutas accesibles con la comunidad' }}
+      </ion-card-subtitle>
+    </ion-card-header>
 
-  <!-- Listado filtrado -->
-  <ion-list>
-    <ion-item *ngFor="let item of filteredItems()">
-      <ion-label>{{ item.name }}</ion-label>
+    <ion-card-content>
+      <ion-button 
+        *ngIf="!isRecording"
+        expand="block" 
+        color="success" 
+        (click)="startRecording()">
+        <ion-icon slot="start" name="play-circle"></ion-icon>
+        Iniciar Grabación
+      </ion-button>
+
+      <ion-button 
+        *ngIf="isRecording"
+        expand="block" 
+        color="danger" 
+        (click)="stopRecording()">
+        <ion-icon slot="start" name="stop-circle"></ion-icon>
+        Finalizar y Guardar
+      </ion-button>
+
+      <ion-text *ngIf="!isRecording" color="medium">
+        <p style="font-size: 12px; margin-top: 10px;">
+          💡 <b>Cómo funciona:</b><br>
+          1. Presiona "Iniciar Grabación"<br>
+          2. Camina o conduce por tu ruta<br>
+          3. El GPS grabará automáticamente tu recorrido<br>
+          4. Presiona "Finalizar" cuando llegues al destino<br>
+          5. Dale un nombre y comparte tu ruta
+        </p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Buscador y filtros (solo cuando no está grabando) -->
+  <div *ngIf="!isRecording">
+    <ion-searchbar 
+      [(ngModel)]="searchText" 
+      debounce="500" 
+      placeholder="Buscar lugares...">
+    </ion-searchbar>
+
+    <ion-item>
+      <ion-label>Filtrar por categoría</ion-label>
+      <ion-select [(ngModel)]="selectedCategory" placeholder="Todas">
+        <ion-select-option value="">Todas</ion-select-option>
+        <ion-select-option value="restaurante">Restaurantes</ion-select-option>
+        <ion-select-option value="agencia_turismo">Agencia de Turismo</ion-select-option>
+        <ion-select-option value="transporte">Transporte</ion-select-option>
+      </ion-select>
     </ion-item>
-  </ion-list>
 
-  <!-- 🌍 Mapa Leaflet -->
-  <div id="map" style="height: 300px; width: 100%; margin-top: 10px; border-radius: 10px; overflow: hidden;"></div>
+    <!-- Listado filtrado -->
+    <ion-list>
+      <ion-item *ngFor="let item of filteredItems()">
+        <ion-label>
+          <h2>{{ item.name }}</h2>
+          <p>{{ item.address }}</p>
+          <p><small>{{ item.category }}</small></p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <!-- 💡 Información adicional -->
+  <ion-card *ngIf="!isRecording">
+    <ion-card-header>
+      <ion-card-title>🌟 Rutas Recomendadas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Explora rutas accesibles creadas por otros usuarios. 
+        Haz clic en el ícono de mapa (📍) arriba para ver todas las rutas disponibles.
+      </p>
+      <ion-button expand="block" fill="outline" (click)="verMisRutas()">
+        <ion-icon slot="start" name="map"></ion-icon>
+        Ver Mis Rutas
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>
