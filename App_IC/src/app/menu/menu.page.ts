@@ -6,7 +6,6 @@ import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { Platform, AlertController, ToastController, ActionSheetController } from '@ionic/angular';
 import * as L from 'leaflet';
 import { Geolocation } from '@capacitor/geolocation';
-import { AppLauncher } from '@capacitor/app-launcher';
 
 @Component({
   selector: 'app-menu',
@@ -16,11 +15,8 @@ import { AppLauncher } from '@capacitor/app-launcher';
   imports: [CommonModule, FormsModule, HttpClientModule, IONIC_IMPORTS]
 })
 export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
-  searchText: string = '';
-  selectedCategory: string = '';
   private map!: L.Map;
-  private currentLocation: [number, number] = [-41.4689, -72.9411];
-  private markers: L.Marker[] = [];
+  currentLocation: [number, number] | null = null; // 👈 Ahora es público
   private currentUserId: number | null = null;
   private apiUrl = 'http://localhost:3000/api/v1';
   
@@ -39,57 +35,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   currentSpeed: number = 0; // km/h
   elapsedTime: string = '00:00:00';
   
-  // 📍 Datos de lugares de interés
-  items: { 
-    id: number;
-    name: string; 
-    category: string; 
-    coords: [number, number];
-    address?: string;
-  }[] = [
-    { 
-      id: 1,
-      name: 'Restaurante El Fogón', 
-      category: 'restaurante', 
-      coords: [-41.4689, -72.9411],
-      address: 'Antonio Varas 447, Puerto Montt'
-    },
-    { 
-      id: 2,
-      name: 'Turismo Patagonia', 
-      category: 'agencia_turismo', 
-      coords: [-41.4705, -72.9350],
-      address: 'Diego Portales 506, Puerto Montt'
-    },
-    { 
-      id: 3,
-      name: 'Transfer Express', 
-      category: 'transporte', 
-      coords: [-41.4720, -72.9480],
-      address: 'Benavente 970, Puerto Montt'
-    },
-    { 
-      id: 4,
-      name: 'Restaurante Vista al Mar', 
-      category: 'restaurante', 
-      coords: [-41.4665, -72.9390],
-      address: 'Costanera 250, Puerto Montt'
-    },
-    { 
-      id: 5,
-      name: 'Aventura Sur Turismo', 
-      category: 'agencia_turismo', 
-      coords: [-41.4710, -72.9440],
-      address: 'San Martín 200, Puerto Montt'
-    },
-    { 
-      id: 6,
-      name: 'Buses Lago Verde', 
-      category: 'transporte', 
-      coords: [-41.4690, -72.9370],
-      address: 'Urmeneta 330, Puerto Montt'
-    }
-  ];
+  // 📍 Rutas guardadas del usuario
+  rutasGuardadas: any[] = [];
+  rutasPolylines: L.Polyline[] = [];
 
   constructor(
     private platform: Platform,
@@ -100,8 +48,8 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.getCurrentPosition();
     this.loadCurrentUser();
+    this.getCurrentPosition();
   }
 
   ngAfterViewInit(): void {
@@ -110,7 +58,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Limpiar watchers al destruir el componente
     this.stopRecording();
   }
 
@@ -121,51 +68,80 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       const user = JSON.parse(userStr);
       this.currentUserId = user.id;
       console.log('✅ Usuario cargado:', this.currentUserId);
+      
+      // Cargar rutas guardadas del usuario
+      if (this.currentUserId) {
+        this.cargarRutasGuardadas();
+      }
     } else {
       console.warn('⚠️ No hay usuario logueado');
+      this.showToast('⚠️ Inicia sesión para grabar rutas', 'warning');
     }
   }
 
-  // 📍 Obtener ubicación actual del dispositivo
+  // 📍 Obtener ubicación actual del dispositivo con GPS real
   async getCurrentPosition() {
     try {
-      const coordinates = await Geolocation.getCurrentPosition();
+      // Verificar permisos primero
+      const permission = await Geolocation.checkPermissions();
+      if (permission.location !== 'granted') {
+        const request = await Geolocation.requestPermissions();
+        if (request.location !== 'granted') {
+          await this.showToast('⚠️ Permiso de GPS denegado', 'warning');
+          return;
+        }
+      }
+
+      // Obtener posición GPS real
+      const coordinates = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+
       this.currentLocation = [
         coordinates.coords.latitude,
         coordinates.coords.longitude
       ];
-      console.log('📍 Ubicación actual:', this.currentLocation);
+
+      console.log('📍 GPS Real obtenido:', this.currentLocation);
+      console.log('📊 Precisión:', coordinates.coords.accuracy, 'metros');
       
       if (this.map) {
-        this.map.setView(this.currentLocation, 15);
+        this.map.setView(this.currentLocation, 17);
         this.addCurrentLocationMarker();
       }
+
+      await this.showToast('✅ GPS conectado correctamente', 'success');
     } catch (error) {
-      console.log('⚠️ No se pudo obtener la ubicación, usando ubicación por defecto');
-      this.showToast('⚠️ No se pudo obtener tu ubicación GPS', 'warning');
+      console.error('❌ Error al obtener GPS:', error);
+      await this.showToast('⚠️ No se pudo conectar al GPS. Usando ubicación por defecto.', 'warning');
     }
   }
 
   // 🧭 Añadir marcador de ubicación actual
   private addCurrentLocationMarker(): void {
-    const blueIcon = L.icon({
-      iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+    if (!this.currentLocation) {
+      console.log('⚠️ No hay ubicación para marcar');
+      return;
+    }
 
-    // Remover marcador anterior si existe
+    const blueIcon = this.createColoredIcon('blue');
+
     if (this.currentMarker) {
       this.map.removeLayer(this.currentMarker);
     }
 
     this.currentMarker = L.marker(this.currentLocation, { icon: blueIcon })
       .addTo(this.map)
-      .bindPopup('<b>📍 Tu ubicación actual</b>');
+      .bindPopup(`
+        <b>📍 Tu ubicación GPS actual</b><br>
+        <small>Lat: ${this.currentLocation[0].toFixed(6)}</small><br>
+        <small>Lng: ${this.currentLocation[1].toFixed(6)}</small>
+      `)
+      .openPopup();
+    
+    console.log('✅ Marcador añadido en:', this.currentLocation);
   }
 
   // 🧭 Soluciona los errores 404 de los íconos de Leaflet
@@ -184,100 +160,49 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     L.Marker.prototype.options.icon = iconDefault;
   }
 
-  // 🗺️ Inicializar el mapa Leaflet con OpenStreetMap
+  // 🗺️ Inicializar el mapa Leaflet
   private initMap(): void {
+    // Esperar a tener ubicación GPS real
+    if (!this.currentLocation) {
+      console.log('⏳ Esperando GPS para inicializar mapa...');
+      setTimeout(() => this.initMap(), 500);
+      return;
+    }
+
+    console.log('🗺️ Inicializando mapa en:', this.currentLocation);
+    
     this.map = L.map('map', {
       center: this.currentLocation,
-      zoom: 15
+      zoom: 17
     });
 
-    // 🌍 Cargar los tiles de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(this.map);
 
     this.addCurrentLocationMarker();
-    this.addMarkers();
+    
+    // Cargar rutas guardadas en el mapa
+    setTimeout(() => {
+      this.mostrarRutasEnMapa();
+    }, 1000);
   }
 
-  // 🔎 Filtrar elementos y actualizar el mapa
-  filteredItems() {
-    const result = this.items.filter((item) => {
-      const matchesSearch = item.name.toLowerCase().includes(this.searchText.toLowerCase());
-      const matchesCategory = this.selectedCategory ? item.category === this.selectedCategory : true;
-      return matchesSearch && matchesCategory;
-    });
-
-    if (this.map) {
-      this.markers.forEach(marker => this.map.removeLayer(marker));
-      this.markers = [];
-      this.addMarkers(result);
-    }
-
-    return result;
-  }
-
-  // 📍 Agregar marcadores de lugares al mapa
-  private addMarkers(data = this.items): void {
-    data.forEach((item) => {
-      const marker = L.marker(item.coords).addTo(this.map);
-      this.markers.push(marker);
-      
-      const popupContent = `
-        <div style="text-align: center;">
-          <b>${item.name}</b><br>
-          <small>Categoría: ${item.category}</small><br>
-          <small>${item.address || ''}</small><br><br>
-          <button onclick="window.dispatchEvent(new CustomEvent('openInMaps', {detail: {coords: [${item.coords}], name: '${item.name}'}}))"
-                  style="background: #2dd36f; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; margin: 2px;">
-            🗺️ Abrir en Maps
-          </button>
-        </div>
-      `;
-      
-      marker.bindPopup(popupContent);
-    });
-
-    window.addEventListener('openInMaps', (event: any) => {
-      this.openInNativeMaps(event.detail.coords, event.detail.name);
-    });
-  }
-
-  // 📱 Abrir en aplicación nativa de mapas
-  async openInNativeMaps(destination: [number, number], destName: string) {
-    const lat = destination[0];
-    const lng = destination[1];
-
-    if (this.platform.is('android')) {
-      const googleMapsUrl = `geo:0,0?q=${lat},${lng}(${encodeURIComponent(destName)})`;
-      try {
-        await AppLauncher.openUrl({ url: googleMapsUrl });
-      } catch (error) {
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_system');
-      }
-    } else if (this.platform.is('ios')) {
-      const appleMapsUrl = `http://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
-      window.open(appleMapsUrl, '_system');
-    } else {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-    }
-  }
-
-  // 🎬 INICIAR GRABACIÓN DE RUTA
+  // 🎬 INICIAR GRABACIÓN DE RUTA CON GPS REAL
   async startRecording() {
     if (!this.currentUserId) {
       await this.showToast('⚠️ Debes iniciar sesión para grabar rutas', 'warning');
       return;
     }
 
-    // Solicitar permiso de ubicación
     try {
+      // Verificar permisos
       const permission = await Geolocation.checkPermissions();
       if (permission.location !== 'granted') {
         const request = await Geolocation.requestPermissions();
         if (request.location !== 'granted') {
-          await this.showToast('❌ Permiso de ubicación denegado', 'danger');
+          await this.showToast('❌ Permiso de GPS denegado', 'danger');
           return;
         }
       }
@@ -288,8 +213,13 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       this.totalDistance = 0;
       this.startTime = Date.now();
 
-      // Obtener posición inicial
-      const position = await Geolocation.getCurrentPosition();
+      // Obtener posición GPS inicial
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      });
+
       const startPoint = {
         latitud: position.coords.latitude,
         longitud: position.coords.longitude,
@@ -299,26 +229,19 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       this.recordedPoints.push(startPoint);
       this.currentLocation = [startPoint.latitud, startPoint.longitud];
 
-      // Marcador de inicio (verde)
-      const greenIcon = L.icon({
-        iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
+      console.log('🚩 Inicio de grabación GPS:', startPoint);
 
+      // Marcador de inicio (verde)
+      const greenIcon = this.createColoredIcon('green');
       this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon: greenIcon })
         .addTo(this.map)
-        .bindPopup('<b>🚩 Inicio de ruta</b>')
+        .bindPopup('<b>🚩 Inicio de tu ruta</b>')
         .openPopup();
 
       // Centrar mapa en posición inicial
-      this.map.setView([startPoint.latitud, startPoint.longitud], 17);
+      this.map.setView([startPoint.latitud, startPoint.longitud], 18);
 
-      // Iniciar tracking GPS continuo (cada 3 segundos)
+      // Iniciar tracking GPS continuo (cada 2 segundos)
       this.watchId = await Geolocation.watchPosition(
         {
           enableHighAccuracy: true,
@@ -327,7 +250,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
         },
         (position, err) => {
           if (err) {
-            console.error('Error en GPS:', err);
+            console.error('❌ Error en GPS tracking:', err);
             return;
           }
 
@@ -347,8 +270,8 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       await this.showToast('✅ Grabación iniciada. ¡Empieza a caminar!', 'success');
 
     } catch (error) {
-      console.error('Error al iniciar grabación:', error);
-      await this.showToast('❌ Error al iniciar grabación', 'danger');
+      console.error('❌ Error al iniciar grabación GPS:', error);
+      await this.showToast('❌ Error al conectar con GPS', 'danger');
       this.isRecording = false;
     }
   }
@@ -361,7 +284,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       timestamp: Date.now()
     };
 
-    // Solo agregar si el punto es diferente al anterior (movimiento mínimo 5 metros)
+    // Solo agregar si el punto es diferente al anterior (movimiento mínimo 3 metros)
     const lastPoint = this.recordedPoints[this.recordedPoints.length - 1];
     const distance = this.calculateDistance(
       lastPoint.latitud,
@@ -370,16 +293,16 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       newPoint.longitud
     );
 
-    if (distance > 0.005) { // > 5 metros
+    if (distance > 0.003) { // > 3 metros
       this.recordedPoints.push(newPoint);
       
       // Calcular distancia total
       this.totalDistance += distance;
 
       // Calcular velocidad (km/h)
-      const timeDiff = (newPoint.timestamp - lastPoint.timestamp) / 1000; // segundos
+      const timeDiff = (newPoint.timestamp - lastPoint.timestamp) / 1000;
       if (timeDiff > 0) {
-        this.currentSpeed = (distance / timeDiff) * 3600; // convertir a km/h
+        this.currentSpeed = (distance / timeDiff) * 3600;
       }
 
       // Actualizar línea en el mapa
@@ -391,7 +314,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       // Centrar mapa en posición actual
       this.map.setView([newPoint.latitud, newPoint.longitud], this.map.getZoom());
 
-      console.log(`📍 Punto grabado: ${this.recordedPoints.length} | Distancia: ${this.totalDistance.toFixed(2)} km`);
+      console.log(`📍 Punto GPS grabado #${this.recordedPoints.length} | Distancia acumulada: ${this.totalDistance.toFixed(3)} km | Velocidad: ${this.currentSpeed.toFixed(1)} km/h`);
     }
   }
 
@@ -405,22 +328,15 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.recordingPolyline = L.polyline(coords, {
       color: '#ff0000',
-      weight: 4,
-      opacity: 0.8
+      weight: 5,
+      opacity: 0.8,
+      dashArray: '10, 5'
     }).addTo(this.map);
   }
 
   // 📍 Actualizar marcador de posición actual
   private updateCurrentMarker(lat: number, lng: number) {
-    const blueIcon = L.icon({
-      iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+    const blueIcon = this.createColoredIcon('blue');
 
     if (this.currentMarker) {
       this.map.removeLayer(this.currentMarker);
@@ -428,12 +344,12 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.currentMarker = L.marker([lat, lng], { icon: blueIcon })
       .addTo(this.map)
-      .bindPopup('<b>📍 Tu ubicación</b>');
+      .bindPopup(`<b>📍 Tu ubicación GPS</b><br>Velocidad: ${this.currentSpeed.toFixed(1)} km/h`);
   }
 
   // ⏱️ Actualizar tiempo transcurrido
   private updateElapsedTime() {
-    const elapsed = Math.floor((Date.now() - this.startTime) / 1000); // segundos
+    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
     const hours = Math.floor(elapsed / 3600);
     const minutes = Math.floor((elapsed % 3600) / 60);
     const seconds = elapsed % 60;
@@ -463,49 +379,44 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       this.recordingInterval = null;
     }
 
+    console.log(`🏁 Grabación finalizada. Total puntos GPS: ${this.recordedPoints.length}, Distancia: ${this.totalDistance.toFixed(2)} km`);
+
     // Agregar marcador de fin (rojo)
-    if (this.recordedPoints.length > 0) {
+    if (this.recordedPoints.length > 1) {
       const lastPoint = this.recordedPoints[this.recordedPoints.length - 1];
       
-      const redIcon = L.icon({
-        iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      });
-
+      const redIcon = this.createColoredIcon('red');
       L.marker([lastPoint.latitud, lastPoint.longitud], { icon: redIcon })
         .addTo(this.map)
-        .bindPopup('<b>🏁 Fin de ruta</b>')
+        .bindPopup('<b>🏁 Fin de tu ruta</b>')
         .openPopup();
 
-      // Mostrar diálogo para guardar
       await this.showSaveDialog();
     } else {
-      await this.showToast('⚠️ No se grabaron suficientes puntos', 'warning');
+      await this.showToast('⚠️ No se grabaron suficientes puntos GPS. Intenta caminar más.', 'warning');
+      this.clearRecording();
     }
   }
 
   // 💾 Mostrar diálogo para guardar la ruta
   async showSaveDialog() {
     const alert = await this.alertController.create({
-      header: '💾 Guardar Ruta',
+      header: '💾 Guardar Tu Ruta GPS',
       message: `
-        <b>📏 Distancia:</b> ${this.totalDistance.toFixed(2)} km<br>
-        <b>⏱️ Tiempo:</b> ${this.elapsedTime}<br>
-        <b>📍 Puntos grabados:</b> ${this.recordedPoints.length}<br><br>
-        Dale un nombre a tu ruta para compartirla con otros usuarios
+        <b>📏 Distancia recorrida:</b> ${this.totalDistance.toFixed(2)} km<br>
+        <b>⏱️ Tiempo total:</b> ${this.elapsedTime}<br>
+        <b>📍 Puntos GPS grabados:</b> ${this.recordedPoints.length}<br>
+        <b>🚶 Velocidad promedio:</b> ${(this.totalDistance / (Date.now() - this.startTime) * 3600000).toFixed(1)} km/h<br><br>
+        <p style="font-size: 12px; color: #666;">Dale un nombre a tu ruta para compartirla con otros usuarios</p>
       `,
       inputs: [
         {
           name: 'nombre_ruta',
           type: 'text',
-          placeholder: 'Ej: Ruta al Museo Accesible',
+          placeholder: 'Ej: Ruta al Parque Accesible',
           attributes: {
-            required: true
+            required: true,
+            maxlength: 100
           }
         },
         {
@@ -516,14 +427,14 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       ],
       buttons: [
         {
-          text: 'Descartar',
+          text: '🗑️ Descartar',
           role: 'cancel',
           handler: () => {
             this.clearRecording();
           }
         },
         {
-          text: 'Guardar',
+          text: '💾 Guardar',
           handler: (data) => {
             if (!data.nombre_ruta || data.nombre_ruta.trim() === '') {
               this.showToast('⚠️ Debes ingresar un nombre para la ruta', 'warning');
@@ -553,14 +464,19 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }))
     };
 
+    console.log('💾 Guardando ruta GPS:', rutaData);
+
     this.http.post(`${this.apiUrl}/rutas`, rutaData).subscribe({
       next: async (response: any) => {
-        console.log('✅ Ruta guardada:', response);
+        console.log('✅ Ruta GPS guardada exitosamente:', response);
         await this.showToast(`✅ Ruta "${nombre}" guardada exitosamente`, 'success');
         this.clearRecording();
+        
+        // Recargar rutas guardadas
+        this.cargarRutasGuardadas();
       },
       error: async (error) => {
-        console.error('❌ Error al guardar ruta:', error);
+        console.error('❌ Error al guardar ruta GPS:', error);
         await this.showToast('❌ Error al guardar la ruta. Intenta nuevamente.', 'danger');
       }
     });
@@ -584,6 +500,91 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // 📍 Cargar rutas guardadas desde el backend
+  private cargarRutasGuardadas() {
+    if (!this.currentUserId) return;
+
+    this.http.get(`${this.apiUrl}/rutas/usuario/${this.currentUserId}`).subscribe({
+      next: async (rutas: any) => {
+        console.log(`📍 Rutas GPS guardadas del usuario: ${rutas.length}`);
+        
+        if (rutas.length === 0) {
+          this.rutasGuardadas = [];
+          return;
+        }
+
+        this.rutasGuardadas = [];
+        
+        // Cargar cada ruta con sus coordenadas completas
+        for (const ruta of rutas) {
+          try {
+            const rutaDetalle: any = await this.http.get(`${this.apiUrl}/rutas/${ruta.id_ruta}`).toPromise();
+            this.rutasGuardadas.push(rutaDetalle);
+          } catch (err) {
+            console.error('Error al cargar detalle de ruta:', err);
+          }
+        }
+
+        // Mostrar rutas en el mapa
+        if (this.map) {
+          this.mostrarRutasEnMapa();
+        }
+      },
+      error: (err) => console.error('Error al cargar rutas guardadas:', err)
+    });
+  }
+
+  // 🗺️ Mostrar todas las rutas guardadas en el mapa
+  private mostrarRutasEnMapa() {
+    // Limpiar polylines anteriores
+    this.rutasPolylines.forEach(p => this.map.removeLayer(p));
+    this.rutasPolylines = [];
+
+    if (this.rutasGuardadas.length === 0) {
+      console.log('📍 No hay rutas guardadas para mostrar');
+      return;
+    }
+
+    const colorPalette = ['#3880ff', '#10dc60', '#ffce00', '#f04141', '#7044ff', '#00d4ff'];
+
+    this.rutasGuardadas.forEach((ruta, index) => {
+      if (!ruta.coordenadas || ruta.coordenadas.length < 2) return;
+
+      const coords = ruta.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
+      const color = colorPalette[index % colorPalette.length];
+
+      // Dibujar la línea de la ruta
+      const polyline = L.polyline(coords, {
+        color: color,
+        weight: 4,
+        opacity: 0.7
+      }).addTo(this.map);
+
+      this.rutasPolylines.push(polyline);
+
+      // Marcadores de inicio y fin
+      const start = coords[0];
+      const end = coords[coords.length - 1];
+
+      const greenIcon = this.createColoredIcon('green');
+      const redIcon = this.createColoredIcon('red');
+
+      L.marker(start, { icon: greenIcon })
+        .addTo(this.map)
+        .bindPopup(`
+          <b>🚩 ${ruta.nombre_ruta}</b><br>
+          ${ruta.descripcion_ruta || ''}<br>
+          <small>📏 ${ruta.longitud_ruta} km</small>
+        `);
+
+      L.marker(end, { icon: redIcon })
+        .addTo(this.map)
+        .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
+    });
+
+    console.log(`✅ ${this.rutasGuardadas.length} rutas GPS mostradas en el mapa`);
+  }
+
   // 📜 Ver mis rutas guardadas
   async verMisRutas() {
     if (!this.currentUserId) {
@@ -591,110 +592,77 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.http.get(`${this.apiUrl}/rutas/usuario/${this.currentUserId}`).subscribe({
-      next: async (rutas: any) => {
-        console.log('📍 Rutas del usuario:', rutas);
-        if (rutas.length === 0) {
-          await this.showToast('📍 Aún no tienes rutas guardadas. ¡Crea tu primera ruta!', 'primary');
-        } else {
-          await this.showRutasActionSheet(rutas);
-        }
-      },
-      error: async (error) => {
-        console.error('❌ Error al obtener rutas:', error);
-        await this.showToast('❌ Error al cargar rutas', 'danger');
-      }
-    });
+    if (this.rutasGuardadas.length === 0) {
+      await this.showToast('📍 Aún no tienes rutas GPS guardadas. ¡Crea tu primera ruta!', 'primary');
+      return;
+    }
+
+    await this.showRutasActionSheet();
   }
 
   // 📋 Mostrar lista de rutas con ActionSheet
-  async showRutasActionSheet(rutas: any[]) {
-    const buttons = rutas.map(ruta => ({
+  async showRutasActionSheet() {
+    const buttons = this.rutasGuardadas.map(ruta => ({
       text: `${ruta.nombre_ruta} (${ruta.longitud_ruta} km)`,
+      icon: 'navigate',
       handler: () => {
         this.cargarRutaEnMapa(ruta.id_ruta);
       }
     }));
 
-    buttons.push({
-      text: 'Cancelar',
-      role: 'cancel'
-    } as any);
+    buttons.push(
+      {
+        text: '🔄 Recargar rutas',
+        icon: 'refresh',
+        handler: () => {
+          this.cargarRutasGuardadas();
+        }
+      } as any,
+      {
+        text: 'Cancelar',
+        icon: 'close',
+        role: 'cancel'
+      } as any
+    );
 
     const actionSheet = await this.actionSheetController.create({
-      header: '📍 Mis Rutas Guardadas',
-      subHeader: `Tienes ${rutas.length} ruta(s)`,
+      header: '📍 Mis Rutas GPS Guardadas',
+      subHeader: `Tienes ${this.rutasGuardadas.length} ruta(s)`,
       buttons: buttons
     });
 
     await actionSheet.present();
   }
 
-  // 🗺️ Cargar una ruta guardada en el mapa
+  // 🗺️ Cargar una ruta guardada en el mapa (centrar y destacar)
   async cargarRutaEnMapa(idRuta: number) {
-    this.http.get(`${this.apiUrl}/rutas/${idRuta}`).subscribe({
-      next: async (ruta: any) => {
-        console.log('📍 Ruta cargada:', ruta);
-        
-        // Limpiar ruta anterior
-        this.clearRecording();
+    const ruta = this.rutasGuardadas.find(r => r.id_ruta === idRuta);
+    if (!ruta) return;
 
-        // Dibujar la ruta
-        const coords = ruta.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
-        
-        this.recordingPolyline = L.polyline(coords, {
-          color: '#3880ff',
-          weight: 5,
-          opacity: 0.7
-        }).addTo(this.map);
+    console.log('📍 Centrando mapa en ruta:', ruta.nombre_ruta);
 
-        // Marcadores de inicio y fin
-        if (coords.length > 0) {
-          const start = coords[0];
-          const end = coords[coords.length - 1];
-          
-          const greenIcon = L.icon({
-            iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-          });
+    const coords = ruta.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
+    
+    // Ajustar vista del mapa a la ruta
+    const bounds = L.latLngBounds(coords);
+    this.map.fitBounds(bounds, { padding: [50, 50] });
 
-          const redIcon = L.icon({
-            iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-          });
-          
-          L.marker(start, { icon: greenIcon })
-            .addTo(this.map)
-            .bindPopup(`<b>🚩 Inicio:</b> ${ruta.nombre_ruta}`);
-          
-          L.marker(end, { icon: redIcon })
-            .addTo(this.map)
-            .bindPopup(`<b>🏁 Fin:</b> ${ruta.nombre_ruta}<br><small>${ruta.descripcion_ruta || ''}</small>`);
-        }
+    // Destacar la ruta temporalmente
+    const highlightPolyline = L.polyline(coords, {
+      color: '#ffce00',
+      weight: 6,
+      opacity: 1.0
+    }).addTo(this.map);
 
-        // Centrar mapa en la ruta
-        this.map.fitBounds(this.recordingPolyline.getBounds());
+    // Remover destacado después de 3 segundos
+    setTimeout(() => {
+      this.map.removeLayer(highlightPolyline);
+    }, 3000);
 
-        await this.showToast(`✅ Ruta cargada: ${ruta.nombre_ruta}`, 'success');
-      },
-      error: async (error) => {
-        console.error('❌ Error al cargar ruta:', error);
-        await this.showToast('❌ Error al cargar la ruta', 'danger');
-      }
-    });
+    await this.showToast(`📍 Mostrando: ${ruta.nombre_ruta}`, 'primary');
   }
 
-  // 📏 Calcular distancia entre dos puntos (fórmula Haversine)
+  // 📏 Calcular distancia entre dos puntos GPS (fórmula Haversine)
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371; // Radio de la Tierra en km
     const dLat = this.deg2rad(lat2 - lat1);
@@ -711,6 +679,19 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     return deg * (Math.PI / 180);
   }
 
+  // 🎨 Crear íconos de colores
+  private createColoredIcon(color: string): L.Icon {
+    return L.icon({
+      iconRetinaUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+      iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+  }
+
   // 🍞 Mostrar toast
   async showToast(message: string, color: string) {
     const toast = await this.toastController.create({
@@ -720,5 +701,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  // 📊 Calcular distancia total de todas las rutas
+  calcularDistanciaTotal(): string {
+    const total = this.rutasGuardadas.reduce((sum, ruta) => sum + (ruta.longitud_ruta || 0), 0);
+    return total.toFixed(2);
   }
 }

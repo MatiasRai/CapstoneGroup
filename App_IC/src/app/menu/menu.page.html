@@ -3,9 +3,12 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Rutas Accesibles</ion-title>
+    <ion-title>📍 Mis Rutas GPS</ion-title>
     
     <ion-buttons slot="end">
+      <ion-button (click)="getCurrentPosition()">
+        <ion-icon slot="icon-only" name="locate"></ion-icon>
+      </ion-button>
       <ion-button (click)="verMisRutas()">
         <ion-icon slot="icon-only" name="map"></ion-icon>
       </ion-button>
@@ -36,7 +39,7 @@
           <div style="text-align: center;">
             <ion-text>
               <h3 style="margin: 0;">{{ recordedPoints.length }}</h3>
-              <p style="margin: 0; font-size: 12px;">puntos</p>
+              <p style="margin: 0; font-size: 12px;">puntos GPS</p>
             </ion-text>
           </div>
         </ion-col>
@@ -47,18 +50,38 @@
 
 <ion-content [fullscreen]="true">
   
-  <!-- 🗺️ Mapa principal -->
-  <div id="map" style="height: 400px; width: 100%; border-radius: 10px; overflow: hidden;"></div>
+  <!-- 🔍 Panel de Debug GPS (temporal) -->
+  <ion-card color="light" *ngIf="currentLocation">
+    <ion-card-content>
+      <p style="margin: 0; font-size: 11px;">
+        <b>🛰️ GPS Activo:</b><br>
+        📍 Lat: {{ currentLocation[0].toFixed(6) }}<br>
+        📍 Lng: {{ currentLocation[1].toFixed(6) }}
+      </p>
+    </ion-card-content>
+  </ion-card>
 
-  <!-- 🎬 Controles de grabación -->
+  <ion-card color="warning" *ngIf="!currentLocation">
+    <ion-card-content>
+      <p style="margin: 0; font-size: 12px; text-align: center;">
+        ⚠️ <b>GPS no conectado</b><br>
+        Presiona el ícono 📍 arriba para obtener tu ubicación
+      </p>
+    </ion-card-content>
+  </ion-card>
+  
+  <!-- 🗺️ Mapa principal -->
+  <div id="map" style="height: 500px; width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 10px;"></div>
+
+  <!-- 🎬 Controles de grabación GPS -->
   <ion-card>
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="navigate-circle" style="vertical-align: middle;"></ion-icon>
-        Grabar Mi Ruta
+        Grabar Mi Ruta GPS
       </ion-card-title>
       <ion-card-subtitle>
-        {{ isRecording ? '🔴 GRABANDO... Camina y tu ruta se guardará automáticamente' : 'Comparte tus rutas accesibles con la comunidad' }}
+        {{ isRecording ? '🔴 GRABANDO GPS... Camina y tu ruta se guardará automáticamente' : 'Crea y comparte tus rutas accesibles usando GPS real' }}
       </ion-card-subtitle>
     </ion-card-header>
 
@@ -69,7 +92,7 @@
         color="success" 
         (click)="startRecording()">
         <ion-icon slot="start" name="play-circle"></ion-icon>
-        Iniciar Grabación
+        Iniciar Grabación GPS
       </ion-button>
 
       <ion-button 
@@ -78,66 +101,110 @@
         color="danger" 
         (click)="stopRecording()">
         <ion-icon slot="start" name="stop-circle"></ion-icon>
-        Finalizar y Guardar
+        Finalizar y Guardar Ruta
       </ion-button>
 
+      <!-- Información durante la grabación -->
+      <div *ngIf="isRecording" style="margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 8px;">
+        <p style="margin: 5px 0; font-size: 14px;">
+          <ion-icon name="speedometer" style="vertical-align: middle;"></ion-icon>
+          <strong>Velocidad actual:</strong> {{ currentSpeed.toFixed(1) }} km/h
+        </p>
+        <p style="margin: 5px 0; font-size: 14px;">
+          <ion-icon name="location" style="vertical-align: middle;"></ion-icon>
+          <strong>Precisión GPS:</strong> Alta (tracking activo)
+        </p>
+      </div>
+
+      <!-- Instrucciones cuando no está grabando -->
       <ion-text *ngIf="!isRecording" color="medium">
         <p style="font-size: 12px; margin-top: 10px;">
           💡 <b>Cómo funciona:</b><br>
-          1. Presiona "Iniciar Grabación"<br>
-          2. Camina o conduce por tu ruta<br>
-          3. El GPS grabará automáticamente tu recorrido<br>
-          4. Presiona "Finalizar" cuando llegues al destino<br>
-          5. Dale un nombre y comparte tu ruta
+          1️⃣ Presiona "Iniciar Grabación GPS"<br>
+          2️⃣ Camina o desplázate por tu ruta<br>
+          3️⃣ El GPS grabará automáticamente cada punto de tu recorrido<br>
+          4️⃣ Presiona "Finalizar" cuando llegues al destino<br>
+          5️⃣ Dale un nombre descriptivo y guarda tu ruta<br><br>
+          
+          📱 <b>Requisitos:</b><br>
+          • GPS activado en tu dispositivo<br>
+          • Conexión estable para mejor precisión<br>
+          • Caminar al menos 10 metros para registrar puntos
         </p>
       </ion-text>
     </ion-card-content>
   </ion-card>
 
-  <!-- Buscador y filtros (solo cuando no está grabando) -->
-  <div *ngIf="!isRecording">
-    <ion-searchbar 
-      [(ngModel)]="searchText" 
-      debounce="500" 
-      placeholder="Buscar lugares...">
-    </ion-searchbar>
-
-    <ion-item>
-      <ion-label>Filtrar por categoría</ion-label>
-      <ion-select [(ngModel)]="selectedCategory" placeholder="Todas">
-        <ion-select-option value="">Todas</ion-select-option>
-        <ion-select-option value="restaurante">Restaurantes</ion-select-option>
-        <ion-select-option value="agencia_turismo">Agencia de Turismo</ion-select-option>
-        <ion-select-option value="transporte">Transporte</ion-select-option>
-      </ion-select>
-    </ion-item>
-
-    <!-- Listado filtrado -->
-    <ion-list>
-      <ion-item *ngFor="let item of filteredItems()">
-        <ion-label>
-          <h2>{{ item.name }}</h2>
-          <p>{{ item.address }}</p>
-          <p><small>{{ item.category }}</small></p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </div>
-
-  <!-- 💡 Información adicional -->
-  <ion-card *ngIf="!isRecording">
+  <!-- 🌟 Información de rutas guardadas -->
+  <ion-card>
     <ion-card-header>
-      <ion-card-title>🌟 Rutas Recomendadas</ion-card-title>
+      <ion-card-title>🌟 Tus Rutas Guardadas</ion-card-title>
+      <ion-card-subtitle>
+        {{ rutasGuardadas.length === 0 ? 'Aún no has creado rutas' : rutasGuardadas.length + ' ruta(s) disponible(s)' }}
+      </ion-card-subtitle>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <div *ngIf="rutasGuardadas.length === 0">
+        <p style="text-align: center; color: #666;">
+          📍 No tienes rutas GPS guardadas aún.<br>
+          ¡Crea tu primera ruta para ayudar a otros usuarios!
+        </p>
+      </div>
+
+      <div *ngIf="rutasGuardadas.length > 0">
+        <p>
+          Tus rutas están visibles en el mapa con diferentes colores.
+          Haz clic en el ícono de mapa (📍) arriba para ver el listado completo.
+        </p>
+        
+        <ion-list>
+          <ion-item *ngFor="let ruta of rutasGuardadas.slice(0, 3)">
+            <ion-label>
+              <h3>{{ ruta.nombre_ruta }}</h3>
+              <p>{{ ruta.descripcion_ruta || 'Sin descripción' }}</p>
+              <p><small>📏 {{ ruta.longitud_ruta }} km | 📍 {{ ruta.coordenadas?.length || 0 }} puntos GPS</small></p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" (click)="cargarRutaEnMapa(ruta.id_ruta)">
+              <ion-icon name="eye" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+
+        <ion-button 
+          *ngIf="rutasGuardadas.length > 3"
+          expand="block" 
+          fill="outline" 
+          (click)="verMisRutas()">
+          <ion-icon slot="start" name="list"></ion-icon>
+          Ver todas ({{ rutasGuardadas.length }})
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 📊 Estadísticas (opcional) -->
+  <ion-card *ngIf="rutasGuardadas.length > 0">
+    <ion-card-header>
+      <ion-card-title>📊 Tus Estadísticas</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p>
-        Explora rutas accesibles creadas por otros usuarios. 
-        Haz clic en el ícono de mapa (📍) arriba para ver todas las rutas disponibles.
-      </p>
-      <ion-button expand="block" fill="outline" (click)="verMisRutas()">
-        <ion-icon slot="start" name="map"></ion-icon>
-        Ver Mis Rutas
-      </ion-button>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <div style="text-align: center;">
+              <h2 style="margin: 0; color: #3880ff;">{{ rutasGuardadas.length }}</h2>
+              <p style="margin: 5px 0; font-size: 12px;">Rutas creadas</p>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <div style="text-align: center;">
+              <h2 style="margin: 0; color: #10dc60;">{{ calcularDistanciaTotal() }}</h2>
+              <p style="margin: 5px 0; font-size: 12px;">km totales</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ion-card-content>
   </ion-card>
 
