@@ -8,7 +8,7 @@ const createRuta = (req, res) => {
     id_tipo_ruta,
     id_usuario,
     longitud_ruta,
-    coordenadas // Array de objetos: [{latitud: -41.46, longitud: -72.94}, ...]
+    coordenadas 
   } = req.body;
 
   // Validaciones básicas
