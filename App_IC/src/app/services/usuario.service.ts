@@ -6,8 +6,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class UsuarioService {
-  private apiUrl = 'http://localhost:3000/api/v1/usuarios';       // ✅ Endpoint para usuarios
-  private apiUrlEmpresas = 'http://localhost:3000/api/v1/empresas'; // ✅ Endpoint para empresas
+private host = window.location.hostname; // Detecta localhost o tu IP local
+
+private apiUrl = `http://${this.host}:3000/api/v1/usuarios`;
+private apiUrlEmpresas = `http://${this.host}:3000/api/v1/empresas`;
+
 
   
 
@@ -29,8 +32,11 @@ export class UsuarioService {
   }
 
   getDiscapacidades(): Observable<any[]> {
-  return this.http.get<any[]>('http://localhost:3000/api/v1/discapacidades');
-}
+    const host = window.location.hostname; // Detecta si es localhost o IP local
+    const url = `http://${host}:3000/api/v1/discapacidades`;
+    return this.http.get<any[]>(url);
+  }
+
  ///Usuarios normales ////
 
   // ==== EMPRESAS ====

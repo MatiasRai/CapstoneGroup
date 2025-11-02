@@ -32,14 +32,16 @@ export class MenuEMPPage implements OnInit {
 
     const id = usuario.id;
 
-    // 🏢 Obtener datos de la empresa
-    this.http.get(`http://localhost:3000/api/v1/empresas/admin/${id}`).subscribe({
+    const host = window.location.hostname; // Detecta localhost o tu IP local
+    const url = `http://${host}:3000/api/v1/empresas/admin/${id}`;
+
+    this.http.get(url).subscribe({
       next: (res) => (this.empresa = res),
       error: (err) => console.error('❌ Error al obtener empresa:', err)
     });
 
-    // 🧾 Obtener servicios de la empresa
-    this.http.get(`http://localhost:3000/api/v1/empresas/admin/${id}/servicios`).subscribe({
+
+    this.http.get(url).subscribe({
       next: (res: any) => {
         this.servicios = res;
         console.log('🧾 Servicios cargados:', res);
@@ -51,29 +53,32 @@ export class MenuEMPPage implements OnInit {
     });
   }
 
-  // 🗑️ Eliminar servicio
-  async eliminarServicio(id: number) {
-    const alerta = await this.alertCtrl.create({
-      header: 'Confirmar eliminación',
-      message: '¿Seguro que deseas eliminar este servicio?',
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Eliminar',
-          handler: () => {
-            this.http.delete(`http://localhost:3000/api/v1/empresas/servicios/${id}`).subscribe({
-              next: () => {
-                console.log(`🗑️ Servicio ${id} eliminado`);
-                this.recargarDatos();
-              },
-              error: (err) => console.error('❌ Error al eliminar servicio:', err)
-            });
-          }
+async eliminarServicio(id: number) {
+  const alerta = await this.alertCtrl.create({
+    header: 'Confirmar eliminación',
+    message: '¿Seguro que deseas eliminar este servicio?',
+    buttons: [
+      { text: 'Cancelar', role: 'cancel' },
+      {
+        text: 'Eliminar',
+        handler: () => {
+          const host = window.location.hostname; // Detecta localhost o IP local automáticamente
+          const url = `http://${host}:3000/api/v1/empresas/servicios/${id}`;
+
+          this.http.delete(url).subscribe({
+            next: () => {
+              console.log(`🗑️ Servicio ${id} eliminado`);
+              this.recargarDatos();
+            },
+            error: (err) => console.error('❌ Error al eliminar servicio:', err)
+          });
         }
-      ]
-    });
-    await alerta.present();
-  }
+      }
+    ]
+  });
+  await alerta.present();
+}
+
 // ✏️ Editar empresa
 async editarEmpresa(empresa: any) {
   const alerta = await this.alertCtrl.create({
@@ -91,7 +96,10 @@ async editarEmpresa(empresa: any) {
       {
         text: 'Guardar',
         handler: (data) => {
-          this.http.put(`http://localhost:3000/api/v1/empresas/${empresa.id_empresa}`, data).subscribe({
+          const host = window.location.hostname; // ✅ Detecta localhost o IP del dispositivo
+          const url = `http://${host}:3000/api/v1/empresas/${empresa.id_empresa}`;
+
+          this.http.put(url, data).subscribe({
             next: () => {
               console.log(`✏️ Empresa ${empresa.id_empresa} actualizada`);
               this.recargarDatos();
@@ -104,6 +112,7 @@ async editarEmpresa(empresa: any) {
   });
   await alerta.present();
 }
+
 
   // ✏️ Editar servicio + lugar + discapacidad
   async editarServicio(servicio: any) {
