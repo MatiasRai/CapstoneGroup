@@ -18,7 +18,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   currentLocation: [number, number] | null = null;
   private currentUserId: number | null = null;
-  private apiUrl = 'http://localhost:3000/api/v1';
+  private host = window.location.hostname; // Detecta localhost o tu IP local
+  private apiUrl = `http://${this.host}:3000/api/v1`;
+
   
   // 🎯 Variables para tracking de ruta en tiempo real
   isRecording: boolean = false;

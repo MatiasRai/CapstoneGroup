@@ -13,4 +13,6 @@ app.use('/api/v1/discapacidades', require('./routes/discapacidades.routes'));
 app.use('/api/v1/login', require('./routes/login.routes'));
 app.use('/api/v1/rutas', require('./routes/rutas.routes')); // 👈 AGREGAR ESTA LÍNEA
 
-app.listen(3000, () => console.log('🚀 Backend corriendo en http://localhost:3000'));
+app.listen(3000, '0.0.0.0', () => {
+  console.log('🚀 Backend corriendo en http://192.168.1.88:3000');
+});
