@@ -5,7 +5,6 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { Platform, AlertController, ToastController, ActionSheetController } from '@ionic/angular';
 import * as L from 'leaflet';
-import { Geolocation } from '@capacitor/geolocation';
 
 @Component({
   selector: 'app-menu',
@@ -18,17 +17,16 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   currentLocation: [number, number] | null = null;
   private currentUserId: number | null = null;
-  private host = window.location.hostname; // Detecta localhost o tu IP local
+  private host = window.location.hostname;
   private apiUrl = `http://${this.host}:3000/api/v1`;
 
-  
-  // 🎯 Variables para tracking de ruta en tiempo real
+  // 🎯 Variables para tracking de ruta
   isRecording: boolean = false;
   recordedPoints: { latitud: number; longitud: number; timestamp: number }[] = [];
   recordingPolyline: L.Polyline | null = null;
   startMarker: L.Marker | null = null;
   currentMarker: L.Marker | null = null;
-  watchId: string | null = null;
+  watchId: number | null = null;
   totalDistance: number = 0;
   startTime: number = 0;
   recordingInterval: any = null;
@@ -37,9 +35,13 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   currentSpeed: number = 0;
   elapsedTime: string = '00:00:00';
   
-  // 📍 Rutas guardadas del usuario
+  // 📍 Rutas guardadas
   rutasGuardadas: any[] = [];
   rutasPolylines: L.Polyline[] = [];
+  
+  // 🗺️ Control de actualización del mapa
+  private lastMapUpdate: number = 0;
+  private mapUpdateThrottle: number = 1000; // 1 segundo entre actualizaciones
 
   constructor(
     private platform: Platform,
@@ -63,7 +65,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.stopRecording();
   }
 
-  // 👤 Cargar usuario actual desde localStorage
+  // 👤 Cargar usuario desde localStorage
   private loadCurrentUser() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
@@ -72,101 +74,121 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       console.log('✅ Usuario cargado:', this.currentUserId);
       
       if (this.currentUserId) {
-        this.cargarRutasGuardadas();
+        this.cargarRutasGuardadas(); // Solo carga la lista, NO las muestra
       }
-    } else {
-      console.warn('⚠️ No hay usuario logueado');
-      this.showToast('⚠️ Inicia sesión para grabar rutas', 'warning');
     }
   }
 
-  // 📍 Obtener ubicación actual - Compatible con WEB y MÓVIL
+  // 📍 Obtener ubicación actual
   async getCurrentPosition() {
     try {
-      console.log('🔍 Solicitando ubicación...');
-      
-      // 🌐 PARA WEB: Usar API del navegador
-      if (!this.platform.is('capacitor')) {
-        console.log('🌐 Modo WEB detectado - Usando Geolocation API del navegador');
-        
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              this.currentLocation = [
-                position.coords.latitude,
-                position.coords.longitude
-              ];
-              console.log('✅ GPS Web obtenido:', this.currentLocation);
-              
-              if (this.map) {
-                this.map.setView(this.currentLocation, 17);
-                this.addCurrentLocationMarker();
-              }
-              
-              this.showToast('✅ GPS conectado correctamente', 'success');
-            },
-            (error) => {
-              console.error('❌ Error GPS Web:', error.message);
-              this.showToast('⚠️ No se pudo obtener ubicación', 'warning');
-              this.usarUbicacionPorDefecto();
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0
-            }
-          );
-        } else {
-          console.error('❌ Geolocation no disponible');
-          this.showToast('⚠️ Tu navegador no soporta geolocalización', 'danger');
-          this.usarUbicacionPorDefecto();
-        }
-        
+      console.log('🔍 Solicitando ubicación GPS...');
+
+      if (!navigator.geolocation) {
+        console.error('❌ Geolocation no disponible');
+        await this.showToast('⚠️ Tu navegador no soporta geolocalización', 'danger');
+        this.usarUbicacionPorDefecto();
         return;
       }
 
-      // 📱 PARA MÓVIL: Usar Capacitor
-      console.log('📱 Modo MÓVIL detectado - Usando Capacitor Geolocation');
-      
-      const permission = await Geolocation.checkPermissions();
-      
-      if (permission.location !== 'granted') {
-        const request = await Geolocation.requestPermissions();
-        if (request.location !== 'granted') {
-          await this.showToast('⚠️ Permiso de GPS denegado', 'warning');
-          this.usarUbicacionPorDefecto();
-          return;
+      const isSecure = window.location.protocol === 'https:' || 
+                       window.location.hostname === 'localhost' ||
+                       window.location.hostname === '127.0.0.1';
+
+      if (!isSecure) {
+        console.warn('⚠️ La geolocalización puede no funcionar en HTTP');
+        await this.showAlertHTTPS();
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.currentLocation = [
+            position.coords.latitude,
+            position.coords.longitude
+          ];
+          
+          console.log('✅ GPS obtenido:', this.currentLocation);
+          console.log('📊 Precisión:', position.coords.accuracy, 'metros');
+          
+          if (this.map) {
+            this.map.setView(this.currentLocation, 17);
+            this.addCurrentLocationMarker();
+          }
+          
+          this.showToast('✅ GPS conectado correctamente', 'success');
+        },
+        (error) => {
+          console.error('❌ Error GPS:', error);
+          this.handleLocationError(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 5000
         }
-      }
+      );
 
-      const coordinates = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
-
-      this.currentLocation = [
-        coordinates.coords.latitude,
-        coordinates.coords.longitude
-      ];
-
-      console.log('✅ GPS Móvil obtenido:', this.currentLocation);
-      
-      if (this.map) {
-        this.map.setView(this.currentLocation, 17);
-        this.addCurrentLocationMarker();
-      }
-
-      await this.showToast('✅ GPS conectado correctamente', 'success');
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error al obtener GPS:', error);
-      await this.showToast('⚠️ Error al conectar con GPS', 'warning');
+      await this.showToast(`⚠️ Error GPS: ${error.message}`, 'warning');
       this.usarUbicacionPorDefecto();
     }
   }
 
-  // 🗺️ Usar ubicación por defecto (Puerto Montt)
+  // 🚨 Manejo de errores
+  private handleLocationError(error: GeolocationPositionError) {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        this.showToast('⚠️ Permiso de ubicación denegado', 'warning');
+        this.showAlertPermisosDenegados();
+        break;
+      case error.POSITION_UNAVAILABLE:
+        this.showToast('⚠️ Ubicación no disponible', 'warning');
+        break;
+      case error.TIMEOUT:
+        this.showToast('⚠️ Tiempo de espera agotado. Intenta de nuevo.', 'warning');
+        break;
+    }
+    this.usarUbicacionPorDefecto();
+  }
+
+  async showAlertHTTPS() {
+    const alert = await this.alertController.create({
+      header: '🔐 Conexión No Segura',
+      message: 'Estás usando HTTP. La geolocalización puede no funcionar correctamente.',
+      buttons: ['Entendido']
+    });
+    await alert.present();
+  }
+
+  async showAlertPermisosDenegados() {
+    const alert = await this.alertController.create({
+      header: '⚠️ Permiso Denegado',
+      message: `
+        Necesitamos acceso a tu ubicación para grabar rutas.
+        <br><br>
+        <b>Para activarlo:</b>
+        <br>1. Click en el 🔒 en la barra de direcciones
+        <br>2. Permisos → Ubicación → Permitir
+        <br>3. Recarga la página
+      `,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Recargar',
+          handler: () => {
+            window.location.reload();
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  // 🗺️ Ubicación por defecto
   private usarUbicacionPorDefecto() {
     this.currentLocation = [-41.4693, -72.9424];
     if (this.map) {
@@ -177,10 +199,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
   // 🧭 Añadir marcador de ubicación actual
   private addCurrentLocationMarker(): void {
-    if (!this.currentLocation || !this.map) {
-      console.log('⚠️ No hay ubicación o mapa para marcar');
-      return;
-    }
+    if (!this.currentLocation || !this.map) return;
 
     const blueIcon = this.createColoredIcon('blue');
 
@@ -191,16 +210,14 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.currentMarker = L.marker(this.currentLocation, { icon: blueIcon })
       .addTo(this.map)
       .bindPopup(`
-        <b>📍 Tu ubicación GPS actual</b><br>
+        <b>📍 Tu ubicación GPS</b><br>
         <small>Lat: ${this.currentLocation[0].toFixed(6)}</small><br>
         <small>Lng: ${this.currentLocation[1].toFixed(6)}</small>
       `)
       .openPopup();
-    
-    console.log('✅ Marcador añadido en:', this.currentLocation);
   }
 
-  // 🧭 Soluciona los errores 404 de los íconos de Leaflet
+  // 🧭 Fix íconos de Leaflet
   private fixLeafletIcons(): void {
     const iconDefault = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -209,192 +226,150 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
-      tooltipAnchor: [16, -28],
       shadowSize: [41, 41]
     });
-
     L.Marker.prototype.options.icon = iconDefault;
   }
 
-  // 🗺️ Inicializar el mapa Leaflet
+  // 🗺️ Inicializar mapa - SIN MOSTRAR RUTAS AUTOMÁTICAMENTE
   private initMap(): void {
-    // Inicializar con ubicación por defecto
     const defaultLocation: [number, number] = [-41.4693, -72.9424];
     const initialLocation = this.currentLocation || defaultLocation;
 
-    console.log('🗺️ Inicializando mapa en:', initialLocation);
-    
     this.map = L.map('map', {
       center: initialLocation,
-      zoom: this.currentLocation ? 17 : 13
+      zoom: this.currentLocation ? 17 : 13,
+      zoomControl: true,
+      // Configuración optimizada para evitar tiles grises
+      preferCanvas: false, // Canvas puede causar problemas con tiles
+      zoomAnimation: false, // Desactivar animaciones durante grabación
+      fadeAnimation: false,
+      markerZoomAnimation: false,
+      // Importante: no mover el mapa automáticamente
+      trackResize: true
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(this.map);
+    // 🔧 SOLUCIÓN: Tiles con mejor configuración
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19,
+      minZoom: 10,
+      // ✅ CLAVE: Configuración para mantener tiles cargadas
+      keepBuffer: 4, // Aumentado de 2 a 4
+      updateWhenIdle: true, // Cambiado a true
+      updateWhenZooming: true, // Cambiado a true
+      updateInterval: 200,
+      // Tiles de respaldo
+      errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+      // Configuración de carga
+      crossOrigin: true,
+      // Importante: mantener tiles antiguas mientras cargan nuevas
+      opacity: 1.0,
+      className: 'map-tiles'
+    });
+
+    tileLayer.addTo(this.map);
+
+    // Manejar errores de tiles
+    tileLayer.on('tileerror', (error: any) => {
+      console.warn('⚠️ Error cargando tile, intentando recargar...');
+    });
+
+    // Precargar tiles al iniciar
+    tileLayer.on('load', () => {
+      console.log('✅ Tiles del mapa cargadas');
+    });
 
     if (this.currentLocation) {
       this.addCurrentLocationMarker();
     }
-    
-    setTimeout(() => {
-      this.mostrarRutasEnMapa();
-    }, 1000);
+
+    // ✅ NO mostrar rutas automáticamente
+    console.log('🗺️ Mapa inicializado. Las rutas NO se muestran automáticamente.');
   }
 
-  // 🎬 INICIAR GRABACIÓN DE RUTA CON GPS REAL
+  // 🎬 INICIAR GRABACIÓN
   async startRecording() {
     if (!this.currentUserId) {
       await this.showToast('⚠️ Debes iniciar sesión para grabar rutas', 'warning');
       return;
     }
 
+    if (!navigator.geolocation) {
+      await this.showToast('❌ Geolocalización no disponible', 'danger');
+      return;
+    }
+
     try {
-      // Inicializar variables
       this.isRecording = true;
       this.recordedPoints = [];
       this.totalDistance = 0;
       this.startTime = Date.now();
+      this.lastMapUpdate = 0; // Reset throttle
 
-      // 🌐 MODO WEB
-      if (!this.platform.is('capacitor')) {
-        console.log('🌐 Iniciando grabación en modo WEB');
-        
-        if (!navigator.geolocation) {
-          throw new Error('Geolocation no disponible');
-        }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const startPoint = {
+            latitud: position.coords.latitude,
+            longitud: position.coords.longitude,
+            timestamp: Date.now()
+          };
+          
+          this.recordedPoints.push(startPoint);
+          this.currentLocation = [startPoint.latitud, startPoint.longitud];
 
-        // Obtener posición inicial
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const startPoint = {
-              latitud: position.coords.latitude,
-              longitud: position.coords.longitude,
-              timestamp: Date.now()
-            };
-            
-            this.recordedPoints.push(startPoint);
-            this.currentLocation = [startPoint.latitud, startPoint.longitud];
+          console.log('🚩 Inicio grabación:', startPoint);
 
-            console.log('🚩 Inicio de grabación GPS Web:', startPoint);
+          const greenIcon = this.createColoredIcon('green');
+          this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon: greenIcon })
+            .addTo(this.map)
+            .bindPopup('<b>🚩 Inicio de tu ruta</b>')
+            .openPopup();
 
-            // Marcador de inicio (verde)
-            const greenIcon = this.createColoredIcon('green');
-            this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon: greenIcon })
-              .addTo(this.map)
-              .bindPopup('<b>🚩 Inicio de tu ruta</b>')
-              .openPopup();
+          this.map.setView([startPoint.latitud, startPoint.longitud], 18, {
+            animate: true,
+            duration: 0.5
+          });
 
-            this.map.setView([startPoint.latitud, startPoint.longitud], 18);
-
-            // Tracking continuo Web
-            this.watchId = navigator.geolocation.watchPosition(
-              (pos) => {
-                if (this.isRecording) {
-                  this.updateRecording(pos);
-                }
-              },
-              (error) => console.error('❌ Error tracking Web:', error),
-              {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-              }
-            ) as any;
-
-            // Actualizar tiempo transcurrido
-            this.recordingInterval = setInterval(() => {
+          // Tracking continuo con throttling
+          this.watchId = navigator.geolocation.watchPosition(
+            (pos) => {
               if (this.isRecording) {
-                this.updateElapsedTime();
+                this.updateRecording(pos);
               }
-            }, 1000);
+            },
+            (error) => console.error('❌ Error tracking:', error),
+            {
+              enableHighAccuracy: true,
+              timeout: 10000, // Aumentado a 10 segundos
+              maximumAge: 2000 // Permitir datos de hace 2 segundos
+            }
+          );
 
-            this.showToast('✅ Grabación iniciada. ¡Empieza a caminar!', 'success');
-          },
-          (error) => {
-            console.error('❌ Error obteniendo posición inicial Web:', error);
-            this.showToast('❌ Error al obtener ubicación inicial', 'danger');
-            this.isRecording = false;
-          }
-        );
+          this.recordingInterval = setInterval(() => {
+            if (this.isRecording) {
+              this.updateElapsedTime();
+            }
+          }, 1000);
 
-        return;
-      }
-
-      // 📱 MODO MÓVIL (Capacitor)
-      console.log('📱 Iniciando grabación en modo MÓVIL');
-
-      const permission = await Geolocation.checkPermissions();
-      if (permission.location !== 'granted') {
-        const request = await Geolocation.requestPermissions();
-        if (request.location !== 'granted') {
-          await this.showToast('❌ Permiso de GPS denegado', 'danger');
-          this.isRecording = false;
-          return;
-        }
-      }
-
-      const position = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      });
-
-      const startPoint = {
-        latitud: position.coords.latitude,
-        longitud: position.coords.longitude,
-        timestamp: Date.now()
-      };
-      
-      this.recordedPoints.push(startPoint);
-      this.currentLocation = [startPoint.latitud, startPoint.longitud];
-
-      console.log('🚩 Inicio de grabación GPS Móvil:', startPoint);
-
-      const greenIcon = this.createColoredIcon('green');
-      this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon: greenIcon })
-        .addTo(this.map)
-        .bindPopup('<b>🚩 Inicio de tu ruta</b>')
-        .openPopup();
-
-      this.map.setView([startPoint.latitud, startPoint.longitud], 18);
-
-      this.watchId = await Geolocation.watchPosition(
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
+          this.showToast('✅ Grabación iniciada. ¡Camina!', 'success');
         },
-        (position, err) => {
-          if (err) {
-            console.error('❌ Error en GPS tracking:', err);
-            return;
-          }
-
-          if (position && this.isRecording) {
-            this.updateRecording(position);
-          }
+        (error) => {
+          console.error('❌ Error posición inicial:', error);
+          this.showToast('❌ Error al obtener ubicación inicial', 'danger');
+          this.isRecording = false;
         }
       );
 
-      this.recordingInterval = setInterval(() => {
-        if (this.isRecording) {
-          this.updateElapsedTime();
-        }
-      }, 1000);
-
-      await this.showToast('✅ Grabación iniciada. ¡Empieza a caminar!', 'success');
-
     } catch (error) {
-      console.error('❌ Error al iniciar grabación GPS:', error);
-      await this.showToast('❌ Error al conectar con GPS', 'danger');
+      console.error('❌ Error al iniciar grabación:', error);
+      await this.showToast('❌ Error al iniciar grabación', 'danger');
       this.isRecording = false;
     }
   }
 
-  // 📍 Actualizar grabación con nuevo punto GPS
-  private updateRecording(position: any) {
+  // 📍 Actualizar grabación - SIN MOVER EL MAPA (evita tiles grises)
+  private updateRecording(position: GeolocationPosition) {
     const newPoint = {
       latitud: position.coords.latitude,
       longitud: position.coords.longitude,
@@ -409,6 +384,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       newPoint.longitud
     );
 
+    // Solo registrar si se movió más de 3 metros
     if (distance > 0.003) {
       this.recordedPoints.push(newPoint);
       this.totalDistance += distance;
@@ -418,15 +394,19 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
         this.currentSpeed = (distance / timeDiff) * 3600;
       }
 
+      // Actualizar polyline y marcador
       this.updatePolyline();
       this.updateCurrentMarker(newPoint.latitud, newPoint.longitud);
-      this.map.setView([newPoint.latitud, newPoint.longitud], this.map.getZoom());
-
-      console.log(`📍 Punto GPS #${this.recordedPoints.length} | ${this.totalDistance.toFixed(3)} km | ${this.currentSpeed.toFixed(1)} km/h`);
+      
+      // 🔧 SOLUCIÓN: NO MOVER EL MAPA durante la grabación
+      // El usuario puede mover el mapa manualmente si quiere
+      // Esto evita que las tiles se pongan grises
+      
+      console.log(`📍 Punto #${this.recordedPoints.length} | ${this.totalDistance.toFixed(3)} km`);
     }
   }
 
-  // 🗺️ Actualizar la línea de la ruta en el mapa
+  // 🗺️ Actualizar línea
   private updatePolyline() {
     const coords = this.recordedPoints.map(p => [p.latitud, p.longitud] as [number, number]);
 
@@ -438,11 +418,12 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       color: '#ff0000',
       weight: 5,
       opacity: 0.8,
-      dashArray: '10, 5'
+      dashArray: '10, 5',
+      smoothFactor: 1.0
     }).addTo(this.map);
   }
 
-  // 📍 Actualizar marcador de posición actual
+  // 📍 Actualizar marcador actual
   private updateCurrentMarker(lat: number, lng: number) {
     const blueIcon = this.createColoredIcon('blue');
 
@@ -452,16 +433,15 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.currentMarker = L.marker([lat, lng], { icon: blueIcon })
       .addTo(this.map)
-      .bindPopup(`<b>📍 Tu ubicación GPS</b><br>Velocidad: ${this.currentSpeed.toFixed(1)} km/h`);
+      .bindPopup(`<b>📍 Tu ubicación</b><br>Velocidad: ${this.currentSpeed.toFixed(1)} km/h`);
   }
 
-  // ⏱️ Actualizar tiempo transcurrido
+  // ⏱️ Actualizar tiempo
   private updateElapsedTime() {
     const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
     const hours = Math.floor(elapsed / 3600);
     const minutes = Math.floor((elapsed % 3600) / 60);
     const seconds = elapsed % 60;
-
     this.elapsedTime = `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
 
@@ -469,19 +449,14 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     return num.toString().padStart(2, '0');
   }
 
-  // ⏹️ DETENER GRABACIÓN DE RUTA
+  // ⏹️ DETENER GRABACIÓN
   async stopRecording() {
     if (!this.isRecording) return;
 
     this.isRecording = false;
 
-    // Detener watch de GPS
-    if (this.watchId) {
-      if (this.platform.is('capacitor')) {
-        await Geolocation.clearWatch({ id: this.watchId });
-      } else {
-        navigator.geolocation.clearWatch(this.watchId as any);
-      }
+    if (this.watchId !== null) {
+      navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
     }
 
@@ -490,7 +465,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       this.recordingInterval = null;
     }
 
-    console.log(`🏁 Grabación finalizada. Puntos: ${this.recordedPoints.length}, Distancia: ${this.totalDistance.toFixed(2)} km`);
+    console.log(`🏁 Grabación finalizada. Puntos: ${this.recordedPoints.length}`);
 
     if (this.recordedPoints.length > 1) {
       const lastPoint = this.recordedPoints[this.recordedPoints.length - 1];
@@ -503,48 +478,42 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
       await this.showSaveDialog();
     } else {
-      await this.showToast('⚠️ No se grabaron suficientes puntos GPS', 'warning');
+      await this.showToast('⚠️ No se grabaron suficientes puntos', 'warning');
       this.clearRecording();
     }
   }
 
-  // 💾 Mostrar diálogo para guardar la ruta
+  // 💾 Diálogo guardar
   async showSaveDialog() {
     const alert = await this.alertController.create({
-      header: '💾 Guardar Tu Ruta GPS',
+      header: '💾 Guardar Ruta GPS',
       message: `
         <b>📏 Distancia:</b> ${this.totalDistance.toFixed(2)} km<br>
         <b>⏱️ Tiempo:</b> ${this.elapsedTime}<br>
-        <b>📍 Puntos GPS:</b> ${this.recordedPoints.length}<br>
+        <b>📍 Puntos:</b> ${this.recordedPoints.length}
       `,
       inputs: [
         {
           name: 'nombre_ruta',
           type: 'text',
-          placeholder: 'Ej: Ruta al Parque Accesible',
-          attributes: {
-            required: true,
-            maxlength: 100
-          }
+          placeholder: 'Ej: Ruta al Parque Accesible'
         },
         {
           name: 'descripcion',
           type: 'textarea',
-          placeholder: 'Describe tu ruta...'
+          placeholder: 'Descripción (opcional)'
         }
       ],
       buttons: [
         {
           text: '🗑️ Descartar',
           role: 'cancel',
-          handler: () => {
-            this.clearRecording();
-          }
+          handler: () => this.clearRecording()
         },
         {
           text: '💾 Guardar',
           handler: (data) => {
-            if (!data.nombre_ruta || data.nombre_ruta.trim() === '') {
+            if (!data.nombre_ruta?.trim()) {
               this.showToast('⚠️ Debes ingresar un nombre', 'warning');
               return false;
             }
@@ -554,11 +523,10 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
         }
       ]
     });
-
     await alert.present();
   }
 
-  // 💾 Guardar ruta en la base de datos
+  // 💾 Guardar ruta
   async saveRoute(nombre: string, descripcion: string) {
     const rutaData = {
       nombre_ruta: nombre.trim(),
@@ -572,14 +540,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }))
     };
 
-    console.log('💾 Guardando ruta GPS:', rutaData);
-
     this.http.post(`${this.apiUrl}/rutas`, rutaData).subscribe({
-      next: async (response: any) => {
-        console.log('✅ Ruta guardada:', response);
+      next: async () => {
         await this.showToast(`✅ Ruta "${nombre}" guardada`, 'success');
         this.clearRecording();
-        this.cargarRutasGuardadas();
+        this.cargarRutasGuardadas(); // Solo recarga la lista
       },
       error: async (error) => {
         console.error('❌ Error al guardar:', error);
@@ -588,7 +553,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // 🧹 Limpiar datos de grabación
+  // 🧹 Limpiar grabación
   private clearRecording() {
     this.recordedPoints = [];
     this.totalDistance = 0;
@@ -606,19 +571,14 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // 📍 Cargar rutas guardadas desde el backend
+  // 📍 Cargar rutas guardadas - SOLO LA LISTA, NO LAS MUESTRA
   private cargarRutasGuardadas() {
     if (!this.currentUserId) return;
 
     this.http.get(`${this.apiUrl}/rutas/usuario/${this.currentUserId}`).subscribe({
       next: async (rutas: any) => {
-        console.log(`📍 Rutas guardadas: ${rutas.length}`);
+        console.log(`📍 ${rutas.length} rutas cargadas (sin mostrar)`);
         
-        if (rutas.length === 0) {
-          this.rutasGuardadas = [];
-          return;
-        }
-
         this.rutasGuardadas = [];
         
         for (const ruta of rutas) {
@@ -629,26 +589,32 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
             console.error('Error cargando ruta:', err);
           }
         }
-
-        if (this.map) {
-          this.mostrarRutasEnMapa();
-        }
+        
+        // ✅ NO llamar a mostrarRutasEnMapa() aquí
       },
       error: (err) => console.error('Error cargando rutas:', err)
     });
   }
 
-  // 🗺️ Mostrar todas las rutas guardadas en el mapa
-  private mostrarRutasEnMapa() {
-    this.rutasPolylines.forEach(p => this.map.removeLayer(p));
-    this.rutasPolylines = [];
+  // 🗺️ Mostrar TODAS las rutas en el mapa con LÍNEAS VISIBLES
+  private mostrarTodasLasRutas() {
+    // Limpiar rutas anteriores
+    this.limpiarRutasDelMapa();
 
     if (this.rutasGuardadas.length === 0) {
-      console.log('📍 No hay rutas para mostrar');
+      this.showToast('📍 No tienes rutas guardadas', 'primary');
       return;
     }
 
-    const colorPalette = ['#3880ff', '#10dc60', '#ffce00', '#f04141', '#7044ff', '#00d4ff'];
+    // Colores brillantes y visibles
+    const colorPalette = [
+      '#0066ff', // Azul brillante
+      '#00cc44', // Verde brillante
+      '#ff6600', // Naranja brillante
+      '#cc00cc', // Morado brillante
+      '#ffcc00', // Amarillo brillante
+      '#00cccc'  // Cyan brillante
+    ];
 
     this.rutasGuardadas.forEach((ruta, index) => {
       if (!ruta.coordenadas || ruta.coordenadas.length < 2) return;
@@ -656,37 +622,55 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       const coords = ruta.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
       const color = colorPalette[index % colorPalette.length];
 
+      // Dibujar línea del camino
       const polyline = L.polyline(coords, {
         color: color,
-        weight: 4,
-        opacity: 0.7
+        weight: 5,
+        opacity: 0.8,
+        smoothFactor: 1.0,
+        lineJoin: 'round',
+        lineCap: 'round'
       }).addTo(this.map);
 
       this.rutasPolylines.push(polyline);
 
-      const start = coords[0];
-      const end = coords[coords.length - 1];
-
       const greenIcon = this.createColoredIcon('green');
       const redIcon = this.createColoredIcon('red');
 
-      L.marker(start, { icon: greenIcon })
+      // Marcador inicio
+      L.marker(coords[0], { icon: greenIcon })
         .addTo(this.map)
         .bindPopup(`
           <b>🚩 ${ruta.nombre_ruta}</b><br>
           ${ruta.descripcion_ruta || ''}<br>
-          <small>📏 ${ruta.longitud_ruta} km</small>
+          <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      L.marker(end, { icon: redIcon })
+      // Marcador fin
+      L.marker(coords[coords.length - 1], { icon: redIcon })
         .addTo(this.map)
         .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
     });
 
-    console.log(`✅ ${this.rutasGuardadas.length} rutas mostradas`);
+    // Ajustar vista para mostrar todas las rutas
+    if (this.rutasPolylines.length > 0) {
+      const group = L.featureGroup(this.rutasPolylines);
+      this.map.fitBounds(group.getBounds(), { 
+        padding: [50, 50],
+        maxZoom: 16
+      });
+    }
+
+    this.showToast(`✅ Mostrando ${this.rutasGuardadas.length} ruta(s)`, 'success');
   }
 
-  // 📜 Ver mis rutas guardadas
+  // 🧹 Limpiar rutas del mapa
+  private limpiarRutasDelMapa() {
+    this.rutasPolylines.forEach(p => this.map.removeLayer(p));
+    this.rutasPolylines = [];
+  }
+
+  // 📜 Ver mis rutas - AHORA CON OPCIÓN DE MOSTRAR TODAS
   async verMisRutas() {
     if (!this.currentUserId) {
       await this.showToast('⚠️ Debes iniciar sesión', 'warning');
@@ -701,30 +685,53 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await this.showRutasActionSheet();
   }
 
-  // 📋 Mostrar lista de rutas con ActionSheet
+  // 📋 ActionSheet de rutas con opción de mostrar todas
   async showRutasActionSheet() {
-    const buttons = this.rutasGuardadas.map(ruta => ({
-      text: `${ruta.nombre_ruta} (${ruta.longitud_ruta} km)`,
-      icon: 'navigate',
-      handler: () => {
-        this.cargarRutaEnMapa(ruta.id_ruta);
-      }
-    }));
+    const buttons: any[] = [];
 
-    buttons.push(
-      {
-        text: '🔄 Recargar',
-        icon: 'refresh',
+    // Botón para mostrar todas las rutas
+    buttons.push({
+      text: `🗺️ Mostrar todas (${this.rutasGuardadas.length})`,
+      icon: 'map',
+      handler: () => {
+        this.mostrarTodasLasRutas();
+      }
+    });
+
+    // Botón para limpiar el mapa
+    buttons.push({
+      text: '🧹 Limpiar mapa',
+      icon: 'close-circle',
+      handler: () => {
+        this.limpiarRutasDelMapa();
+        this.showToast('✅ Mapa limpiado', 'success');
+      }
+    });
+
+    // Lista de rutas individuales
+    this.rutasGuardadas.forEach(ruta => {
+      buttons.push({
+        text: `${ruta.nombre_ruta} (${ruta.longitud_ruta} km)`,
+        icon: 'navigate',
         handler: () => {
-          this.cargarRutasGuardadas();
+          this.cargarRutaEnMapa(ruta.id_ruta);
         }
-      } as any,
-      {
-        text: 'Cancelar',
-        icon: 'close',
-        role: 'cancel'
-      } as any
-    );
+      });
+    });
+
+    buttons.push({
+      text: '🔄 Recargar',
+      icon: 'refresh',
+      handler: () => {
+        this.cargarRutasGuardadas();
+      }
+    });
+
+    buttons.push({
+      text: 'Cancelar',
+      icon: 'close',
+      role: 'cancel'
+    });
 
     const actionSheet = await this.actionSheetController.create({
       header: '📍 Mis Rutas GPS',
@@ -735,32 +742,59 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await actionSheet.present();
   }
 
-  // 🗺️ Cargar una ruta en el mapa
+  // 🗺️ Cargar UNA ruta específica en el mapa con LÍNEA AZUL
   async cargarRutaEnMapa(idRuta: number) {
     const ruta = this.rutasGuardadas.find(r => r.id_ruta === idRuta);
     if (!ruta) return;
 
-    console.log('📍 Centrando en:', ruta.nombre_ruta);
+    // Limpiar rutas anteriores
+    this.limpiarRutasDelMapa();
 
     const coords = ruta.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
     
-    const bounds = L.latLngBounds(coords);
-    this.map.fitBounds(bounds, { padding: [50, 50] });
-
-    const highlightPolyline = L.polyline(coords, {
-      color: '#ffce00',
+    // 🔵 SOLUCIÓN: Dibujar la línea AZUL del camino completo
+    const polyline = L.polyline(coords, {
+      color: '#0066ff', // Azul brillante
       weight: 6,
-      opacity: 1.0
+      opacity: 0.9,
+      smoothFactor: 1.0,
+      lineJoin: 'round',
+      lineCap: 'round'
     }).addTo(this.map);
 
-    setTimeout(() => {
-      this.map.removeLayer(highlightPolyline);
-    }, 3000);
+    this.rutasPolylines.push(polyline);
 
-    await this.showToast(`📍 ${ruta.nombre_ruta}`, 'primary');
+    // Marcadores inicio (verde) y fin (rojo)
+    const greenIcon = this.createColoredIcon('green');
+    const redIcon = this.createColoredIcon('red');
+
+    const startMarker = L.marker(coords[0], { icon: greenIcon })
+      .addTo(this.map)
+      .bindPopup(`
+        <b>🚩 Inicio: ${ruta.nombre_ruta}</b><br>
+        ${ruta.descripcion_ruta || ''}<br>
+        <small>📏 Distancia total: ${ruta.longitud_ruta} km</small><br>
+        <small>📍 Puntos GPS: ${coords.length}</small>
+      `);
+
+    const endMarker = L.marker(coords[coords.length - 1], { icon: redIcon })
+      .addTo(this.map)
+      .bindPopup(`<b>🏁 Fin: ${ruta.nombre_ruta}</b>`);
+
+    // Abrir popup del inicio automáticamente
+    startMarker.openPopup();
+
+    // Centrar mapa en la ruta con padding
+    const bounds = L.latLngBounds(coords);
+    this.map.fitBounds(bounds, { 
+      padding: [50, 50],
+      maxZoom: 17 
+    });
+
+    await this.showToast(`📍 ${ruta.nombre_ruta} - ${ruta.longitud_ruta} km`, 'primary');
   }
 
-  // 📏 Calcular distancia entre dos puntos GPS
+  // 📏 Calcular distancia
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371;
     const dLat = this.deg2rad(lat2 - lat1);
@@ -777,7 +811,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     return deg * (Math.PI / 180);
   }
 
-  // 🎨 Crear íconos de colores
+  // 🎨 Íconos de colores
   private createColoredIcon(color: string): L.Icon {
     return L.icon({
       iconRetinaUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
@@ -790,7 +824,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // 🍞 Mostrar toast
+  // 🍞 Toast
   async showToast(message: string, color: string) {
     const toast = await this.toastController.create({
       message,
@@ -801,7 +835,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await toast.present();
   }
 
-  // 📊 Calcular distancia total de todas las rutas
+  // 📊 Distancia total
   calcularDistanciaTotal(): string {
     const total = this.rutasGuardadas.reduce((sum, ruta) => sum + (ruta.longitud_ruta || 0), 0);
     return total.toFixed(2);

@@ -1,26 +1,26 @@
 // Variables de color y estilo
-$primary-color: #007bff; // Azul brillante
-$secondary-color: #4caf50; // Color para el botón y los enlaces
-$background-color: #f4f7fa; // Fondo gris suave
-$text-color: #333; // Color de texto oscuro
-$border-radius: 8px; // Bordes redondeados
-$input-padding: 16px 18px; // Padding en los inputs
-$button-padding: 14px 20px; // Padding en el botón
+$primary-color: #007bff;
+$secondary-color: #4caf50;
+$background-color: #f4f7fa;
+$text-color: #333;
+$border-radius: 8px;
+$input-padding: 16px 18px;
+$button-padding: 14px 20px;
 
-// Fondo general de la página
+// Fondo general
 body {
   font-family: 'Roboto', sans-serif;
   background-color: $background-color;
   margin: 0;
   padding: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   height: 100vh;
   box-sizing: border-box;
 }
 
-// Estilo del contenedor principal
+// Contenedor principal
 ion-content {
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@ ion-content {
   height: 100%;
 }
 
-// Estilo del formulario de registro
+// Formularios
 form {
   background-color: #fff;
   padding: 40px;
@@ -42,7 +42,6 @@ form {
   animation: fadeIn 0.5s ease-in-out;
 }
 
-// Animación para el formulario
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -54,7 +53,7 @@ form {
   }
 }
 
-// Título de la página de registro
+// Títulos
 h2 {
   font-size: 2.2rem;
   color: $primary-color;
@@ -64,7 +63,7 @@ h2 {
   letter-spacing: 1px;
 }
 
-// Estilo de los elementos de formulario
+// Campos de formulario
 ion-item {
   --padding-start: 16px;
   --padding-end: 16px;
@@ -79,7 +78,6 @@ ion-label {
   color: $text-color;
 }
 
-// Estilo de los campos de entrada (ion-input)
 ion-input {
   font-size: 1rem;
   padding: $input-padding;
@@ -92,7 +90,6 @@ ion-input {
   width: 100%;
   height: 50px;
 
-  // Estilos para el borde al enfocar el input
   &:focus {
     outline: none;
     border-color: $primary-color;
@@ -100,19 +97,25 @@ ion-input {
   }
 }
 
-// Estilo para el enlace de "Celular" y "Foto de perfil"
-ion-item ion-label {
-  font-size: 0.9rem;
+ion-select {
+  --background: #fafafa;
+  --border-radius: $border-radius;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  font-size: 1rem;
   color: $text-color;
-  margin-top: 10px;
 }
 
-ion-item ion-input {
+input[type='file'] {
   font-size: 0.9rem;
-  padding: 12px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+  background-color: #fafafa;
 }
 
-// Estilo para el botón de registro
+// Botones
 ion-button {
   --background: $primary-color;
   --color: white;
@@ -130,27 +133,7 @@ ion-button {
   }
 }
 
-// Estilo para el campo de "Tipo de discapacidad"
-ion-select {
-  --background: #fafafa;
-  --border-radius: $border-radius;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  font-size: 1rem;
-  color: $text-color;
-}
-
-// Estilo para el input de tipo file (Foto de perfil)
-input[type='file'] {
-  font-size: 0.9rem;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-top: 10px;
-  background-color: #fafafa;
-}
-
-// Responsividad: Ajustes para pantallas pequeñas
+// Responsividad
 @media (max-width: 600px) {
   ion-content {
     padding: 15px;
@@ -174,33 +157,194 @@ input[type='file'] {
   }
 }
 
-/* 🌍 === ESTILO DEL MAPA LEAFLET === */
+/* ═══════════════════════════════════════════════════════════════════
+   🗺️ ESTILOS DEL MAPA LEAFLET - MEJORADOS PARA EVITAR GRIS
+   ═══════════════════════════════════════════════════════════════════ */
+
 #map {
   width: 100%;
-  height: 300px;
+  height: 500px;
   border-radius: 10px;
   margin-top: 10px;
+  margin-bottom: 10px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  
+  /* 🔧 CRÍTICO: Fondo blanco para que no se vea gris */
+  background-color: #ffffff !important;
+  
+  /* Asegurar que el contenedor tenga el tamaño correcto */
+  min-height: 500px;
+  display: block;
 }
 
-/* Asegurar que los controles del mapa (zoom, attribution) se vean bien */
+/* Asegurar que los tiles se carguen correctamente */
+.leaflet-tile-container {
+  background-color: #ffffff !important;
+}
+
+/* Tiles del mapa con transición suave */
+.map-tiles {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Evitar que el pane del mapa se ponga transparente */
+.leaflet-pane {
+  background-color: transparent;
+}
+
+/* Capa de tiles específica */
+.leaflet-tile-pane {
+  opacity: 1 !important;
+  background-color: #f0f0f0;
+}
+
+/* Tiles individuales */
+.leaflet-tile {
+  opacity: 1 !important;
+  /* Mantener tiles mientras cargan */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Tiles que están cargando */
+.leaflet-tile-loading {
+  opacity: 0.5;
+}
+
+/* Controles del mapa */
 .leaflet-control {
   border-radius: 8px !important;
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Mejorar el popup del marcador */
+/* Botones de zoom */
+.leaflet-control-zoom {
+  a {
+    background-color: white !important;
+    color: #333 !important;
+    
+    &:hover {
+      background-color: #f0f0f0 !important;
+    }
+  }
+}
+
+/* Popup del marcador - mejorado */
 .leaflet-popup-content-wrapper {
   border-radius: 10px;
-  padding: 8px;
+  padding: 10px;
   background: #ffffff;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .leaflet-popup-content {
   color: $text-color;
   font-size: 0.95rem;
   font-weight: 500;
+  margin: 8px 12px;
+  
+  b {
+    color: $primary-color;
+    font-size: 1rem;
+  }
+  
+  small {
+    color: #666;
+    font-size: 0.85rem;
+  }
+}
+
+/* Punta del popup */
+.leaflet-popup-tip {
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón de cerrar popup */
+.leaflet-popup-close-button {
+  color: #999 !important;
+  font-size: 20px !important;
+  
+  &:hover {
+    color: #333 !important;
+  }
+}
+
+/* Atribución */
+.leaflet-control-attribution {
+  font-size: 10px;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Container principal del mapa */
+.leaflet-container {
+  background-color: #ffffff !important;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Asegurar que el mapa sea visible durante animaciones */
+.leaflet-zoom-animated {
+  will-change: auto !important;
+}
+
+/* Prevenir que las capas desaparezcan */
+.leaflet-layer {
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* Estilo para las polylines (rutas) */
+.leaflet-interactive {
+  cursor: pointer;
+  
+  &:hover {
+    stroke-width: 8px;
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📱 ESTILOS RESPONSIVE PARA EL MAPA
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  #map {
+    height: 400px;
+    min-height: 400px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  #map {
+    height: 350px;
+    min-height: 350px;
+    border-radius: 5px;
+  }
+  
+  .leaflet-control {
+    font-size: 14px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🎨 ESTILOS ADICIONALES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Loading spinner para tiles */
+.leaflet-tile-container::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f8f8;
+  z-index: -1;
 }
