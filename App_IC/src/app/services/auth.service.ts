@@ -5,7 +5,8 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly LS_KEY = 'usuarioLogeado';
+  // 🔧 CORREGIDO: Cambiar de 'usuarioLogeado' a 'user' para que coincida con los guards
+  private readonly LS_KEY = 'user';
   private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());
   user$ = this.userSubject.asObservable();
 
