@@ -43,7 +43,7 @@ const getUsuarioById = (req, res) => {
   });
 };
 
-// ✅ Crear usuario
+// ✅ Crear usuario (con contraseña encriptada)
 const createUsuario = async (req, res) => {
   const { nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad } = req.body;
 
@@ -51,7 +51,8 @@ const createUsuario = async (req, res) => {
     const hashedPassword = await bcrypt.hash(contrasena, 10);
 
     db.query(
-      'INSERT INTO usuario (nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad) VALUES (?, ?, ?, ?, ?, ?)',
+      `INSERT INTO usuario (nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [nombre, correo, hashedPassword, celular, foto_perfil, Discapacidades_id_discapacidad],
       (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -63,7 +64,7 @@ const createUsuario = async (req, res) => {
           celular,
           foto_perfil,
           Discapacidades_id_discapacidad,
-          message: '✅ Usuario registrado con contraseña protegida'
+          message: '✅ Usuario registrado correctamente'
         });
       }
     );
@@ -73,28 +74,63 @@ const createUsuario = async (req, res) => {
   }
 };
 
-// ✅ Actualizar usuario
+// ✅ Actualizar usuario (para el perfil)
 const updateUsuario = (req, res) => {
   const { id } = req.params;
-  const { nombre, correo } = req.body;
+  const { correo, celular, Discapacidades_id_discapacidad } = req.body;
 
-  db.query(
-    'UPDATE usuario SET nombre=?, correo=? WHERE id_usuario=?',
-    [nombre, correo, id],
-    (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id_usuario: id, nombre, correo });
+  // Validar que al menos uno de los campos venga
+  if (!correo && !celular && !Discapacidades_id_discapacidad) {
+    return res.status(400).json({ error: 'Debe proporcionar al menos un campo para actualizar' });
+  }
+
+  const fields = [];
+  const values = [];
+
+  if (correo) {
+    fields.push('correo = ?');
+    values.push(correo);
+  }
+
+  if (celular) {
+    fields.push('celular = ?');
+    values.push(celular);
+  }
+
+  if (Discapacidades_id_discapacidad) {
+    fields.push('Discapacidades_id_discapacidad = ?');
+    values.push(Discapacidades_id_discapacidad);
+  }
+
+  values.push(id);
+
+  const query = `UPDATE usuario SET ${fields.join(', ')} WHERE id_usuario = ?`;
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('❌ Error SQL en updateUsuario:', err.sqlMessage);
+      return res.status(500).json({ error: 'Error al actualizar usuario' });
     }
-  );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({
+      message: '✅ Usuario actualizado correctamente',
+      id_usuario: id,
+      actualizado: { correo, celular, Discapacidades_id_discapacidad }
+    });
+  });
 };
 
 // ✅ Eliminar usuario
 const deleteUsuario = (req, res) => {
   const { id } = req.params;
 
-  db.query('DELETE FROM usuario WHERE id_usuario = ?', [id], (err2) => {
-    if (err2) return res.status(500).json({ error: err2.message });
-    res.json({ message: '✅ Usuario eliminado' });
+  db.query('DELETE FROM usuario WHERE id_usuario = ?', [id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: '✅ Usuario eliminado correctamente' });
   });
 };
 

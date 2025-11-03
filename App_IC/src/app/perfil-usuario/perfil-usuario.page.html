@@ -4,46 +4,43 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="profile-container" *ngIf="user">
-    <ion-avatar class="profile-avatar">
-      <img [src]="user.foto_perfil || 'assets/default-avatar.png'" alt="Foto de perfil">
-    </ion-avatar>
+<ion-content class="ion-padding">
 
-    <h2>{{ user.nombre || user.correo }}</h2>
-    <p class="role-text">ID: {{ user.id_usuario }}</p>
-  </div>
+  <ion-card *ngIf="!cargando">
+    <ion-card-header>
+      <ion-card-title>Editar Información</ion-card-title>
+    </ion-card-header>
 
-  <ion-list *ngIf="user">
-    <ion-item>
-      <ion-icon slot="start" name="mail-outline" color="primary"></ion-icon>
-      <ion-label>
-        <h3>Correo</h3>
-        <p>{{ user.correo }}</p>
-      </ion-label>
-    </ion-item>
+    <ion-card-content>
+      <!-- Correo -->
+      <ion-item>
+        <ion-label position="floating">Correo electrónico</ion-label>
+        <ion-input [(ngModel)]="usuario.correo" type="email"></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-icon slot="start" name="call-outline" color="primary"></ion-icon>
-      <ion-label>
-        <h3>Celular</h3>
-        <p>{{ user.celular || 'No registrado' }}</p>
-      </ion-label>
-    </ion-item>
+      <!-- Celular -->
+      <ion-item>
+        <ion-label position="floating">Celular</ion-label>
+        <ion-input [(ngModel)]="usuario.celular" type="tel"></ion-input>
+      </ion-item>
 
-    <ion-item>
-      <ion-icon slot="start" name="accessibility-outline" color="primary"></ion-icon>
-      <ion-label>
-        <h3>Discapacidad</h3>
-        <p>
-          {{ user.nombre_discapacidad || ('ID: ' + (user.Discapacidades_id_discapacidad || 'Sin registrar')) }}
-        </p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
+      <!-- Discapacidad -->
+      <ion-item>
+        <ion-label>Tipo de discapacidad</ion-label>
+        <ion-select [(ngModel)]="usuario.Discapacidades_id_discapacidad">
+          <ion-select-option *ngFor="let d of discapacidades" [value]="d.id_discapacidad">
+            {{ d.tipo_discapacidad }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
 
-  <div *ngIf="!user" class="empty-state">
-    <ion-icon name="alert-circle-outline" color="medium" size="large"></ion-icon>
-    <p>No se pudo cargar la información del usuario.</p>
-  </div>
+      <!-- Botón Guardar -->
+      <ion-button expand="block" color="success" (click)="guardarCambios()">
+        Guardar Cambios
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-spinner *ngIf="cargando" name="crescent" class="ion-text-center"></ion-spinner>
+
 </ion-content>
