@@ -57,5 +57,9 @@ export const routes: Routes = [
   {
     path: 'registro-empresa',
     loadComponent: () => import('./registro-empresa/registro-empresa.page').then(m => m.RegistroEmpresaPage)
+  },  {
+    path: 'perfil-usuario',
+    loadComponent: () => import('./perfil-usuario/perfil-usuario.page').then( m => m.PerfilUsuarioPage)
   },
+
 ];

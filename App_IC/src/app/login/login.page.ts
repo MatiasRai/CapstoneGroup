@@ -45,10 +45,9 @@ export class LoginPage {
     private loginService: AdmEmpresaService,
     private toastCtrl: ToastController,
     private authService: AuthService,
-    private router: Router // Agregado Router para redirecciones
+    private router: Router
   ) {}
 
-  // Función para mostrar mensajes de toast
   async presentToast(message: string, color: string) {
     const toast = await this.toastCtrl.create({
       message,
@@ -58,7 +57,6 @@ export class LoginPage {
     await toast.present();
   }
 
-  // Función de login
   onLogin() {
     if (!this.credenciales.correo || !this.credenciales.contrasena) {
       this.presentToast('Completa todos los campos', 'warning');
@@ -67,42 +65,29 @@ export class LoginPage {
 
     this.loginService.login(this.credenciales).subscribe({
       next: (res) => {
-        // Normalizamos el ID sin importar el tipo de usuario
-        const id =
-          res.id ||
-          res.id_adm_empresa ||
-          res.id_usuario ||
-          res.id_adm ||     
-          null;
-
-        if (res && id) {
-          // Normalizamos el objeto antes de guardar
-          const usuario = { ...res, id };
-
-          // Guardamos el usuario logeado en localStorage
-          localStorage.setItem('user', JSON.stringify(usuario));
-          console.log('Usuario guardado en localStorage:', usuario);
-
-          this.presentToast(res.message, 'success');
-
-          // Redirección según el rol usando Router
-          if (res.role === 'adm_empresa') {
-            this.router.navigate(['/menu-emp']); // Redirige a menu-emp
-          } else if (res.role === 'adm') {
-            this.router.navigate(['/menu-adm']); // Redirige a menu-adm
-          } else {
-            this.router.navigate(['/menu']); // Redirige a menu para otros roles
-          }
-        } else {
-          // Si no hay ID, muestra mensaje
-          console.warn('Respuesta del servidor sin ID:', res);
+        if (!res?.id) {
           this.presentToast('Respuesta inválida del servidor', 'danger');
+          return;
+        }
+
+        // ✅ Guardar usuario en AuthService
+        this.authService.login(res);
+
+        this.presentToast(res.message || 'Login correcto', 'success');
+
+        // ✅ Redirección según el rol
+        if (res.role === 'adm_empresa') {
+          this.router.navigate(['/menu-emp']);
+        } else if (res.role === 'adm') {
+          this.router.navigate(['/menu-adm']);
+        } else {
+          this.router.navigate(['/menu']);
         }
       },
       error: (err) => {
         console.error('Error en login:', err);
         this.presentToast(
-          err.error?.error || 'Usuario o contraseña incorrectos',
+          err?.error?.error || 'Usuario o contraseña incorrectos',
           'danger'
         );
       }

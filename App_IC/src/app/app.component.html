@@ -1,23 +1,59 @@
 <ion-app>
+  <!-- 🔵 Encabezado Global -->
+  <ion-header *ngIf="currentUser">
+    <ion-toolbar color="primary">
+      <!-- ✅ Botón del menú (las tres rayitas) -->
+      <ion-buttons slot="start">
+        <ion-menu-button autoHide="false"></ion-menu-button>
+      </ion-buttons>
+
+      <!-- 👤 Nombre del usuario -->
+      <ion-title>
+        👋 Bienvenido, {{ currentUser?.nombre || currentUser?.correo }}
+      </ion-title>
+
+      <!-- 🔴 Botón de cerrar sesión -->
+      <ion-buttons slot="end">
+        <ion-button color="light" (click)="logout()">
+          <ion-icon slot="start" name="log-out"></ion-icon>
+          Cerrar sesión
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- 🔹 Menú lateral -->
   <ion-split-pane contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
       <ion-header>
         <ion-toolbar color="primary">
-          <ion-buttons slot="end" *ngIf="currentUser">
-            <ion-label style="margin-right: 10px; font-size: 14px;">
-              👤 {{ currentUser.correo }}
-            </ion-label>
-            <ion-button color="danger" size="small" (click)="logout()">
-              <ion-icon slot="start" name="log-out"></ion-icon>
-              Cerrar
-            </ion-button>
-          </ion-buttons>
+          <ion-title>Menú</ion-title>
         </ion-toolbar>
       </ion-header>
 
       <ion-content>
         <ion-list id="inbox-list">
-          <ion-list-header>Menu</ion-list-header>
+          <ion-list-header>Opciones</ion-list-header>
+
+          <!-- ✅ Nuevo botón Perfil de Usuario -->
+          <ion-menu-toggle auto-hide="false" *ngIf="currentUser">
+            <ion-item
+              routerDirection="root"
+              routerLink="/perfil-usuario"
+              lines="none"
+              detail="false"
+              routerLinkActive="selected">
+              <ion-icon
+                aria-hidden="true"
+                slot="start"
+                ios="person-circle-outline"
+                md="person-circle-sharp">
+              </ion-icon>
+              <ion-label>Perfil de Usuario</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+
+          <!-- 🔹 Otras opciones -->
           @for (p of appPages; track p; let i = $index) {
             <ion-menu-toggle auto-hide="false">
               <ion-item
@@ -25,14 +61,13 @@
                 [routerLink]="[p.url]"
                 lines="none"
                 detail="false"
-                routerLinkActive="selected"
-              >
+                routerLinkActive="selected">
                 <ion-icon
                   aria-hidden="true"
                   slot="start"
                   [ios]="p.icon + '-outline'"
-                  [md]="p.icon + '-sharp'"
-                ></ion-icon>
+                  [md]="p.icon + '-sharp'">
+                </ion-icon>
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
@@ -47,8 +82,8 @@
                 aria-hidden="true"
                 slot="start"
                 ios="bookmark-outline"
-                md="bookmark-sharp"
-              ></ion-icon>
+                md="bookmark-sharp">
+              </ion-icon>
               <ion-label>{{ label }}</ion-label>
             </ion-item>
           }
@@ -56,6 +91,7 @@
       </ion-content>
     </ion-menu>
 
+    <!-- 📱 Contenido principal -->
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>
 </ion-app>

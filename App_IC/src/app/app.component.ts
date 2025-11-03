@@ -1,37 +1,29 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { addIcons } from 'ionicons';
-import {
-  mailOutline,
-  mailSharp,
-  paperPlaneOutline,
-  paperPlaneSharp,
-  heartOutline,
-  heartSharp,
-  archiveOutline,
-  archiveSharp,
-  trashOutline,
-  trashSharp,
-  warningOutline,
-  warningSharp,
-  bookmarkOutline,
-  bookmarkSharp, logOut } from 'ionicons/icons';
-
-import { IONIC_IMPORTS } from 'src/shared/ionic-imports'; // 👈 solo Ionic aquí
+import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { AuthService } from './services/auth.service';
+import {
+  logOut,
+  bookmarkOutline,
+  bookmarkSharp,
+  logIn,
+  personAdd,
+  menu,
+  business,
+  addCircle,
+  clipboard,
+  apps,
+  briefcase
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule,        // 👈 Para *ngIf y *ngFor
-    RouterLink,
-    RouterLinkActive,
-    ...IONIC_IMPORTS     // 👈 Todos los componentes de Ionic
-  ],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ...IONIC_IMPORTS],
 })
 export class AppComponent {
   currentUser: any = null;
@@ -40,6 +32,7 @@ export class AppComponent {
     { title: 'Login', url: '/login', icon: 'log-in' },
     { title: 'Registro', url: '/registro', icon: 'person-add' },
     { title: 'Menu', url: '/menu', icon: 'menu' },
+    { title: 'Perfil de Usuario', url: '/perfil-usuario', icon: 'person-circle' },
     { title: 'Registro Empresa', url: '/registro-empresa', icon: 'business' },
     { title: 'Publicar Servicio', url: '/publicar-servicio', icon: 'add-circle' },
     { title: 'Servicio', url: '/servicio', icon: 'clipboard' },
@@ -49,16 +42,30 @@ export class AppComponent {
 
   labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 
-  constructor(private authService: AuthService) {
-    addIcons({logOut,mailOutline,mailSharp,paperPlaneOutline,paperPlaneSharp,heartOutline,heartSharp,archiveOutline,archiveSharp,trashOutline,trashSharp,warningOutline,warningSharp,bookmarkOutline,bookmarkSharp});
+  constructor(private authService: AuthService, private router: Router) {
+    addIcons({
+      logOut,
+      logIn,
+      personAdd,
+      menu,
+      business,
+      addCircle,
+      clipboard,
+      apps,
+      briefcase,
+      bookmarkOutline,
+      bookmarkSharp
+    });
   }
 
   ngOnInit() {
-    this.currentUser = this.authService.getUser();
+    this.authService.user$.subscribe(user => {
+      this.currentUser = user;
+    });
   }
 
   logout() {
     this.authService.logout();
-    this.currentUser = null;
+    this.router.navigate(['/login']);
   }
 }
