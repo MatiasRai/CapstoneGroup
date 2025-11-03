@@ -1,15 +1,28 @@
 <ion-app>
-  <!-- 🔵 Encabezado Global -->
+  <!-- 🔵 Encabezado superior (solo si hay sesión activa) -->
   <ion-header *ngIf="currentUser">
     <ion-toolbar color="primary">
-      <!-- ✅ Botón del menú (las tres rayitas) -->
+      <!-- ☰ Botón del menú -->
       <ion-buttons slot="start">
         <ion-menu-button autoHide="false"></ion-menu-button>
       </ion-buttons>
 
-      <!-- 👤 Nombre del usuario -->
+      <!-- 👤 Nombre o correo del usuario con color dinámico según rol -->
       <ion-title>
-        👋 Bienvenido, {{ currentUser?.nombre || currentUser?.correo }}
+        👋 Bienvenido,
+        <span
+          [ngStyle]="{
+            'color':
+              currentUser?.role === 'adm_empresa'
+                ? '#FFD700' :
+              currentUser?.role === 'adm'
+                ? '#00FFFF' :
+              '#FFFFFF'
+          }"
+          style="font-weight: bold;"
+        >
+          {{ currentUser?.nombre || currentUser?.correo }}
+        </span>
       </ion-title>
 
       <!-- 🔴 Botón de cerrar sesión -->
@@ -35,59 +48,33 @@
         <ion-list id="inbox-list">
           <ion-list-header>Opciones</ion-list-header>
 
-          <!-- ✅ Nuevo botón Perfil de Usuario -->
-          <ion-menu-toggle auto-hide="false" *ngIf="currentUser">
+          <!-- 🔸 Menú dinámico -->
+          <ion-menu-toggle auto-hide="false" *ngFor="let page of appPages">
             <ion-item
               routerDirection="root"
-              routerLink="/perfil-usuario"
+              [routerLink]="[page.url]"
               lines="none"
               detail="false"
-              routerLinkActive="selected">
+              routerLinkActive="selected"
+            >
               <ion-icon
                 aria-hidden="true"
                 slot="start"
-                ios="person-circle-outline"
-                md="person-circle-sharp">
-              </ion-icon>
-              <ion-label>Perfil de Usuario</ion-label>
+                [ios]="page.icon + '-outline'"
+                [md]="page.icon + '-sharp'"
+              ></ion-icon>
+              <ion-label>{{ page.title }}</ion-label>
             </ion-item>
           </ion-menu-toggle>
-
-          <!-- 🔹 Otras opciones -->
-          @for (p of appPages; track p; let i = $index) {
-            <ion-menu-toggle auto-hide="false">
-              <ion-item
-                routerDirection="root"
-                [routerLink]="[p.url]"
-                lines="none"
-                detail="false"
-                routerLinkActive="selected">
-                <ion-icon
-                  aria-hidden="true"
-                  slot="start"
-                  [ios]="p.icon + '-outline'"
-                  [md]="p.icon + '-sharp'">
-                </ion-icon>
-                <ion-label>{{ p.title }}</ion-label>
-              </ion-item>
-            </ion-menu-toggle>
-          }
         </ion-list>
 
-        <ion-list id="labels-list">
-          <ion-list-header>Labels</ion-list-header>
-          @for (label of labels; track label) {
-            <ion-item lines="none">
-              <ion-icon
-                aria-hidden="true"
-                slot="start"
-                ios="bookmark-outline"
-                md="bookmark-sharp">
-              </ion-icon>
-              <ion-label>{{ label }}</ion-label>
-            </ion-item>
-          }
-        </ion-list>
+        <!-- 🔹 Botón de cerrar sesión dentro del menú -->
+        <div *ngIf="currentUser" style="padding: 10px;">
+          <ion-button expand="block" color="danger" (click)="logout()">
+            <ion-icon slot="start" name="log-out"></ion-icon>
+            Cerrar sesión
+          </ion-button>
+        </div>
       </ion-content>
     </ion-menu>
 
