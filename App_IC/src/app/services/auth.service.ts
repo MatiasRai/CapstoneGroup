@@ -1,39 +1,42 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUser: any = null;
+  private readonly LS_KEY = 'usuarioLogeado';
+  private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());
+  user$ = this.userSubject.asObservable();
 
-  constructor() {
-    // ✅ Unificamos la clave
-    const savedUser = localStorage.getItem('usuarioLogeado');
-    if (savedUser) {
-      this.currentUser = JSON.parse(savedUser);
-    }
-  }
+  constructor() {}
 
-  // ✅ Guarda el usuario logeado
+  // 🔹 Guardar usuario
   login(user: any) {
-    this.currentUser = user;
-    localStorage.setItem('usuarioLogeado', JSON.stringify(user));
+    localStorage.setItem(this.LS_KEY, JSON.stringify(user));
+    this.userSubject.next(user);
   }
 
-  // ✅ Cierra sesión y redirige al login
+  // 🔹 Obtener usuario actual
+  getUser() {
+    return this.userSubject.value;
+  }
+
+  // 🔹 Leer usuario almacenado (inicio app)
+  private getUserFromStorage() {
+    const data = localStorage.getItem(this.LS_KEY);
+    return data ? JSON.parse(data) : null;
+  }
+
+  // 🔹 Cerrar sesión
   logout() {
-    this.currentUser = null;
-    localStorage.removeItem('usuarioLogeado');
+    localStorage.removeItem(this.LS_KEY);
+    this.userSubject.next(null);
     window.location.href = '/login';
   }
 
-  // ✅ Retorna el usuario actual
-  getUser() {
-    return this.currentUser;
-  }
-
-  // ✅ Verifica si hay sesión activa
+  // 🔹 Verificar sesión
   isLoggedIn(): boolean {
-    return !!(this.currentUser && this.currentUser.id);
+    return !!this.getUser();
   }
 }
