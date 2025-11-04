@@ -8,47 +8,50 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <!-- 👇 Título -->
-  <h2 style="text-align: center; margin-bottom: 20px;">Servicios</h2>
 
-  <ion-item>
-    <ion-label position="floating">Nombre</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+  <h2 style="text-align: center; margin-bottom: 20px;">Registrar nuevo servicio</h2>
 
-  <ion-item>
-    <ion-label position="floating">Descripcion</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+  <form (ngSubmit)="registrarServicio()" #servicioForm="ngForm">
 
-  <ion-item>
-    <ion-label position="floating">Costo Servicios</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Nombre</ion-label>
+      <ion-input type="text" [(ngModel)]="servicio.nombre_servicio" name="nombre_servicio" required></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label position="floating">Direccion</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Descripción</ion-label>
+      <ion-input type="text" [(ngModel)]="servicio.descripcion_servicio" name="descripcion_servicio" required></ion-input>
+    </ion-item>
 
-  <ion-item>
-    <ion-label>Foto de referencia</ion-label>
-    <input type="file" accept="image/*" style="margin-left: 10px;" />
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Costo (CLP)</ion-label>
+      <ion-input type="number" [(ngModel)]="servicio.costo_servicio" name="costo_servicio"></ion-input>
+    </ion-item>
 
-  <!-- 👇 Tipo de discapacidad como select -->
-  <ion-item>
-    <ion-label>Tipo de discapacidad</ion-label>
-    <ion-select placeholder="Selecciona una opción">
-      <ion-select-option value="visual">Visual</ion-select-option>
-      <ion-select-option value="auditiva">Auditiva</ion-select-option>
-      <ion-select-option value="motriz">Motriz</ion-select-option>
-      <ion-select-option value="cognitiva">Cognitiva</ion-select-option>
-      <ion-select-option value="otra">Otra</ion-select-option>
-    </ion-select>
-  </ion-item>
+    <ion-item>
+      <ion-label position="floating">Dirección</ion-label>
+      <ion-input type="text" [(ngModel)]="servicio.direccion" name="direccion"></ion-input>
+    </ion-item>
 
-  <ion-button expand="block" style="margin-top: 20px;">
-    Registrar
-  </ion-button>
+    <ion-item>
+      <ion-label>Foto de referencia</ion-label>
+      <input type="file" accept="image/*" style="margin-left: 10px;" (change)="onFileSelected($event)" />
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Tipo de discapacidad</ion-label>
+      <ion-select placeholder="Selecciona una opción" [(ngModel)]="servicio.id_discapacidad" name="id_discapacidad">
+        <ion-select-option value="1">Visual</ion-select-option>
+        <ion-select-option value="2">Auditiva</ion-select-option>
+        <ion-select-option value="3">Motriz</ion-select-option>
+        <ion-select-option value="4">Cognitiva</ion-select-option>
+        <ion-select-option value="5">Otra</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" color="success" style="margin-top: 20px;">
+      Registrar
+    </ion-button>
+  </form>
+
 </ion-content>

@@ -8,15 +8,17 @@ export class AuthEmpresaGuard implements CanActivate {
   constructor(private router: Router) {}
 
   canActivate(): boolean {
-    const userData = localStorage.getItem('user');
+    // ✅ Leer el usuario guardado correctamente
+    const userData = localStorage.getItem('usuarioLogeado');
     if (userData) {
       const user = JSON.parse(userData);
+      // ✅ Verificar que sea administrador de empresa
       if (user.role === 'adm_empresa') {
-        return true; // ✅ acceso permitido
+        return true;
       }
     }
 
-    // ❌ no tiene rol de administrador de empresa
+    // ❌ No tiene sesión o no es administrador de empresa
     this.router.navigate(['/login']);
     return false;
   }
