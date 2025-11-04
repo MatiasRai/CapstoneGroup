@@ -8,15 +8,15 @@ export class AuthAdmGuard implements CanActivate {
   constructor(private router: Router) {}
 
   canActivate(): boolean {
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('usuarioLogeado'); // ✅ clave correcta
     if (userData) {
       const user = JSON.parse(userData);
-      if (user.role === 'adm') {
-        return true; // ✅ acceso permitido
+      if (user.role === 'adm') { // ✅ el rol correcto para admin del sistema
+        return true;
       }
     }
 
-    // ❌ no tiene rol de administrador del sistema
+    // ❌ Si no es admin, lo saca
     this.router.navigate(['/login']);
     return false;
   }

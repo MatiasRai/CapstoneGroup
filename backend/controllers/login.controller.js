@@ -37,7 +37,7 @@ const login = async (req, res) => {
           console.log('✅ Login correcto (adm_empresa), ID:', admEmpresa.id_adm_Empresa);
           return res.json({
             role: 'adm_empresa',
-            id: admEmpresa.id_adm_Empresa, // 👈 corregido
+            id: admEmpresa.id_adm_Empresa,
             correo: admEmpresa.correo,
             message: '✅ Login correcto (Administrador de Empresa, migrado si era MD5)'
           });
@@ -89,15 +89,16 @@ const login = async (req, res) => {
               if (md5 === adm.contrasena || contrasena === adm.contrasena) {
                 match = true;
                 const newHash = await bcrypt.hash(contrasena, 10);
-                db.query('UPDATE adm SET contrasena=? WHERE id_adm=?', [newHash, adm.id_adm]);
+                // 🔹 Usamos id_admin (no id_adm)
+                db.query('UPDATE adm SET contrasena=? WHERE id_admin=?', [newHash, adm.id_admin]);
               }
             }
 
             if (match) {
-              console.log('✅ Login correcto (adm), ID:', adm.id_adm);
+              console.log('✅ Login correcto (adm), ID:', adm.id_admin);
               return res.json({
                 role: 'adm',
-                id: adm.id_adm,
+                id: adm.id_admin,
                 correo: adm.correo,
                 message: '✅ Login correcto (Administrador del Sistema, migrado si era MD5)'
               });

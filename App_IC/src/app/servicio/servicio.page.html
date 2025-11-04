@@ -1,70 +1,41 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <!-- 👇 Botón hamburguesa -->
+  <ion-toolbar color="primary">
+    <!-- 👇 Botón menú lateral -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
 
-    <ion-title>Detalles del Servicio</ion-title>
+    <ion-title>Servicios</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <!-- Información del servicio -->
-  <h2 style="text-align: center; margin-bottom: 20px;">Servicios</h2>
 
-  <ion-item>
-    <ion-label style="display: block; margin-top: 10px;">
-      <ion-label style="text-align: center; margin-bottom: 20px">El Fogon De Pepe</ion-label>
-      <strong>Descripcion :</strong> 5 estrellas<br />
-      <strong>Horarios :</strong> Lunes a Viernes de 9:00 a 18:00<br />
-      <strong>Costos :</strong> 5000 CLP<br />
-      <strong>Ubicación :</strong> Rengifo 845 Esquina Baquedano, Puerto Montt 5502816 Chile<br />
-      <strong>Empresa :</strong> Pepes.inc<br />
-      <strong>Tipo de Discapacidad Permitida :</strong> Visual, movilidad<br />
-    </ion-label>
-  </ion-item>
+  <h2 style="text-align: center; margin-bottom: 20px;">Servicios Registrados</h2>
 
-  <!-- Reseñas -->
-  <h3 style="margin-top: 30px;">Reseñas</h3>
+  <!-- 🔄 Loader -->
+  <ion-spinner *ngIf="cargando" name="crescent" style="display:block; margin:30px auto;"></ion-spinner>
 
-  <!-- Mostrar Reseñas como etiquetas -->
-  <ion-label style="display: block; margin-top: 10px;">
-    <strong>Excelente servicio (2023-09-15)</strong><br />
-    <strong>Valoración:</strong> 5 estrellas<br />
-    <strong>Comentario:</strong> Me encantó el servicio, todo fue muy rápido y profesional.
-  </ion-label>
+  <!-- ⚠️ Sin servicios -->
+  <div *ngIf="!cargando && servicios.length === 0" style="text-align:center; margin-top:20px;">
+    <ion-icon name="information-circle-outline" size="large" color="medium"></ion-icon>
+    <p>No hay servicios registrados.</p>
+  </div>
 
-  <ion-label style="display: block; margin-top: 10px;">
-    <strong>Buen servicio (2023-09-12)</strong><br />
-    <strong>Valoración:</strong> 4 estrellas<br />
-    <strong>Comentario:</strong> El servicio fue bueno, pero hubo un pequeño retraso.
-  </ion-label>
+  <!-- ✅ Lista de servicios -->
+  <ion-list *ngIf="!cargando && servicios.length > 0">
+    <ion-card *ngFor="let s of servicios">
+      <ion-card-header>
+        <ion-card-title>{{ s.nombre_servicio }}</ion-card-title>
+      </ion-card-header>
 
-  <!-- Formulario para agregar una nueva reseña (solo la interfaz) -->
-  <h4 style="margin-top: 20px;">Agregar una Reseña</h4>
-  <ion-item>
-    <ion-label position="floating">Título del Usuario</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
+      <ion-card-content>
+        <p><strong>Descripción:</strong> {{ s.descripcion_servicio }}</p>
+        <p><strong>Horario:</strong> {{ s.horario_disponible }}</p>
+        <p><strong>Costo:</strong> {{ s.costo_servicio }} CLP</p>
+        <p *ngIf="s.nombre_discapacidad"><strong>Discapacidad:</strong> {{ s.nombre_discapacidad }}</p>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
 
-  <ion-item>
-    <ion-label position="floating">Comentario</ion-label>
-    <ion-input type="text"></ion-input>
-  </ion-item>
-
-  <ion-item>
-    <ion-label position="floating">Valoración</ion-label>
-    <ion-select value="1">
-      <ion-select-option value="1">1 Estrella</ion-select-option>
-      <ion-select-option value="2">2 Estrellas</ion-select-option>
-      <ion-select-option value="3">3 Estrellas</ion-select-option>
-      <ion-select-option value="4">4 Estrellas</ion-select-option>
-      <ion-select-option value="5">5 Estrellas</ion-select-option>
-    </ion-select>
-  </ion-item>
-
-  <ion-button expand="block">
-    Agregar Reseña
-  </ion-button>
 </ion-content>
