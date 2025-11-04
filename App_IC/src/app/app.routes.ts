@@ -28,12 +28,12 @@ export const routes: Routes = [
   {
     path: 'publicar-servicio',
     loadComponent: () => import('./publicar-servicio/publicar-servicio.page').then(m => m.PublicarServicioPage),
-    canActivate: [AuthUserGuard]
+    canActivate: [AuthEmpresaGuard]
   },
   {
     path: 'servicio',
     loadComponent: () => import('./servicio/servicio.page').then(m => m.ServicioPage),
-    canActivate: [AuthUserGuard]
+    canActivate: [AuthEmpresaGuard]
   },
 
   // 👨‍💻 Administrador sistema
@@ -57,7 +57,8 @@ export const routes: Routes = [
   {
     path: 'registro-empresa',
     loadComponent: () => import('./registro-empresa/registro-empresa.page').then(m => m.RegistroEmpresaPage)
-  },  {
+  },
+  {
     path: 'perfil-usuario',
     loadComponent: () => import('./perfil-usuario/perfil-usuario.page').then( m => m.PerfilUsuarioPage)
   },
