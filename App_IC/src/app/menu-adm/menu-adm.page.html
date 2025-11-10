@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
@@ -9,9 +9,9 @@
 
 <ion-content class="ion-padding">
 
-  <!-- ================= USUARIOS ================= -->
+  <!-- ==================== USUARIOS ==================== -->
   <h2>👤 Usuarios</h2>
-  <ion-list>
+  <ion-list *ngIf="usuarios.length > 0; else noUsuarios">
     <ion-item *ngFor="let u of usuarios">
       <ion-label>
         <h2>{{ u.nombre }}</h2>
@@ -21,47 +21,60 @@
 
       <ion-buttons slot="end">
         <ion-button color="danger" (click)="eliminarUsuario(u.id_usuario)">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
           Eliminar
         </ion-button>
       </ion-buttons>
     </ion-item>
   </ion-list>
 
-  <!-- ================= EMPRESAS ================= -->
-  <h2 style="margin-top:20px;">🏢 Empresas</h2>
-  <ion-list>
+  <ng-template #noUsuarios>
+    <p style="text-align:center; color: gray;">No hay usuarios registrados</p>
+  </ng-template>
+
+
+  <!-- ==================== EMPRESAS ==================== -->
+  <h2 style="margin-top:30px;">🏢 Empresas</h2>
+  <ion-list *ngIf="empresas.length > 0; else noEmpresas">
     <ion-item *ngFor="let e of empresas">
       <ion-label>
         <h2>{{ e.nombre_empresa }}</h2>
         <p><strong>Correo:</strong> {{ e.correo }}</p>
         <p><strong>Teléfono:</strong> {{ e.telefono }}</p>
-        <p><strong>Estado:</strong>  
-          <span [ngClass]="e.estado">{{ e.Estado }}</span>
+        <p><strong>Estado:</strong>
+          <span [ngClass]="e.estado" style="font-weight: bold;">
+            {{ e.estado }}
+          </span>
         </p>
       </ion-label>
 
-      <!-- Botones para cambiar estado -->
       <ion-buttons slot="end">
-        <ion-button color="success" (click)="cambiarEstado(e.id_empresa, 'Aprobado')">Aprobar</ion-button>
-        <ion-button color="warning" (click)="cambiarEstado(e.id_empresa, 'Pendiente')">Pendiente</ion-button>
-        <ion-button color="danger" (click)="cambiarEstado(e.id_empresa, 'Rechazado')">Rechazar</ion-button>
+        <ion-button color="success" (click)="cambiarEstado(e.id_empresa, 'Aprobado')">
+          <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+          Aprobar
+        </ion-button>
+
+        <ion-button color="warning" (click)="cambiarEstado(e.id_empresa, 'Pendiente')">
+          <ion-icon slot="start" name="time-outline"></ion-icon>
+          Pendiente
+        </ion-button>
+
+        <ion-button color="danger" (click)="cambiarEstado(e.id_empresa, 'Rechazado')">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Rechazar
+        </ion-button>
+
+        <ion-button color="medium" (click)="eliminarEmpresa(e.id_empresa)">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Eliminar
+        </ion-button>
       </ion-buttons>
     </ion-item>
   </ion-list>
 
+  <ng-template #noEmpresas>
+    <p style="text-align:center; color: gray;">No hay empresas registradas</p>
+  </ng-template>
+
 </ion-content>
 
-<style>
-  .Aprobado {
-    color: green;
-    font-weight: bold;
-  }
-  .Pendiente {
-    color: orange;
-    font-weight: bold;
-  }
-  .Rechazado {
-    color: red;
-    font-weight: bold;
-  }
-</style>

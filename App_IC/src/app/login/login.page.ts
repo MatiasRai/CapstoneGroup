@@ -48,6 +48,7 @@ export class LoginPage {
     private router: Router
   ) {}
 
+  // ✅ Mostrar notificaciones
   async presentToast(message: string, color: string) {
     const toast = await this.toastCtrl.create({
       message,
@@ -57,6 +58,7 @@ export class LoginPage {
     await toast.present();
   }
 
+  // ✅ Función principal de login
   onLogin() {
     if (!this.credenciales.correo || !this.credenciales.contrasena) {
       this.presentToast('Completa todos los campos', 'warning');
@@ -70,22 +72,30 @@ export class LoginPage {
           return;
         }
 
-        // ✅ Guardar usuario en AuthService
+        // ✅ Guardar usuario correctamente en localStorage (clave unificada)
         this.authService.login(res);
+
+        // 🟢 Verificación en consola
+        console.log('🟢 Usuario logeado:', res);
 
         this.presentToast(res.message || 'Login correcto', 'success');
 
-        // ✅ Redirección según el rol
-        if (res.role === 'adm_empresa') {
-          this.router.navigate(['/menu-emp']);
-        } else if (res.role === 'adm') {
-          this.router.navigate(['/menu-adm']);
-        } else {
-          this.router.navigate(['/menu']);
+        // ✅ Redirección según rol
+        switch (res.role) {
+          case 'adm_empresa':
+            this.router.navigate(['/menu-emp']);
+            break;
+          case 'adm':
+            this.router.navigate(['/menu-adm']);
+            break;
+          case 'usuario':
+          default:
+            this.router.navigate(['/menu']);
+            break;
         }
       },
       error: (err) => {
-        console.error('Error en login:', err);
+        console.error('❌ Error en login:', err);
         this.presentToast(
           err?.error?.error || 'Usuario o contraseña incorrectos',
           'danger'

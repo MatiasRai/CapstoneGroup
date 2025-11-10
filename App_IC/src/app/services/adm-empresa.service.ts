@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class AdmEmpresaService {
 
-  private baseHost = window.location.hostname;  // Detecta localhost o tu IP local
+  private baseHost = window.location.hostname; // Detecta localhost o IP LAN automáticamente
+
   private apiUrlAdm = `http://${this.baseHost}:3000/api/v1/adm_empresa`;
   private apiUrlEmpresas = `http://${this.baseHost}:3000/api/v1/empresas`;
   private apiUrlLogin = `http://${this.baseHost}:3000/api/v1/login`;
@@ -15,28 +16,57 @@ export class AdmEmpresaService {
 
   constructor(private http: HttpClient) {}
 
-  // ✅ Registrar un administrador de empresa
+  /* ======================================================
+     👨‍💼 ADMINISTRADOR DE EMPRESA
+  ====================================================== */
+
   registrarAdmEmpresa(data: any): Observable<any> {
     return this.http.post(this.apiUrlAdm, data);
   }
 
-  // ✅ Hacer login (admin empresa o usuario)
   login(credenciales: { correo: string; contrasena: string }): Observable<any> {
     return this.http.post(this.apiUrlLogin, credenciales);
   }
 
-  // ✅ Registrar una empresa vinculada a un administrador
+  /* ======================================================
+     🏢 EMPRESAS
+  ====================================================== */
+
   registrarEmpresa(data: any): Observable<any> {
     return this.http.post(this.apiUrlEmpresas, data);
   }
 
-  // ✅ Publicar un nuevo servicio (admin empresa)
+  obtenerEmpresaPorAdm(id_adm_empresa: number): Observable<any> {
+    return this.http.get(`${this.apiUrlEmpresas}/admin/${id_adm_empresa}`);
+  }
+
+  /* ======================================================
+     🧩 SERVICIOS
+  ====================================================== */
+
+  // Crear nuevo servicio
   publicarServicio(data: any): Observable<any> {
     return this.http.post(this.apiUrlServicios, data);
   }
 
-  // ✅ Obtener los servicios publicados por una empresa
+  // Obtener todos los servicios de una empresa
   obtenerServiciosPorEmpresa(id_empresa: number): Observable<any> {
     return this.http.get(`${this.apiUrlServicios}/${id_empresa}`);
+  }
+
+  // Obtener un servicio específico (para edición)
+  obtenerServicioPorId(id_servicio: number): Observable<any> {
+    return this.http.get(`${this.apiUrlServicios}/detail/${id_servicio}`);
+    // ⚠️ Crea este endpoint en tu backend: GET /api/v1/servicios/detail/:id
+  }
+
+  // Editar servicio existente
+  editarServicio(id_servicio: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrlServicios}/${id_servicio}`, data);
+  }
+
+  // Eliminar servicio
+  eliminarServicio(id_servicio: number): Observable<any> {
+    return this.http.delete(`${this.apiUrlServicios}/${id_servicio}`);
   }
 }

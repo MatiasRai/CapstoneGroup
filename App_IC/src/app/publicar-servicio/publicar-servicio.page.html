@@ -8,8 +8,7 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-
-  <h2 style="text-align: center; margin-bottom: 20px;">Registrar nuevo servicio</h2>
+  <h2 style="text-align:center; margin-bottom:20px;">Registrar nuevo servicio</h2>
 
   <form (ngSubmit)="registrarServicio()" #servicioForm="ngForm">
 
@@ -30,12 +29,12 @@
 
     <ion-item>
       <ion-label position="floating">Dirección</ion-label>
-      <ion-input type="text" [(ngModel)]="servicio.direccion" name="direccion"></ion-input>
+      <ion-input type="text" [(ngModel)]="servicio.direccion_lugar" name="direccion_lugar"></ion-input>
     </ion-item>
 
     <ion-item>
-      <ion-label>Foto de referencia</ion-label>
-      <input type="file" accept="image/*" style="margin-left: 10px;" (change)="onFileSelected($event)" />
+      <ion-label position="floating">Nombre del lugar</ion-label>
+      <ion-input type="text" [(ngModel)]="servicio.nombre_lugar" name="nombre_lugar"></ion-input>
     </ion-item>
 
     <ion-item>
@@ -49,9 +48,17 @@
       </ion-select>
     </ion-item>
 
-    <ion-button expand="block" type="submit" color="success" style="margin-top: 20px;">
-      Registrar
+    <!-- 📍 Botón de geolocalización -->
+    <ion-button expand="block" color="medium" (click)="obtenerUbicacion()">
+      📍 Usar mi ubicación actual
     </ion-button>
-  </form>
 
+    <!-- 🗺️ Mapa -->
+    <div id="map" style="height: 250px; margin-top: 10px; border-radius: 8px;"></div>
+
+    <ion-button expand="block" type="submit" color="success" style="margin-top: 20px;">
+      Registrar Servicio
+    </ion-button>
+
+  </form>
 </ion-content>
