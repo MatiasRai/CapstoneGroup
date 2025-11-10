@@ -12,6 +12,9 @@
       <ion-button (click)="verMisRutas()">
         <ion-icon slot="icon-only" name="map"></ion-icon>
       </ion-button>
+      <ion-button (click)="verRutasPublicas()">
+        <ion-icon slot="icon-only" name="globe"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 
@@ -154,8 +157,10 @@
 
       <div *ngIf="rutasGuardadas.length > 0">
         <p>
-          Tus rutas están visibles en el mapa con diferentes colores.
-          Haz clic en el ícono de mapa (📍) arriba para ver el listado completo.
+          Tus rutas están disponibles para visualizar. Usa los íconos arriba:
+          <br>📍 = Ver tu ubicación
+          <br>🗺️ = Ver/gestionar tus rutas
+          <br>🌍 = Ver rutas de otros usuarios
         </p>
         
         <ion-list>
@@ -183,6 +188,31 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- 🌍 Información de rutas públicas -->
+  <ion-card *ngIf="rutasPublicas.length > 0">
+    <ion-card-header>
+      <ion-card-title>🌍 Rutas de Otros Usuarios</ion-card-title>
+      <ion-card-subtitle>
+        {{ rutasPublicas.length }} ruta(s) disponible(s) para explorar
+      </ion-card-subtitle>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <p style="text-align: center; margin-bottom: 15px;">
+        Descubre rutas accesibles creadas por otros usuarios de la comunidad.
+        <br>¡Explora nuevos caminos seguros!
+      </p>
+
+      <ion-button 
+        expand="block" 
+        color="secondary"
+        (click)="verRutasPublicas()">
+        <ion-icon slot="start" name="globe"></ion-icon>
+        Explorar Rutas Públicas ({{ rutasPublicas.length }})
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
   <!-- 📊 Estadísticas (opcional) -->
   <ion-card *ngIf="rutasGuardadas.length > 0">
     <ion-card-header>
@@ -191,16 +221,22 @@
     <ion-card-content>
       <ion-grid>
         <ion-row>
-          <ion-col size="6">
+          <ion-col size="4">
             <div style="text-align: center;">
               <h2 style="margin: 0; color: #3880ff;">{{ rutasGuardadas.length }}</h2>
               <p style="margin: 5px 0; font-size: 12px;">Rutas creadas</p>
             </div>
           </ion-col>
-          <ion-col size="6">
+          <ion-col size="4">
             <div style="text-align: center;">
               <h2 style="margin: 0; color: #10dc60;">{{ calcularDistanciaTotal() }}</h2>
               <p style="margin: 5px 0; font-size: 12px;">km totales</p>
+            </div>
+          </ion-col>
+          <ion-col size="4">
+            <div style="text-align: center;">
+              <h2 style="margin: 0; color: #ffce00;">{{ rutasPublicas.length }}</h2>
+              <p style="margin: 5px 0; font-size: 12px;">Rutas para explorar</p>
             </div>
           </ion-col>
         </ion-row>
