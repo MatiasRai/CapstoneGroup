@@ -1,38 +1,32 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getEmpresas,
-  createEmpresa,
-  updateEstadoEmpresa,
-  getEmpresaByAdm,
-  updateServicio,
-  updateEmpresa,
-  deleteServicio,
-  getServiciosByEmpresa
-} = require('../controllers/empresas.controller');
+const empresaController = require('../controllers/empresas.controller'); // ✅ nombre correcto (plural)
 
 // 🔹 Obtener todas las empresas
-router.get('/', getEmpresas);
+router.get('/', empresaController.getEmpresas);
 
 // 🔹 Crear nueva empresa
-router.post('/', createEmpresa);
+router.post('/', empresaController.createEmpresa);
 
 // 🔹 Actualizar estado de una empresa
-router.put('/:id/estado', updateEstadoEmpresa);
+router.put('/:id/estado', empresaController.updateEstadoEmpresa);
 
 // 🔹 Obtener empresa por ID del administrador logeado
-router.get('/admin/:id_adm_empresa', getEmpresaByAdm);
+router.get('/admin/:id_adm_empresa', empresaController.getEmpresaByAdm);
 
 // 🔹 Obtener servicios de una empresa según su administrador
-router.get('/admin/:id_adm_empresa/servicios', getServiciosByEmpresa);
+router.get('/admin/:id_adm_empresa/servicios', empresaController.getServiciosByEmpresa);
 
 // ✏️ Editar servicio
-router.put('/servicios/:id', updateServicio);
+router.put('/servicios/:id', empresaController.updateServicio);
 
 // 🗑️ Eliminar servicio
-router.delete('/servicios/:id', deleteServicio);
+router.delete('/servicios/:id', empresaController.deleteServicio);
 
-// ✏️ Editar empresa (⚠️ ESTA DEBE IR AL FINAL)
-router.put('/:id', updateEmpresa);
+// ✏️ Editar empresa
+router.put('/:id', empresaController.updateEmpresa);
+
+// 🗑️ Eliminar empresa (✅ NUEVA RUTA FUNCIONAL)
+router.delete('/:id', empresaController.deleteEmpresa);
 
 module.exports = router;

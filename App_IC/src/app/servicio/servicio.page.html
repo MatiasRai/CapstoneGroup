@@ -1,41 +1,45 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <!-- 👇 Botón menú lateral -->
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
+<!-- ✅ Lista de servicios -->
+<ion-list *ngIf="!cargando && servicios.length > 0">
+  <ion-card *ngFor="let s of servicios" style="margin-bottom: 15px;">
+    <ion-card-header>
+      <ion-card-title>{{ s.nombre_servicio }}</ion-card-title>
+    </ion-card-header>
 
-    <ion-title>Servicios</ion-title>
-  </ion-toolbar>
-</ion-header>
+    <ion-card-content>
+      <p><strong>Descripción:</strong> {{ s.descripcion_servicio }}</p>
+      <p><strong>Horario:</strong> {{ s.horario_disponible || 'No definido' }}</p>
+      <p><strong>Costo:</strong> {{ s.costo_servicio }} CLP</p>
+      <p *ngIf="s.nombre_discapacidad"><strong>Discapacidad:</strong> {{ s.nombre_discapacidad }}</p>
+      <p *ngIf="s.direccion_lugar"><strong>Dirección:</strong> {{ s.direccion_lugar }}</p>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+      <!-- 🟢 RESEÑAS DEL SERVICIO -->
+      <div *ngIf="s.resenas?.length > 0" style="margin-top: 15px;">
+        <h4>⭐ Reseñas:</h4>
+        <ion-list>
+          <ion-item *ngFor="let r of s.resenas">
+            <ion-label>
+              <p><strong>Valoración:</strong> {{ r.valoracion }}/5</p>
+              <p><em>{{ r.comentarios }}</em></p>
+              <small>{{ r.fecha_resena | date:'shortDate' }}</small>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
 
-  <h2 style="text-align: center; margin-bottom: 20px;">Servicios Registrados</h2>
+      <!-- ⚠️ Si no hay reseñas -->
+      <p *ngIf="!s.resenas?.length" style="color: gray; font-size: 0.9em; margin-top: 10px;">
+        No hay reseñas para este servicio.
+      </p>
 
-  <!-- 🔄 Loader -->
-  <ion-spinner *ngIf="cargando" name="crescent" style="display:block; margin:30px auto;"></ion-spinner>
-
-  <!-- ⚠️ Sin servicios -->
-  <div *ngIf="!cargando && servicios.length === 0" style="text-align:center; margin-top:20px;">
-    <ion-icon name="information-circle-outline" size="large" color="medium"></ion-icon>
-    <p>No hay servicios registrados.</p>
-  </div>
-
-  <!-- ✅ Lista de servicios -->
-  <ion-list *ngIf="!cargando && servicios.length > 0">
-    <ion-card *ngFor="let s of servicios">
-      <ion-card-header>
-        <ion-card-title>{{ s.nombre_servicio }}</ion-card-title>
-      </ion-card-header>
-
-      <ion-card-content>
-        <p><strong>Descripción:</strong> {{ s.descripcion_servicio }}</p>
-        <p><strong>Horario:</strong> {{ s.horario_disponible }}</p>
-        <p><strong>Costo:</strong> {{ s.costo_servicio }} CLP</p>
-        <p *ngIf="s.nombre_discapacidad"><strong>Discapacidad:</strong> {{ s.nombre_discapacidad }}</p>
-      </ion-card-content>
-    </ion-card>
-  </ion-list>
-
-</ion-content>
+      <!-- ✏️🗑️ Botones de acción -->
+      <div class="acciones-servicio">
+        <ion-button color="warning" fill="outline" size="small" (click)="editarServicio(s)">
+          ✏️ Editar
+        </ion-button>
+        <ion-button color="danger" fill="outline" size="small" (click)="eliminarServicio(s.id_servicio)">
+          🗑️ Eliminar
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-list>

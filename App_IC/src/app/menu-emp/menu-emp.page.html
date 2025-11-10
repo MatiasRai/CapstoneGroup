@@ -1,70 +1,75 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <!-- 🍔 Botón hamburguesa -->
+    <!-- 🍔 Menú lateral -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
-    <ion-title>Mi Empresa</ion-title>
+    <ion-title>Panel de Empresa</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- 🔹 Empresa cargada -->
   <ng-container *ngIf="empresa; else cargando">
+    
     <!-- 🏢 Datos de la empresa -->
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ empresa.nombre_empresa }}</ion-card-title>
-        <ion-card-subtitle>{{ empresa.estado || empresa.Estado }}</ion-card-subtitle>
+        <ion-card-subtitle [ngStyle]="{color: empresa.Estado === 'Aprobado' ? 'green' : (empresa.Estado === 'Rechazado' ? 'red' : 'orange')}">
+          {{ empresa.Estado || 'En proceso' }}
+        </ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>
-        <p><strong>Dirección:</strong> {{ empresa.direccion_empresa }}</p>
-        <p><strong>Teléfono:</strong> {{ empresa.telefono }}</p>
-        <p><strong>Correo:</strong> {{ empresa.Correo }}</p>
-        <p><strong>Descripción:</strong> {{ empresa.descripcion_empresa }}</p>
-        <p><strong>Horarios:</strong> {{ empresa.horarios }}</p>
-        <ion-button color="warning" expand="block" (click)="editarEmpresa(empresa)">
+        <p><strong>📍 Dirección:</strong> {{ empresa.direccion_empresa }}</p>
+        <p><strong>📞 Teléfono:</strong> {{ empresa.telefono }}</p>
+        <p><strong>✉️ Correo:</strong> {{ empresa.Correo }}</p>
+        <p><strong>🕒 Horarios:</strong> {{ empresa.horarios }}</p>
+        <p><strong>📝 Descripción:</strong> {{ empresa.descripcion_empresa }}</p>
+
+        <ion-button expand="block" color="warning" (click)="editarEmpresa(empresa)">
           ✏️ Editar Empresa
         </ion-button>
       </ion-card-content>
     </ion-card>
 
-    <!-- 🧾 Sección de Servicios -->
+    <!-- 🧾 Lista de servicios -->
     <ion-card>
       <ion-card-header>
-        <ion-card-title>🧾 Servicios de la Empresa</ion-card-title>
+        <ion-card-title>🧾 Servicios Publicados</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
         <ng-container *ngIf="servicios.length > 0; else sinServicios">
           <ion-list>
-            <ion-item *ngFor="let s of servicios">
+            <ion-item *ngFor="let s of servicios" class="servicio-item">
               <ion-label>
-                <h2><strong>{{ s.nombre_servicio }}</strong></h2>
+                <h2 class="titulo-servicio"><strong>{{ s.nombre_servicio }}</strong></h2>
                 <p>{{ s.descripcion_servicio }}</p>
-                <p><strong>Horario disponible:</strong> {{ s.horario_disponible }}</p>
-                <p><strong>Costo:</strong> {{ s.costo_servicio | currency:'CLP' }}</p>
-                <p><strong>Lugar:</strong> {{ s.nombre_lugar }} - {{ s.direccion_lugar }}</p>
-                <p><strong>Categoría:</strong> {{ s.categoria_lugar }}</p>
-                <p><strong>Tipo de discapacidad:</strong> {{ s.nombre_discapacidad || 'No especificado' }}</p>
+                <p><strong>🕒 Horario:</strong> {{ s.horario_disponible }}</p>
+                <p><strong>💰 Costo:</strong> {{ s.costo_servicio | currency:'CLP' }}</p>
+                <p><strong>📍 Lugar:</strong> {{ s.nombre_lugar }} - {{ s.direccion_lugar }}</p>
+                <p><strong>♿ Discapacidad:</strong> {{ s.nombre_discapacidad || 'No especificado' }}</p>
 
-                <!-- ⭐ Reseñas del servicio -->
-                <ion-list *ngIf="s.resenas?.length > 0">
-                  <ion-item *ngFor="let r of s.resenas">
-                    <ion-label>
-                      <p>⭐ {{ r.valoracion }}/5</p>
-                      <p><em>{{ r.comentarios }}</em></p>
-                      <small>{{ r.fecha_resena | date:'shortDate' }}</small>
-                    </ion-label>
-                  </ion-item>
-                </ion-list>
+                <!-- ⭐ Reseñas -->
+                <div *ngIf="s.resenas?.length > 0" class="resenas-container">
+                  <ion-list>
+                    <ion-item *ngFor="let r of s.resenas">
+                      <ion-icon slot="start" name="star" color="warning"></ion-icon>
+                      <ion-label>
+                        <p><strong>{{ r.valoracion }}/5</strong> - {{ r.comentarios }}</p>
+                        <small>{{ r.fecha_resena | date:'shortDate' }}</small>
+                      </ion-label>
+                    </ion-item>
+                  </ion-list>
+                </div>
 
-                <p *ngIf="!s.resenas?.length" style="color: gray; font-size: 0.9em;">
+                <p *ngIf="!s.resenas?.length" class="no-resenas">
                   No hay reseñas para este servicio.
                 </p>
 
-                <!-- ✏️🗑️ Botones de acción -->
+                <!-- ✏️🗑️ Botones -->
                 <div class="acciones-servicio">
                   <ion-button color="warning" fill="outline" size="small" (click)="editarServicio(s)">
                     ✏️ Editar
@@ -78,20 +83,22 @@
           </ion-list>
         </ng-container>
 
+        <!-- 🚫 Si no hay servicios -->
         <ng-template #sinServicios>
-          <p class="sin-servicios">
-            ⚠️ No hay servicios registrados para esta empresa.
-          </p>
+          <div class="sin-servicios">
+            <ion-icon name="information-circle-outline" size="large" color="medium"></ion-icon>
+            <p>No hay servicios registrados para esta empresa.</p>
+          </div>
         </ng-template>
       </ion-card-content>
     </ion-card>
   </ng-container>
 
-  <!-- 🔄 Estado de carga -->
+  <!-- 🔄 Cargando datos -->
   <ng-template #cargando>
     <div class="cargando">
       <ion-spinner name="crescent"></ion-spinner>
-      <p>Cargando datos de la empresa...</p>
+      <p>Cargando información de la empresa...</p>
     </div>
   </ng-template>
 </ion-content>

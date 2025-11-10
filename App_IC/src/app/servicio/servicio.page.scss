@@ -1,0 +1,33 @@
+.acciones-servicio {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+ion-card {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.acciones-servicio {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+ion-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+h4 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+ion-item {
+  --padding-start: 10px;
+  --inner-padding-end: 10px;
+}

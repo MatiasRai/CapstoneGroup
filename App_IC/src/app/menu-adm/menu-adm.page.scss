@@ -1,0 +1,120 @@
+/* ======================================================
+   🧭 ESTRUCTURA GENERAL
+====================================================== */
+ion-content {
+  --background: #f4f5f8;
+  padding: 16px;
+}
+
+h2 {
+  font-weight: 600;
+  margin: 20px 0 10px 0;
+  color: #222;
+}
+
+p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+/* ======================================================
+   📋 TARJETAS DE LISTADO (ION-ITEM)
+====================================================== */
+ion-item {
+  --background: #ffffff;
+  --border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+  transition: transform 0.2s ease-in-out;
+}
+
+ion-item:hover {
+  transform: scale(1.01);
+}
+
+ion-label h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+ion-label p {
+  color: #555;
+}
+
+/* ======================================================
+   🔘 BOTONES DE ACCIÓN
+====================================================== */
+ion-button {
+  margin-left: 4px;
+  font-size: 13px;
+  --border-radius: 8px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+
+ion-button[color="success"] {
+  --background: #28a745;
+}
+
+ion-button[color="warning"] {
+  --background: #ffc107;
+  --color: #000;
+}
+
+ion-button[color="danger"] {
+  --background: #dc3545;
+}
+
+ion-button[color="medium"] {
+  --background: #6c757d;
+}
+
+/* ======================================================
+   🟩 ESTADOS DE EMPRESA
+====================================================== */
+.Aprobado {
+  color: green;
+  font-weight: bold;
+}
+
+.Pendiente {
+  color: orange;
+  font-weight: bold;
+}
+
+.Rechazado {
+  color: red;
+  font-weight: bold;
+}
+
+/* ======================================================
+   ⚠️ MENSAJES VACÍOS
+====================================================== */
+.no-data {
+  text-align: center;
+  color: gray;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* ======================================================
+   📱 RESPONSIVE
+====================================================== */
+@media (max-width: 768px) {
+  ion-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  ion-buttons[slot="end"] {
+    margin-top: 8px;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  ion-button {
+    flex: 1;
+    margin: 3px;
+  }
+}

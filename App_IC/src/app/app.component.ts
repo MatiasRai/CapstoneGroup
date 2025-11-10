@@ -42,49 +42,49 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    // 🔹 Escuchar cambios de sesión
+    // 🔹 Escuchar cambios de sesión en tiempo real
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
+      console.log('👤 Usuario actual:', user);
       this.actualizarMenu();
     });
   }
 
-  // 🔹 Menú dinámico según el rol del usuario
+  // 🔹 Menú dinámico según rol
   actualizarMenu() {
-    if (this.currentUser) {
-      switch (this.currentUser.role) {
-        case 'adm_empresa':
-          this.appPages = [
-            { title: 'Menú Empresa', url: '/menu-emp', icon: 'briefcase' },
-            { title: 'Registro Empresa', url: '/registro-empresa', icon: 'business' },
-            { title: 'Publicar Servicio', url: '/publicar-servicio', icon: 'add-circle' },
-            { title: 'Servicio', url: '/servicio', icon: 'clipboard' }
-          ];
-          break;
-
-        case 'adm':
-          this.appPages = [
-            { title: 'Menú Admin', url: '/menu-adm', icon: 'apps' }
-          ];
-          break;
-
-        default:
-          this.appPages = [
-            { title: 'Menú', url: '/menu', icon: 'menu' },
-            { title: 'Perfil de Usuario', url: '/perfil-usuario', icon: 'person-circle' }
-          ];
-          break;
-      }
-    } else {
-      // 🔹 Si no hay sesión, mostrar login y registro
+    if (!this.currentUser) {
       this.appPages = [
         { title: 'Login', url: '/login', icon: 'log-in' },
         { title: 'Registro', url: '/registro', icon: 'person-add' }
       ];
+      return;
+    }
+
+    switch (this.currentUser.role) {
+      case 'adm_empresa':
+        this.appPages = [
+          { title: 'Menú Empresa', url: '/menu-emp', icon: 'briefcase' },
+          { title: 'Publicar Servicio', url: '/publicar-servicio', icon: 'add-circle' },
+          { title: 'Servicio', url: '/servicio', icon: 'clipboard' },
+        ];
+        break;
+
+      case 'adm':
+        this.appPages = [
+          { title: 'Menú Admin', url: '/menu-adm', icon: 'apps' },
+        ];
+        break;
+
+      case 'usuario':
+      default:
+        this.appPages = [
+          { title: 'Menú', url: '/menu', icon: 'menu' },
+          { title: 'Perfil de Usuario', url: '/perfil-usuario', icon: 'person-circle' },
+        ];
+        break;
     }
   }
 
-  // 🔹 Cerrar sesión
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);

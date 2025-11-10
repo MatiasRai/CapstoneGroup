@@ -14,10 +14,10 @@
           [ngStyle]="{
             'color':
               currentUser?.role === 'adm_empresa'
-                ? '#FFD700' :
-              currentUser?.role === 'adm'
-                ? '#00FFFF' :
-              '#FFFFFF'
+                ? '#FFD700'
+                : currentUser?.role === 'adm'
+                ? '#00FFFF'
+                : '#FFFFFF'
           }"
           style="font-weight: bold;"
         >
@@ -36,7 +36,7 @@
   </ion-header>
 
   <!-- 🔹 Menú lateral -->
-  <ion-split-pane contentId="main-content">
+  <ion-split-pane when="md" contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
       <ion-header>
         <ion-toolbar color="primary">
@@ -45,23 +45,23 @@
       </ion-header>
 
       <ion-content>
-        <ion-list id="inbox-list">
+        <ion-list id="menu-list">
           <ion-list-header>Opciones</ion-list-header>
 
           <!-- 🔸 Menú dinámico -->
           <ion-menu-toggle auto-hide="false" *ngFor="let page of appPages">
             <ion-item
+              [routerLink]="page.url"
               routerDirection="root"
-              [routerLink]="[page.url]"
-              lines="none"
-              detail="false"
               routerLinkActive="selected"
+              detail="false"
+              lines="none"
+              button
             >
               <ion-icon
-                aria-hidden="true"
                 slot="start"
-                [ios]="page.icon + '-outline'"
-                [md]="page.icon + '-sharp'"
+                [name]="page.icon"
+                aria-hidden="true"
               ></ion-icon>
               <ion-label>{{ page.title }}</ion-label>
             </ion-item>

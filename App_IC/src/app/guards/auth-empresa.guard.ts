@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthEmpresaGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   canActivate(): boolean {
-    // ✅ Leer el usuario guardado correctamente
-    const userData = localStorage.getItem('usuarioLogeado');
-    if (userData) {
-      const user = JSON.parse(userData);
-      // ✅ Verificar que sea administrador de empresa
-      if (user.role === 'adm_empresa') {
-        return true;
-      }
+    const user = this.authService.getUser();
+
+    console.log('🟢 [AuthEmpresaGuard] usuario detectado:', user);
+
+    if (user && user.role === 'adm_empresa') {
+      console.log('✅ [AuthEmpresaGuard] acceso permitido');
+      return true;
     }
 
-    // ❌ No tiene sesión o no es administrador de empresa
+    console.warn('🚫 [AuthEmpresaGuard] acceso denegado');
     this.router.navigate(['/login']);
     return false;
   }

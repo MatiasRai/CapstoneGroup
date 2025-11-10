@@ -11,7 +11,9 @@ const login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
   try {
-    // 👉 Buscar en adm_empresa
+    // ==============================
+    // 🔹 ADMINISTRADOR DE EMPRESA
+    // ==============================
     db.query('SELECT * FROM adm_empresa WHERE correo = ?', [correo], async (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
 
@@ -26,10 +28,8 @@ const login = async (req, res) => {
           if (md5 === admEmpresa.contrasena || contrasena === admEmpresa.contrasena) {
             match = true;
             const newHash = await bcrypt.hash(contrasena, 10);
-            db.query(
-              'UPDATE adm_empresa SET contrasena=? WHERE id_adm_Empresa=?',
-              [newHash, admEmpresa.id_adm_Empresa]
-            );
+            db.query('UPDATE adm_empresa SET contrasena=? WHERE id_adm_Empresa=?',
+              [newHash, admEmpresa.id_adm_Empresa]);
           }
         }
 
@@ -44,7 +44,9 @@ const login = async (req, res) => {
         }
       }
 
-      // 👉 Buscar en usuario
+      // ==============================
+      // 🔹 USUARIO NORMAL
+      // ==============================
       db.query('SELECT * FROM usuario WHERE correo = ?', [correo], async (err2, rows2) => {
         if (err2) return res.status(500).json({ error: err2.message });
 
@@ -59,7 +61,8 @@ const login = async (req, res) => {
             if (md5 === usuario.contrasena || contrasena === usuario.contrasena) {
               match = true;
               const newHash = await bcrypt.hash(contrasena, 10);
-              db.query('UPDATE usuario SET contrasena=? WHERE id_usuario=?', [newHash, usuario.id_usuario]);
+              db.query('UPDATE usuario SET contrasena=? WHERE id_usuario=?',
+                [newHash, usuario.id_usuario]);
             }
           }
 
@@ -74,23 +77,26 @@ const login = async (req, res) => {
           }
         }
 
-        // 👉 Buscar en adm (administrador del sistema)
-        db.query('SELECT * FROM adm WHERE correo = ?', [correo], async (err3, rows3) => {
+        // ==============================
+        // 🔹 ADMINISTRADOR DEL SISTEMA
+        // ==============================
+        db.query('SELECT * FROM adm WHERE Correo = ?', [correo], async (err3, rows3) => {
           if (err3) return res.status(500).json({ error: err3.message });
 
           if (rows3.length > 0) {
             const adm = rows3[0];
             let match = false;
 
-            if (isBcryptHash(adm.contrasena)) {
-              match = await bcrypt.compare(contrasena, adm.contrasena);
+            // Usamos la columna real Contrasena
+            if (isBcryptHash(adm.Contrasena)) {
+              match = await bcrypt.compare(contrasena, adm.Contrasena);
             } else {
               const md5 = crypto.createHash('md5').update(contrasena).digest('hex');
-              if (md5 === adm.contrasena || contrasena === adm.contrasena) {
+              if (md5 === adm.Contrasena || contrasena === adm.Contrasena) {
                 match = true;
                 const newHash = await bcrypt.hash(contrasena, 10);
-                // 🔹 Usamos id_admin (no id_adm)
-                db.query('UPDATE adm SET contrasena=? WHERE id_admin=?', [newHash, adm.id_admin]);
+                db.query('UPDATE adm SET Contrasena=? WHERE id_admin=?',
+                  [newHash, adm.id_admin]);
               }
             }
 
@@ -99,7 +105,7 @@ const login = async (req, res) => {
               return res.json({
                 role: 'adm',
                 id: adm.id_admin,
-                correo: adm.correo,
+                correo: adm.Correo,
                 message: '✅ Login correcto (Administrador del Sistema, migrado si era MD5)'
               });
             }
