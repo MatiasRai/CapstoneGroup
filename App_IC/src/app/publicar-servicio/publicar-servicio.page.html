@@ -37,14 +37,18 @@
       <ion-input type="text" [(ngModel)]="servicio.nombre_lugar" name="nombre_lugar"></ion-input>
     </ion-item>
 
+    <!-- 👇 CAMBIAR ESTO -->
     <ion-item>
       <ion-label>Tipo de discapacidad</ion-label>
-      <ion-select placeholder="Selecciona una opción" [(ngModel)]="servicio.id_discapacidad" name="id_discapacidad">
-        <ion-select-option value="1">Visual</ion-select-option>
-        <ion-select-option value="2">Auditiva</ion-select-option>
-        <ion-select-option value="3">Motriz</ion-select-option>
-        <ion-select-option value="4">Cognitiva</ion-select-option>
-        <ion-select-option value="5">Otra</ion-select-option>
+      <ion-select 
+        placeholder="Selecciona una opción" 
+        [(ngModel)]="servicio.id_discapacidad" 
+        name="id_discapacidad">
+        <ion-select-option 
+          *ngFor="let tipo of tiposDiscapacidad" 
+          [value]="tipo.id_discapacidad">
+          {{ tipo.nombre_discapacidad }}
+        </ion-select-option>
       </ion-select>
     </ion-item>
 
