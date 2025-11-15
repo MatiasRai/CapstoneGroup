@@ -20,7 +20,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   private host = window.location.hostname;
   private apiUrl = `http://${this.host}:3000/api/v1`;
 
-  // 🎯 Variables para tracking de ruta
   isRecording: boolean = false;
   recordedPoints: { latitud: number; longitud: number; timestamp: number }[] = [];
   recordingPolyline: L.Polyline | null = null;
@@ -31,18 +30,13 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   startTime: number = 0;
   recordingInterval: any = null;
   
-  // 📊 Estadísticas en vivo
   currentSpeed: number = 0;
   elapsedTime: string = '00:00:00';
   
-  // 📍 Rutas guardadas
   rutasGuardadas: any[] = [];
   rutasPolylines: L.Polyline[] = [];
-  
-  // 🌍 Rutas de otros usuarios
   rutasPublicas: any[] = [];
   
-  // 🗺️ Control de actualización del mapa
   private lastMapUpdate: number = 0;
   private mapUpdateThrottle: number = 1000;
 
@@ -61,22 +55,18 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.fixLeafletIcons();
-    setTimeout(() => {
-      this.initMap();
-    }, 100);
+    setTimeout(() => this.initMap(), 100);
   }
 
   ngOnDestroy() {
     this.stopRecording();
   }
 
-  // 👤 Cargar usuario desde localStorage
   private loadCurrentUser() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const user = JSON.parse(userStr);
       this.currentUserId = user.id;
-      console.log('✅ Usuario cargado:', this.currentUserId);
       
       if (this.currentUserId) {
         this.cargarRutasGuardadas();
@@ -85,13 +75,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // 📍 Obtener ubicación actual
   async getCurrentPosition() {
     try {
-      console.log('🔍 Solicitando ubicación GPS...');
-
       if (!navigator.geolocation) {
-        console.error('❌ Geolocation no disponible');
         await this.showToast('⚠️ Tu navegador no soporta geolocalización', 'danger');
         this.usarUbicacionPorDefecto();
         return;
@@ -102,19 +88,12 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
                        window.location.hostname === '127.0.0.1';
 
       if (!isSecure) {
-        console.warn('⚠️ La geolocalización puede no funcionar en HTTP');
         await this.showAlertHTTPS();
       }
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          this.currentLocation = [
-            position.coords.latitude,
-            position.coords.longitude
-          ];
-          
-          console.log('✅ GPS obtenido:', this.currentLocation);
-          console.log('📊 Precisión:', position.coords.accuracy, 'metros');
+          this.currentLocation = [position.coords.latitude, position.coords.longitude];
           
           if (this.map) {
             this.map.setView(this.currentLocation, 17);
@@ -123,10 +102,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           
           this.showToast('✅ GPS conectado correctamente', 'success');
         },
-        (error) => {
-          console.error('❌ Error GPS:', error);
-          this.handleLocationError(error);
-        },
+        (error) => this.handleLocationError(error),
         {
           enableHighAccuracy: true,
           timeout: 15000,
@@ -135,13 +111,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       );
 
     } catch (error: any) {
-      console.error('❌ Error al obtener GPS:', error);
       await this.showToast(`⚠️ Error GPS: ${error.message}`, 'warning');
       this.usarUbicacionPorDefecto();
     }
   }
 
-  // 🚨 Manejo de errores
   private handleLocationError(error: GeolocationPositionError) {
     switch (error.code) {
       case error.PERMISSION_DENIED:
@@ -171,39 +145,27 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     const alert = await this.alertController.create({
       header: '⚠️ Permiso Denegado',
       message: `
-        Necesitamos acceso a tu ubicación para grabar rutas.
-        <br><br>
-        <b>Para activarlo:</b>
-        <br>1. Click en el 🔒 en la barra de direcciones
-        <br>2. Permisos → Ubicación → Permitir
-        <br>3. Recarga la página
+        Necesitamos acceso a tu ubicación para grabar rutas.<br><br>
+        <b>Para activarlo:</b><br>
+        1. Click en el 🔒 en la barra de direcciones<br>
+        2. Permisos → Ubicación → Permitir<br>
+        3. Recarga la página
       `,
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Recargar',
-          handler: () => {
-            window.location.reload();
-          }
-        }
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Recargar', handler: () => window.location.reload() }
       ]
     });
     await alert.present();
   }
 
-  // 🗺️ Ubicación por defecto
   private usarUbicacionPorDefecto() {
     this.currentLocation = [-41.4693, -72.9424];
     if (this.map) {
       this.map.setView(this.currentLocation, 13);
     }
-    console.log('📍 Usando ubicación por defecto: Puerto Montt');
   }
 
-  // 🧭 Añadir marcador de ubicación actual
   private addCurrentLocationMarker(): void {
     if (!this.currentLocation || !this.map) return;
 
@@ -223,7 +185,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       .openPopup();
   }
 
-  // 🧭 Fix íconos de Leaflet
   private fixLeafletIcons(): void {
     const iconDefault = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -237,7 +198,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     L.Marker.prototype.options.icon = iconDefault;
   }
 
-  // 🗺️ Inicializar mapa
   private initMap(): void {
     const defaultLocation: [number, number] = [-41.4693, -72.9424];
     const initialLocation = this.currentLocation || defaultLocation;
@@ -269,29 +229,17 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     tileLayer.addTo(this.map);
 
-    tileLayer.on('tileerror', (error: any) => {
-      console.warn('⚠️ Error cargando tile, intentando recargar...');
-    });
-
-    tileLayer.on('load', () => {
-      console.log('✅ Tiles del mapa cargadas');
-    });
-
     setTimeout(() => {
       if (this.map) {
         this.map.invalidateSize();
-        console.log('🗺️ Mapa redimensionado correctamente');
       }
     }, 200);
 
     if (this.currentLocation) {
       this.addCurrentLocationMarker();
     }
-
-    console.log('🗺️ Mapa inicializado con animaciones activadas');
   }
 
-  // 🎬 INICIAR GRABACIÓN
   async startRecording() {
     if (!this.currentUserId) {
       await this.showToast('⚠️ Debes iniciar sesión para grabar rutas', 'warning');
@@ -320,8 +268,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           
           this.recordedPoints.push(startPoint);
           this.currentLocation = [startPoint.latitud, startPoint.longitud];
-
-          console.log('🚩 Inicio grabación:', startPoint);
 
           const greenIcon = this.createColoredIcon('green');
           this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon: greenIcon })
@@ -357,20 +303,17 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           this.showToast('✅ Grabación iniciada. ¡Camina!', 'success');
         },
         (error) => {
-          console.error('❌ Error posición inicial:', error);
           this.showToast('❌ Error al obtener ubicación inicial', 'danger');
           this.isRecording = false;
         }
       );
 
     } catch (error) {
-      console.error('❌ Error al iniciar grabación:', error);
       await this.showToast('❌ Error al iniciar grabación', 'danger');
       this.isRecording = false;
     }
   }
 
-  // 📍 Actualizar grabación
   private updateRecording(position: GeolocationPosition) {
     const newPoint = {
       latitud: position.coords.latitude,
@@ -397,12 +340,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
       this.updatePolyline();
       this.updateCurrentMarker(newPoint.latitud, newPoint.longitud);
-      
-      console.log(`📍 Punto #${this.recordedPoints.length} | ${this.totalDistance.toFixed(3)} km`);
     }
   }
 
-  // 🗺️ Actualizar línea
   private updatePolyline() {
     const coords = this.recordedPoints.map(p => [p.latitud, p.longitud] as [number, number]);
 
@@ -419,7 +359,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }).addTo(this.map);
   }
 
-  // 📍 Actualizar marcador actual
   private updateCurrentMarker(lat: number, lng: number) {
     const blueIcon = this.createColoredIcon('blue');
 
@@ -432,7 +371,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       .bindPopup(`<b>📍 Tu ubicación</b><br>Velocidad: ${this.currentSpeed.toFixed(1)} km/h`);
   }
 
-  // ⏱️ Actualizar tiempo
   private updateElapsedTime() {
     const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
     const hours = Math.floor(elapsed / 3600);
@@ -445,7 +383,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     return num.toString().padStart(2, '0');
   }
 
-  // ⏹️ DETENER GRABACIÓN
   async stopRecording() {
     if (!this.isRecording) return;
 
@@ -460,8 +397,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       clearInterval(this.recordingInterval);
       this.recordingInterval = null;
     }
-
-    console.log(`🏁 Grabación finalizada. Puntos: ${this.recordedPoints.length}`);
 
     if (this.recordedPoints.length > 1) {
       const lastPoint = this.recordedPoints[this.recordedPoints.length - 1];
@@ -479,7 +414,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // 💾 Diálogo guardar
   async showSaveDialog() {
     const alert = await this.alertController.create({
       header: '💾 Guardar Ruta GPS',
@@ -522,7 +456,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await alert.present();
   }
 
-  // 💾 Guardar ruta
   async saveRoute(nombre: string, descripcion: string) {
     const rutaData = {
       nombre_ruta: nombre.trim(),
@@ -543,13 +476,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
         this.cargarRutasGuardadas();
       },
       error: async (error) => {
-        console.error('❌ Error al guardar:', error);
         await this.showToast('❌ Error al guardar la ruta', 'danger');
       }
     });
   }
 
-  // 🧹 Limpiar grabación
   private clearRecording() {
     this.recordedPoints = [];
     this.totalDistance = 0;
@@ -567,14 +498,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // 📍 Cargar rutas guardadas del usuario actual
   private cargarRutasGuardadas() {
     if (!this.currentUserId) return;
 
     this.http.get(`${this.apiUrl}/rutas/usuario/${this.currentUserId}`).subscribe({
       next: async (rutas: any) => {
-        console.log(`📍 ${rutas.length} rutas propias cargadas`);
-        
         this.rutasGuardadas = [];
         
         for (const ruta of rutas) {
@@ -585,14 +513,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
             console.error('Error cargando ruta:', err);
           }
         }
-        
-        console.log('✅ Rutas guardadas cargadas:', this.rutasGuardadas);
       },
       error: (err) => console.error('Error cargando rutas:', err)
     });
   }
 
-  // 🌍 Cargar rutas públicas de otros usuarios
   private cargarRutasPublicas() {
     this.http.get(`${this.apiUrl}/rutas`).subscribe({
       next: async (todasRutas: any) => {
@@ -608,14 +533,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
             }
           }
         }
-        
-        console.log(`🌍 ${this.rutasPublicas.length} rutas públicas cargadas`);
       },
       error: (err) => console.error('Error cargando rutas públicas:', err)
     });
   }
 
-  // 🗺️ Mostrar TODAS las rutas propias en el mapa
   private mostrarTodasLasRutas() {
     this.limpiarRutasDelMapa();
 
@@ -624,9 +546,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const colorPalette = [
-      '#0066ff', '#00cc44', '#ff6600', '#cc00cc', '#ffcc00', '#00cccc'
-    ];
+    const colorPalette = ['#0066ff', '#00cc44', '#ff6600', '#cc00cc', '#ffcc00', '#00cccc'];
 
     this.rutasGuardadas.forEach((ruta, index) => {
       if (!ruta.coordenadas || ruta.coordenadas.length < 2) return;
@@ -663,16 +583,12 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.rutasPolylines.length > 0) {
       const group = L.featureGroup(this.rutasPolylines);
-      this.map.fitBounds(group.getBounds(), { 
-        padding: [50, 50],
-        maxZoom: 16
-      });
+      this.map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 16 });
     }
 
     this.showToast(`✅ Mostrando ${this.rutasGuardadas.length} ruta(s)`, 'success');
   }
 
-  // 🌍 Mostrar rutas de otros usuarios
   private mostrarRutasPublicas() {
     this.limpiarRutasDelMapa();
 
@@ -681,9 +597,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const colorPalette = [
-      '#9b59b6', '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#1abc9c'
-    ];
+    const colorPalette = ['#9b59b6', '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#1abc9c'];
 
     this.rutasPublicas.forEach((ruta, index) => {
       if (!ruta.coordenadas || ruta.coordenadas.length < 2) return;
@@ -722,22 +636,17 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.rutasPolylines.length > 0) {
       const group = L.featureGroup(this.rutasPolylines);
-      this.map.fitBounds(group.getBounds(), { 
-        padding: [50, 50],
-        maxZoom: 16
-      });
+      this.map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 16 });
     }
 
     this.showToast(`✅ Mostrando ${this.rutasPublicas.length} ruta(s) pública(s)`, 'success');
   }
 
-  // 🧹 Limpiar rutas del mapa
   private limpiarRutasDelMapa() {
     this.rutasPolylines.forEach(p => this.map.removeLayer(p));
     this.rutasPolylines = [];
   }
 
-  // 📜 Ver mis rutas - CON OPCIÓN DE BORRAR
   async verMisRutas() {
     if (!this.currentUserId) {
       await this.showToast('⚠️ Debes iniciar sesión', 'warning');
@@ -752,7 +661,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await this.showRutasActionSheet();
   }
 
-  // 🌍 Ver rutas de otros usuarios
   async verRutasPublicas() {
     if (this.rutasPublicas.length === 0) {
       await this.showToast('🌍 No hay rutas públicas disponibles', 'primary');
@@ -762,21 +670,18 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await this.showRutasPublicasActionSheet();
   }
 
-  // 📋 ActionSheet de mis rutas con opción de borrar - ✅ CORREGIDO
   async showRutasActionSheet() {
     const buttons: any[] = [];
 
-    // Botón para mostrar todas las rutas
     buttons.push({
       text: `🗺️ Mostrar todas mis rutas (${this.rutasGuardadas.length})`,
       icon: 'map',
       handler: () => {
         this.mostrarTodasLasRutas();
-        return true; // ✅ Importante: retornar true para cerrar el ActionSheet
+        return true;
       }
     });
 
-    // Botón para limpiar el mapa
     buttons.push({
       text: '🧹 Limpiar mapa',
       icon: 'close-circle',
@@ -787,10 +692,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // ✅ Lista de rutas individuales con nombre y distancia
     this.rutasGuardadas.forEach(ruta => {
       buttons.push({
-        text: `📍 ${ruta.nombre_ruta} (${ruta.longitud_ruta} km)`, // ✅ Nombre visible
+        text: `📍 ${ruta.nombre_ruta} (${ruta.longitud_ruta} km)`,
         icon: 'navigate',
         handler: () => {
           this.mostrarOpcionesRuta(ruta);
@@ -799,7 +703,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    // Botón para recargar
     buttons.push({
       text: '🔄 Recargar',
       icon: 'refresh',
@@ -809,7 +712,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // Botón cancelar
     buttons.push({
       text: 'Cancelar',
       icon: 'close',
@@ -825,7 +727,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await actionSheet.present();
   }
 
-  // 📋 ActionSheet para una ruta específica (ver o borrar)
   async mostrarOpcionesRuta(ruta: any) {
     const actionSheet = await this.actionSheetController.create({
       header: ruta.nombre_ruta,
@@ -859,22 +760,16 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await actionSheet.present();
   }
 
-  // 🗑️ Confirmar eliminación de ruta
   async confirmarEliminarRuta(ruta: any) {
     const alert = await this.alertController.create({
       header: '⚠️ Confirmar eliminación',
       message: `¿Estás seguro de que deseas eliminar la ruta "<b>${ruta.nombre_ruta}</b>"?<br><br>Esta acción no se puede deshacer.`,
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Eliminar',
           role: 'destructive',
-          handler: () => {
-            this.eliminarRuta(ruta.id_ruta);
-          }
+          handler: () => this.eliminarRuta(ruta.id_ruta)
         }
       ]
     });
@@ -882,7 +777,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await alert.present();
   }
 
-  // 🗑️ Eliminar ruta
   async eliminarRuta(idRuta: number) {
     this.http.delete(`${this.apiUrl}/rutas/${idRuta}`).subscribe({
       next: async () => {
@@ -891,17 +785,14 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
         this.cargarRutasGuardadas();
       },
       error: async (error) => {
-        console.error('❌ Error al eliminar ruta:', error);
         await this.showToast('❌ Error al eliminar la ruta', 'danger');
       }
     });
   }
 
-  // 📋 ActionSheet de rutas públicas - ✅ CORREGIDO
   async showRutasPublicasActionSheet() {
     const buttons: any[] = [];
 
-    // Botón para mostrar todas
     buttons.push({
       text: `🌍 Mostrar todas las rutas públicas (${this.rutasPublicas.length})`,
       icon: 'globe',
@@ -911,7 +802,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // Botón para limpiar
     buttons.push({
       text: '🧹 Limpiar mapa',
       icon: 'close-circle',
@@ -922,7 +812,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // ✅ Lista de rutas públicas con nombre, distancia y autor
     this.rutasPublicas.forEach(ruta => {
       buttons.push({
         text: `🌍 ${ruta.nombre_ruta} (${ruta.longitud_ruta} km) - ${ruta.usuario_nombre || 'Usuario'}`,
@@ -934,7 +823,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    // Botón recargar
     buttons.push({
       text: '🔄 Recargar',
       icon: 'refresh',
@@ -944,7 +832,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // Botón cancelar
     buttons.push({
       text: 'Cancelar',
       icon: 'close',
@@ -960,7 +847,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await actionSheet.present();
   }
 
-  // 🗺️ Cargar UNA ruta específica en el mapa
   async cargarRutaEnMapa(idRuta: number, esPublica: boolean = false) {
     const rutas = esPublica ? this.rutasPublicas : this.rutasGuardadas;
     const ruta = rutas.find(r => r.id_ruta === idRuta);
@@ -1005,15 +891,11 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     startMarker.openPopup();
 
     const bounds = L.latLngBounds(coords);
-    this.map.fitBounds(bounds, { 
-      padding: [50, 50],
-      maxZoom: 17 
-    });
+    this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
 
     await this.showToast(`📍 ${ruta.nombre_ruta} - ${ruta.longitud_ruta} km`, 'primary');
   }
 
-  // 📏 Calcular distancia
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371;
     const dLat = this.deg2rad(lat2 - lat1);
@@ -1030,7 +912,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     return deg * (Math.PI / 180);
   }
 
-  // 🎨 Íconos de colores
   private createColoredIcon(color: string): L.Icon {
     return L.icon({
       iconRetinaUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
@@ -1043,7 +924,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // 🍞 Toast
   async showToast(message: string, color: string) {
     const toast = await this.toastController.create({
       message,
@@ -1054,7 +934,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     await toast.present();
   }
 
-  // 📊 Distancia total
   calcularDistanciaTotal(): string {
     const total = this.rutasGuardadas.reduce((sum, ruta) => sum + (ruta.longitud_ruta || 0), 0);
     return total.toFixed(2);
