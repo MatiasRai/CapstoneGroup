@@ -6,7 +6,7 @@ import { AuthEmpresaGuard } from './guards/auth-empresa.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login', // Redirige al login por defecto
+    redirectTo: 'menu', // 🔹 Ahora va directo al menú principal
     pathMatch: 'full',
   },
 
@@ -20,10 +20,17 @@ export const routes: Routes = [
     loadComponent: () => import('./registro/registro.page').then(m => m.RegistroPage)
   },
 
-  // 👤 Usuario normal
+  // 👤 Usuario normal - YA NO REQUIERE AUTENTICACIÓN para ver
   {
     path: 'menu',
-    loadComponent: () => import('./menu/menu.page').then(m => m.MenuPage),
+    loadComponent: () => import('./menu/menu.page').then(m => m.MenuPage)
+    // ✅ Sin canActivate - accesible sin login
+  },
+
+  // 📋 Perfil de usuario - SÍ requiere autenticación
+  {
+    path: 'perfil-usuario',
+    loadComponent: () => import('./perfil-usuario/perfil-usuario.page').then(m => m.PerfilUsuarioPage),
     canActivate: [AuthUserGuard]
   },
 
@@ -60,15 +67,10 @@ export const routes: Routes = [
     path: 'registro-empresa',
     loadComponent: () => import('./registro-empresa/registro-empresa.page').then(m => m.RegistroEmpresaPage)
   },
-  {
-    path: 'perfil-usuario',
-    loadComponent: () => import('./perfil-usuario/perfil-usuario.page').then(m => m.PerfilUsuarioPage),
-    canActivate: [AuthUserGuard]
-  },
 
-  // ❌ Si la ruta no existe, redirige al login
+  // ❌ Si la ruta no existe, redirige al menú principal
   {
     path: '**',
-    redirectTo: 'login'
+    redirectTo: 'menu'
   }
 ];

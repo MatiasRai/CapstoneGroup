@@ -24,12 +24,6 @@ app.use('/api/v1/adm_empresa', require('./routes/adm.routes'));
 app.use('/api/v1/discapacidades', require('./routes/discapacidades.routes'));
 app.use('/api/v1/login', require('./routes/login.routes'));
 app.use('/api/v1/servicios', require('./routes/servicios.routes'));
-app.use('/api/v1/rutas', require('./routes/rutas.routes')); // 👈 Ya estaba ok
-
-
-/* ============================================
-   ⚠️ RUTA 404 PARA ENDPOINTS INEXISTENTES
-============================================ */
 app.use((req, res, next) => {
   res.status(404).json({
     error: "❌ Ruta no encontrada",
@@ -40,7 +34,6 @@ app.use((req, res, next) => {
 
 /* ============================================
    ❗ MANEJO GLOBAL DE ERRORES
-============================================ */
 app.use((err, req, res, next) => {
   console.error("🔥 Error en el servidor:", err);
 
@@ -52,7 +45,6 @@ app.use((err, req, res, next) => {
 
 /* ============================================
    🚀 INICIAR SERVIDOR
-============================================ */
 const PORT = 3000;
 const HOST = "0.0.0.0";
 
@@ -62,3 +54,9 @@ app.listen(PORT, HOST, () => {
 });
 
 module.exports = app;
+app.use('/api/v1/rutas', require('./routes/rutas.routes'));
+app.use('/api/v1/resenas', require('./routes/resenas.routes')); // 👈 ✅ NUEVA RUTA AGREGADA
+
+app.listen(3000, '0.0.0.0', () => {
+  console.log('🚀 Backend corriendo en http://192.168.1.88:3000');
+});

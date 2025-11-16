@@ -1,15 +1,17 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
+      <!-- ✅ Menú hamburguesa siempre visible -->
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>📍 Mis Rutas GPS</ion-title>
+    <ion-title>📍 Rutas y Servicios Accesibles</ion-title>
     
     <ion-buttons slot="end">
-      <ion-button (click)="getCurrentPosition()">
+      <!-- ✅ Solo botones de funcionalidad, Login/Registro están en el menú -->
+      <ion-button *ngIf="isUserLoggedIn" (click)="getCurrentPosition()">
         <ion-icon slot="icon-only" name="locate"></ion-icon>
       </ion-button>
-      <ion-button (click)="verMisRutas()">
+      <ion-button *ngIf="isUserLoggedIn" (click)="verMisRutas()">
         <ion-icon slot="icon-only" name="map"></ion-icon>
       </ion-button>
       <ion-button (click)="verRutasPublicas()">
@@ -53,7 +55,18 @@
 
 <ion-content [fullscreen]="true">
   
-  <!-- 🔍 Panel de Debug GPS (temporal) -->
+  <!-- 🌟 Mensaje de bienvenida para usuarios no logueados -->
+  <ion-card *ngIf="!isUserLoggedIn" color="light">
+    <ion-card-content>
+      <h2 style="margin: 0 0 10px 0; text-align: center;">¡Bienvenido!</h2>
+      <p style="margin: 0; text-align: center;">
+        Explora rutas accesibles y servicios para personas con discapacidad.
+        <br><b>Inicia sesión</b> para guardar tus propias rutas GPS.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 📍 Panel de Debug GPS (temporal) -->
   <ion-card color="light" *ngIf="currentLocation">
     <ion-card-content>
       <p style="margin: 0; font-size: 11px;">
@@ -89,6 +102,12 @@
     </ion-card-header>
 
     <ion-card-content>
+      <!-- Mensaje si no está logueado -->
+      <ion-note *ngIf="!isUserLoggedIn" color="warning" style="display: block; margin-bottom: 15px; padding: 10px; background: #fff3cd; border-radius: 8px;">
+        🔒 <b>Inicia sesión para grabar rutas</b><br>
+        Debes tener una cuenta para guardar y compartir tus rutas GPS.
+      </ion-note>
+
       <ion-button 
         *ngIf="!isRecording"
         expand="block" 
@@ -138,8 +157,73 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- 🌟 Información de rutas guardadas -->
+  <!-- 🧩 SECCIÓN DE SERVICIOS DISPONIBLES -->
   <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        🧩 Servicios Disponibles
+      </ion-card-title>
+      <ion-card-subtitle>
+        {{ serviciosDisponibles.length }} servicio(s) para personas con discapacidad
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- Lista de servicios -->
+      <div *ngIf="serviciosDisponibles.length > 0">
+        <p style="margin-bottom: 15px;">
+          Los servicios están marcados en el mapa con íconos 🟡 amarillos. Haz clic en ellos para ver más detalles.
+        </p>
+
+        <!-- Lista expandible de servicios -->
+        <ion-list>
+          <ion-item *ngFor="let servicio of serviciosDisponibles" lines="full">
+            <ion-label class="ion-text-wrap">
+              <h2><strong>🧩 {{ servicio.nombre_servicio }}</strong></h2>
+              <h3>{{ servicio.nombre_empresa }}</h3>
+              <p>{{ servicio.descripcion_servicio }}</p>
+              
+              <div style="margin-top: 8px;">
+                <p style="margin: 2px 0; font-size: 12px;">
+                  📍 <strong>Lugar:</strong> {{ servicio.nombre_lugar || 'N/A' }}
+                </p>
+                <p style="margin: 2px 0; font-size: 12px;">
+                  📌 <strong>Dirección:</strong> {{ servicio.direccion_lugar || 'N/A' }}
+                </p>
+                <p *ngIf="servicio.horario_disponible" style="margin: 2px 0; font-size: 12px;">
+                  🕐 <strong>Horario:</strong> {{ servicio.horario_disponible }}
+                </p>
+                <p style="margin: 2px 0; font-size: 12px;">
+                  💰 <strong>Costo:</strong> {{ servicio.costo_servicio ? (servicio.costo_servicio | currency:'CLP':'symbol-narrow':'1.0-0') : 'Consultar' }}
+                </p>
+                <p *ngIf="servicio.nombre_discapacidad" style="margin: 2px 0; font-size: 12px;">
+                  ♿ <strong>Discapacidad:</strong> {{ servicio.nombre_discapacidad }}
+                </p>
+                <p *ngIf="servicio.empresa_telefono" style="margin: 2px 0; font-size: 12px;">
+                  📞 <strong>Contacto:</strong> {{ servicio.empresa_telefono }}
+                </p>
+                <p *ngIf="servicio.resenas && servicio.resenas.length > 0" style="margin: 2px 0; font-size: 12px;">
+                  ⭐ <strong>Valoración:</strong> {{ calcularPromedioValoracion(servicio.resenas) }}/5 
+                  ({{ servicio.resenas.length }} reseña{{ servicio.resenas.length > 1 ? 's' : '' }})
+                </p>
+              </div>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+
+      <!-- Mensaje si no hay servicios -->
+      <div *ngIf="serviciosDisponibles.length === 0">
+        <p style="text-align: center; color: #666;">
+          🧩 No hay servicios disponibles en este momento.<br>
+          Pronto habrá más servicios registrados.
+        </p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- 🌟 Información de rutas guardadas (solo si está logueado) -->
+  <ion-card *ngIf="isUserLoggedIn">
     <ion-card-header>
       <ion-card-title>🌟 Tus Rutas Guardadas</ion-card-title>
       <ion-card-subtitle>
@@ -213,8 +297,8 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- 📊 Estadísticas (opcional) -->
-  <ion-card *ngIf="rutasGuardadas.length > 0">
+  <!-- 📊 Estadísticas (solo si está logueado y tiene rutas) -->
+  <ion-card *ngIf="isUserLoggedIn && rutasGuardadas.length > 0">
     <ion-card-header>
       <ion-card-title>📊 Tus Estadísticas</ion-card-title>
     </ion-card-header>
