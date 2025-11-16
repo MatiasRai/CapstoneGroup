@@ -1,26 +1,37 @@
 const express = require('express');
 const router = express.Router();
+
 const {
   getUsuarios,
   getUsuarioById,
   createUsuario,
   updateUsuario,
-  deleteUsuario
+  deleteUsuario,
+  getUsuariosPaginados // 👈 Nueva función añadida
 } = require('../controllers/usuarios.controller');
 
-// ✅ Obtener todos los usuarios
+// ======================================================
+// 📌 NUEVA RUTA: Obtener usuarios con paginación
+// ======================================================
+router.get('/paginados', getUsuariosPaginados);
+
+// ======================================================
+// 📌 Rutas antiguas (se mantienen igual)
+// ======================================================
+
+// Obtener todos los usuarios
 router.get('/', getUsuarios);
 
-// ✅ Obtener un usuario por ID (para el perfil)
+// Obtener un usuario por ID
 router.get('/:id', getUsuarioById);
 
-// ✅ Crear un nuevo usuario
+// Crear un nuevo usuario
 router.post('/', createUsuario);
 
-// ✅ Actualizar un usuario existente
+// Actualizar un usuario
 router.put('/:id', updateUsuario);
 
-// ✅ Eliminar un usuario y sus reseñas asociadas
+// Eliminar un usuario
 router.delete('/:id', deleteUsuario);
 
 module.exports = router;

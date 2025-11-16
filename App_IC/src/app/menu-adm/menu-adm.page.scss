@@ -6,115 +6,143 @@ ion-content {
   padding: 16px;
 }
 
-h2 {
-  font-weight: 600;
-  margin: 20px 0 10px 0;
+.section-title {
+  font-weight: 700;
+  margin: 25px 0 10px 0;
   color: #222;
+  font-size: 20px;
 }
 
-p {
-  margin: 2px 0;
+.empty-text {
+  text-align: center;
+  color: gray;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+/* ======================================================
+   🧩 GRID RESPONSIVE (DESKTOP / MOBILE)
+====================================================== */
+.grid-desktop {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.grid-mobile {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+/* ======================================================
+   📋 TARJETAS
+====================================================== */
+.card-item {
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.10);
+  transition: transform 0.2s ease-in-out;
+}
+
+.card-item:hover {
+  transform: scale(1.01);
+}
+
+ion-card-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ======================================================
+   🟩 ETIQUETAS DE ESTADO (BADGES)
+====================================================== */
+.estado-tag {
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.aprobado {
+  background-color: #2dd36f;
+}
+
+.pendiente {
+  background-color: #ffc409;
+  color: black;
+}
+
+.rechazado {
+  background-color: #eb445a;
+}
+
+/* ======================================================
+   🔘 GRUPOS DE BOTONES
+====================================================== */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+}
+
+.btn-mobile ion-button {
+  width: 100%;
+}
+
+/* ======================================================
+   🔘 BOTONES GENERALES
+====================================================== */
+ion-button {
+  --border-radius: 10px;
   font-size: 14px;
 }
 
 /* ======================================================
-   📋 TARJETAS DE LISTADO (ION-ITEM)
+   📄 PAGINACIÓN (NUEVO)
 ====================================================== */
-ion-item {
-  --background: #ffffff;
-  --border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px;
-  transition: transform 0.2s ease-in-out;
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px 0 20px 0;
 }
 
-ion-item:hover {
-  transform: scale(1.01);
-}
-
-ion-label h2 {
-  font-size: 16px;
+.page-label {
+  font-size: 15px;
   font-weight: 600;
-  color: #000;
+  color: #333;
 }
 
-ion-label p {
-  color: #555;
-}
-
-/* ======================================================
-   🔘 BOTONES DE ACCIÓN
-====================================================== */
-ion-button {
-  margin-left: 4px;
-  font-size: 13px;
+/* botones outline → estilo más elegante */
+.pagination-container ion-button {
   --border-radius: 8px;
-  --padding-start: 10px;
-  --padding-end: 10px;
-}
-
-ion-button[color="success"] {
-  --background: #28a745;
-}
-
-ion-button[color="warning"] {
-  --background: #ffc107;
-  --color: #000;
-}
-
-ion-button[color="danger"] {
-  --background: #dc3545;
-}
-
-ion-button[color="medium"] {
-  --background: #6c757d;
+  --padding-start: 12px;
+  --padding-end: 12px;
 }
 
 /* ======================================================
-   🟩 ESTADOS DE EMPRESA
-====================================================== */
-.Aprobado {
-  color: green;
-  font-weight: bold;
-}
-
-.Pendiente {
-  color: orange;
-  font-weight: bold;
-}
-
-.Rechazado {
-  color: red;
-  font-weight: bold;
-}
-
-/* ======================================================
-   ⚠️ MENSAJES VACÍOS
-====================================================== */
-.no-data {
-  text-align: center;
-  color: gray;
-  font-style: italic;
-  margin-top: 10px;
-}
-
-/* ======================================================
-   📱 RESPONSIVE
+   📱 RESPONSIVE ADICIONAL
 ====================================================== */
 @media (max-width: 768px) {
-  ion-item {
+  .section-title {
+    font-size: 18px;
+  }
+
+  ion-card-title {
+    font-size: 16px;
+  }
+
+  .pagination-container {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 8px;
   }
 
-  ion-buttons[slot="end"] {
-    margin-top: 8px;
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  ion-button {
-    flex: 1;
-    margin: 3px;
+  .page-label {
+    font-size: 14px;
   }
 }

@@ -1,7 +1,52 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 
-// ✅ Obtener todos los usuarios
+/* ======================================================
+   📌 OBTENER USUARIOS PAGINADOS (CORRECTO PARA IONIC)
+====================================================== */
+const getUsuariosPaginados = (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  const queryData = `
+    SELECT *
+    FROM usuario
+    ORDER BY id_usuario ASC
+    LIMIT ? OFFSET ?
+  `;
+
+  const queryTotal = `SELECT COUNT(*) AS total FROM usuario`;
+
+  db.query(queryData, [limit, offset], (err, rows) => {
+    if (err) {
+      console.error("❌ Error SQL en getUsuariosPaginados:", err.sqlMessage);
+      return res.status(500).json({ error: "Error al obtener usuarios paginados" });
+    }
+
+    db.query(queryTotal, (err2, totalRows) => {
+      if (err2) {
+        console.error("❌ Error SQL al contar usuarios:", err2.sqlMessage);
+        return res.status(500).json({ error: "Error al contar usuarios" });
+      }
+
+      const total = totalRows[0].total;
+      const totalPages = Math.ceil(total / limit);
+
+      res.json({
+        page,
+        limit,
+        total,
+        totalPages,
+        data: rows
+      });
+    });
+  });
+};
+
+/* ======================================================
+   📌 Obtener todos los usuarios
+====================================================== */
 const getUsuarios = (req, res) => {
   db.query('SELECT * FROM usuario', (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -9,7 +54,9 @@ const getUsuarios = (req, res) => {
   });
 };
 
-// ✅ Obtener usuario por ID (para perfil)
+/* ======================================================
+   📌 Obtener usuario por ID
+====================================================== */
 const getUsuarioById = (req, res) => {
   const { id } = req.params;
 
@@ -43,7 +90,9 @@ const getUsuarioById = (req, res) => {
   });
 };
 
-// ✅ Crear usuario (con contraseña encriptada)
+/* ======================================================
+   📌 Crear usuario
+====================================================== */
 const createUsuario = async (req, res) => {
   const { nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad } = req.body;
 
@@ -74,12 +123,13 @@ const createUsuario = async (req, res) => {
   }
 };
 
-// ✅ Actualizar usuario (para el perfil)
+/* ======================================================
+   📌 Actualizar usuario
+====================================================== */
 const updateUsuario = (req, res) => {
   const { id } = req.params;
   const { correo, celular, Discapacidades_id_discapacidad } = req.body;
 
-  // Validar que al menos uno de los campos venga
   if (!correo && !celular && !Discapacidades_id_discapacidad) {
     return res.status(400).json({ error: 'Debe proporcionar al menos un campo para actualizar' });
   }
@@ -124,7 +174,9 @@ const updateUsuario = (req, res) => {
   });
 };
 
-// ✅ Eliminar usuario
+/* ======================================================
+   📌 Eliminar usuario
+====================================================== */
 const deleteUsuario = (req, res) => {
   const { id } = req.params;
 
@@ -134,10 +186,14 @@ const deleteUsuario = (req, res) => {
   });
 };
 
+/* ======================================================
+   📌 EXPORTACIONES (DEBEN IR AL FINAL)
+====================================================== */
 module.exports = {
   getUsuarios,
   getUsuarioById,
   createUsuario,
   updateUsuario,
-  deleteUsuario
+  deleteUsuario,
+  getUsuariosPaginados
 };
