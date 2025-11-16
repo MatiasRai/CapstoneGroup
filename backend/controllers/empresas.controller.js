@@ -1,7 +1,51 @@
 const db = require('../config/db');
 
 /* ======================================================
-   🔹 OBTENER TODAS LAS EMPRESAS
+   📌 EMPRESAS PAGINADAS (CORRECTO PARA IONIC)
+====================================================== */
+const getEmpresasPaginadas = (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  const queryData = `
+    SELECT *
+    FROM empresas
+    ORDER BY id_empresa ASC
+    LIMIT ? OFFSET ?
+  `;
+
+  const queryTotal = `SELECT COUNT(*) AS total FROM empresas`;
+
+  db.query(queryData, [limit, offset], (err, rows) => {
+    if (err) {
+      console.error("❌ Error en getEmpresasPaginadas:", err.sqlMessage);
+      return res.status(500).json({ error: "Error al obtener empresas paginadas" });
+    }
+
+    db.query(queryTotal, (err2, totalRows) => {
+      if (err2) {
+        console.error("❌ Error al contar empresas:", err2.sqlMessage);
+        return res.status(500).json({ error: "Error al contar empresas" });
+      }
+
+      const total = totalRows[0].total;
+      const totalPages = Math.ceil(total / limit);
+
+      res.json({
+        page,
+        limit,
+        total,
+        totalPages,
+        data: rows
+      });
+    });
+  });
+};
+
+
+/* ======================================================
+   📌 Obtener todas las empresas
 ====================================================== */
 const getEmpresas = (req, res) => {
   db.query('SELECT * FROM empresas', (err, rows) => {
@@ -10,8 +54,9 @@ const getEmpresas = (req, res) => {
   });
 };
 
+
 /* ======================================================
-   🔹 CREAR NUEVA EMPRESA
+   📌 Crear empresa
 ====================================================== */
 const createEmpresa = (req, res) => {
   const {
@@ -31,61 +76,77 @@ const createEmpresa = (req, res) => {
     `INSERT INTO empresas 
      (nombre_empresa, direccion_empresa, telefono, descripcion_empresa, horarios, sitio_web, Adm_Empresa_id_adm_Empresa, Correo, Estado)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nombre_empresa, direccion_empresa, telefono, descripcion_empresa, horarios, sitio_web, Adm_Empresa_id_adm_Empresa, Correo, Estado],
+    [
+      nombre_empresa,
+      direccion_empresa,
+      telefono,
+      descripcion_empresa,
+      horarios,
+      sitio_web,
+      Adm_Empresa_id_adm_Empresa,
+      Correo,
+      Estado
+    ],
     (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
+
       res.status(201).json({
         id_empresa: result.insertId,
         nombre_empresa,
         Estado,
-        message: '✅ Empresa registrada correctamente (estado: Proceso)'
+        message: "✅ Empresa registrada correctamente"
       });
     }
   );
 };
 
+
 /* ======================================================
-   🔹 ACTUALIZAR ESTADO DE EMPRESA
+   📌 Actualizar estado de empresa
 ====================================================== */
 const updateEstadoEmpresa = (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
 
-  db.query('UPDATE empresas SET estado = ? WHERE id_empresa = ?', [estado, id], (err) => {
+  db.query('UPDATE empresas SET Estado = ? WHERE id_empresa = ?', [estado, id], (err) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: '✅ Estado actualizado correctamente' });
+    res.json({ message: "✅ Estado actualizado correctamente" });
   });
 };
 
+
 /* ======================================================
-   🔹 OBTENER EMPRESA POR ADMIN
+   📌 Obtener empresa por ID del administrador
 ====================================================== */
 const getEmpresaByAdm = (req, res) => {
   const { id_adm_empresa } = req.params;
+
   const query = `
-    SELECT e.*
-    FROM empresas e
-    INNER JOIN adm_empresa a ON e.Adm_Empresa_id_adm_Empresa = a.id_adm_empresa
-    WHERE e.Adm_Empresa_id_adm_Empresa = ?;
+    SELECT *
+    FROM empresas
+    WHERE Adm_Empresa_id_adm_Empresa = ?
   `;
 
   db.query(query, [id_adm_empresa], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
+
     if (rows.length === 0)
-      return res.status(404).json({ message: '⚠️ Empresa no encontrada' });
+      return res.status(404).json({ message: "⚠️ Empresa no encontrada" });
 
     res.json(rows[0]);
   });
 };
 
+
 /* ======================================================
-   🔹 OBTENER SERVICIOS POR EMPRESA
+   📌 Obtener servicios por empresa
 ====================================================== */
 const getServiciosByEmpresa = (req, res) => {
   const { id_adm_empresa } = req.params;
+
   const query = `
     SELECT 
-      s.id_servicio, s.nombre_servicio, s.descripcion_servicio, s.horario_disponible, s.costo_servicio,
+      s.*,
       l.nombre_lugar, l.direccion_lugar,
       c.nombre_categoria AS categoria_lugar,
       d.nombre_discapacidad,
@@ -101,6 +162,8 @@ const getServiciosByEmpresa = (req, res) => {
 
   db.query(query, [id_adm_empresa], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
+
+    // Agrupar servicios con sus reseñas
     const servicios = {};
     for (const row of rows) {
       if (!servicios[row.id_servicio]) {
@@ -126,41 +189,53 @@ const getServiciosByEmpresa = (req, res) => {
         });
       }
     }
+
     res.json(Object.values(servicios));
   });
 };
 
+
 /* ======================================================
-   🔹 ELIMINAR SERVICIO POR ID
+   📌 Eliminar servicio
 ====================================================== */
 const deleteServicio = (req, res) => {
   const { id } = req.params;
+
   db.query('DELETE FROM servicios WHERE id_servicio = ?', [id], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
+
     if (result.affectedRows === 0)
-      return res.status(404).json({ message: '⚠️ Servicio no encontrado' });
-    res.json({ message: '✅ Servicio eliminado correctamente' });
+      return res.status(404).json({ message: "⚠️ Servicio no encontrado" });
+
+    res.json({ message: "✅ Servicio eliminado correctamente" });
   });
 };
 
+
 /* ======================================================
-   🔹 ACTUALIZAR SERVICIO + LUGAR + DISCAPACIDAD
+   📌 Actualizar servicio
 ====================================================== */
 const updateServicio = (req, res) => {
   const { id } = req.params;
   const {
-    nombre_servicio, descripcion_servicio, horario_disponible, costo_servicio,
-    nombre_lugar, direccion_lugar, nombre_discapacidad
+    nombre_servicio,
+    descripcion_servicio,
+    horario_disponible,
+    costo_servicio,
+    nombre_lugar,
+    direccion_lugar,
+    nombre_discapacidad
   } = req.body;
 
   const queryGet = `
     SELECT s.Lugares_id_lugar, s.id_discapacidad
     FROM servicios s
-    WHERE s.id_servicio = ?;
+    WHERE s.id_servicio = ?
   `;
 
   db.query(queryGet, [id], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
+
     if (results.length === 0)
       return res.status(404).json({ message: "⚠️ Servicio no encontrado" });
 
@@ -169,23 +244,29 @@ const updateServicio = (req, res) => {
     db.query(
       `UPDATE servicios 
        SET nombre_servicio=?, descripcion_servicio=?, horario_disponible=?, costo_servicio=?
-       WHERE id_servicio=?;`,
-      [nombre_servicio, descripcion_servicio, horario_disponible, costo_servicio, id],
+       WHERE id_servicio=?`,
+      [
+        nombre_servicio, descripcion_servicio,
+        horario_disponible, costo_servicio, id
+      ],
       (err) => {
         if (err) return res.status(500).json({ error: err.message });
 
         db.query(
-          `UPDATE lugares SET nombre_lugar=?, direccion_lugar=? WHERE id_lugar=?;`,
+          `UPDATE lugares SET nombre_lugar=?, direccion_lugar=? WHERE id_lugar=?`,
           [nombre_lugar, direccion_lugar, Lugares_id_lugar],
           (err) => {
             if (err) return res.status(500).json({ error: err.message });
 
             db.query(
-              `UPDATE tipos_discapacidad SET nombre_discapacidad=? WHERE id_discapacidad=?;`,
+              `UPDATE tipos_discapacidad SET nombre_discapacidad=? WHERE id_discapacidad=?`,
               [nombre_discapacidad, id_discapacidad],
               (err) => {
                 if (err) return res.status(500).json({ error: err.message });
-                res.json({ message: "✅ Servicio, lugar y discapacidad actualizados correctamente" });
+
+                res.json({
+                  message: "✅ Servicio, lugar y discapacidad actualizados correctamente"
+                });
               }
             );
           }
@@ -195,34 +276,49 @@ const updateServicio = (req, res) => {
   });
 };
 
+
 /* ======================================================
-   🔹 ACTUALIZAR EMPRESA
+   📌 Actualizar empresa
 ====================================================== */
 const updateEmpresa = (req, res) => {
   const { id } = req.params;
-  const { nombre_empresa, direccion_empresa, telefono, correo, descripcion_empresa, horarios } = req.body;
+  const {
+    nombre_empresa,
+    direccion_empresa,
+    telefono,
+    correo,
+    descripcion_empresa,
+    horarios
+  } = req.body;
 
   const query = `
     UPDATE empresas
     SET nombre_empresa=?, direccion_empresa=?, telefono=?, correo=?, descripcion_empresa=?, horarios=?
-    WHERE id_empresa=?;
+    WHERE id_empresa=?
   `;
 
-  db.query(query, [nombre_empresa, direccion_empresa, telefono, correo, descripcion_empresa, horarios, id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.affectedRows === 0)
-      return res.status(404).json({ message: '⚠️ Empresa no encontrada' });
-    res.json({ message: '✅ Empresa actualizada correctamente' });
-  });
+  db.query(
+    query,
+    [nombre_empresa, direccion_empresa, telefono, correo, descripcion_empresa, horarios, id],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      if (result.affectedRows === 0)
+        return res.status(404).json({ message: "⚠️ Empresa no encontrada" });
+
+      res.json({ message: "✅ Empresa actualizada correctamente" });
+    }
+  );
 };
 
+
 /* ======================================================
-   🔹 ELIMINAR EMPRESA (elimina reseñas → servicios → lugares → empresa)
+   📌 Eliminar empresa COMPLETA (cascada)
 ====================================================== */
 const deleteEmpresa = (req, res) => {
   const { id } = req.params;
 
-  // 1️⃣ Eliminar reseñas asociadas a los lugares de la empresa
+  // 1. Eliminar reseñas
   const deleteResenas = `
     DELETE r FROM resenas r
     INNER JOIN lugares l ON r.Lugares_id_lugar = l.id_lugar
@@ -230,12 +326,9 @@ const deleteEmpresa = (req, res) => {
   `;
 
   db.query(deleteResenas, [id], (err) => {
-    if (err) {
-      console.error('❌ Error al eliminar reseñas:', err);
-      return res.status(500).json({ error: 'Error al eliminar reseñas asociadas' });
-    }
+    if (err) return res.status(500).json({ error: "Error al eliminar reseñas" });
 
-    // 2️⃣ Eliminar servicios asociados a los lugares de la empresa
+    // 2. Eliminar servicios
     const deleteServicios = `
       DELETE s FROM servicios s
       INNER JOIN lugares l ON s.Lugares_id_lugar = l.id_lugar
@@ -243,38 +336,34 @@ const deleteEmpresa = (req, res) => {
     `;
 
     db.query(deleteServicios, [id], (err) => {
-      if (err) {
-        console.error('❌ Error al eliminar servicios:', err);
-        return res.status(500).json({ error: 'Error al eliminar servicios asociados' });
-      }
+      if (err) return res.status(500).json({ error: "Error al eliminar servicios" });
 
-      // 3️⃣ Eliminar lugares
+      // 3. Eliminar lugares
       const deleteLugares = `DELETE FROM lugares WHERE Empresas_id_empresa = ?`;
-      db.query(deleteLugares, [id], (err) => {
-        if (err) {
-          console.error('❌ Error al eliminar lugares:', err);
-          return res.status(500).json({ error: 'Error al eliminar lugares asociados' });
-        }
 
-        // 4️⃣ Eliminar la empresa
+      db.query(deleteLugares, [id], (err) => {
+        if (err) return res.status(500).json({ error: "Error al eliminar lugares" });
+
+        // 4. Eliminar empresa
         const deleteEmpresaQuery = `DELETE FROM empresas WHERE id_empresa = ?`;
+
         db.query(deleteEmpresaQuery, [id], (err, result) => {
-          if (err) {
-            console.error('❌ Error al eliminar empresa:', err);
-            return res.status(500).json({ error: 'Error al eliminar la empresa' });
-          }
+          if (err) return res.status(500).json({ error: "Error al eliminar empresa" });
 
           if (result.affectedRows === 0)
-            return res.status(404).json({ message: '⚠️ Empresa no encontrada' });
+            return res.status(404).json({ message: "⚠️ Empresa no encontrada" });
 
-          console.log(`✅ Empresa ${id} eliminada (reseñas, servicios, lugares incluidos)`);
-          res.json({ message: '✅ Empresa, servicios, lugares y reseñas eliminados correctamente' });
+          res.json({ message: "✅ Empresa y datos asociados eliminados correctamente" });
         });
       });
     });
   });
 };
 
+
+/* ======================================================
+   📌 EXPORTACIONES
+====================================================== */
 module.exports = {
   getEmpresas,
   createEmpresa,
@@ -284,5 +373,6 @@ module.exports = {
   deleteServicio,
   updateServicio,
   updateEmpresa,
-  deleteEmpresa
+  deleteEmpresa,
+  getEmpresasPaginadas      // 👈 IMPORTANTE
 };

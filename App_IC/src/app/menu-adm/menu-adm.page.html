@@ -9,46 +9,93 @@
 
 <ion-content class="ion-padding">
 
-  <!-- ==================== USUARIOS ==================== -->
-  <h2>👤 Usuarios</h2>
-  <ion-list *ngIf="usuarios.length > 0; else noUsuarios">
-    <ion-item *ngFor="let u of usuarios">
-      <ion-label>
-        <h2>{{ u.nombre }}</h2>
-        <p><strong>Correo:</strong> {{ u.correo }}</p>
-        <p><strong>Celular:</strong> {{ u.celular }}</p>
-      </ion-label>
+  <!-- ======================================================
+       👤 USUARIOS
+  ====================================================== -->
+  <h2 class="section-title">👤 Usuarios</h2>
 
-      <ion-buttons slot="end">
-        <ion-button color="danger" (click)="eliminarUsuario(u.id_usuario)">
-          <ion-icon slot="start" name="trash-outline"></ion-icon>
-          Eliminar
-        </ion-button>
-      </ion-buttons>
-    </ion-item>
-  </ion-list>
+  <!-- PAGINACIÓN USUARIOS -->
+  <div class="pagination-container">
+    <ion-button fill="outline" (click)="usuariosAnterior()" [disabled]="usuarioPage === 1">
+      ◀ Anterior
+    </ion-button>
+
+    <span class="page-label">Página {{ usuarioPage }} de {{ usuarioTotalPages }}</span>
+
+    <ion-button fill="outline" (click)="usuariosSiguiente()" [disabled]="usuarioPage === usuarioTotalPages">
+      Siguiente ▶
+    </ion-button>
+  </div>
+
+  <!-- LISTADO USUARIOS -->
+  <div *ngIf="usuarios.length > 0; else noUsuarios"
+       [ngClass]="{ 'grid-desktop': !isMobile, 'grid-mobile': isMobile }">
+
+    <ion-card *ngFor="let u of usuarios" class="card-item">
+      <ion-card-header>
+        <ion-card-title>{{ u.nombre }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p><strong>Correo:</strong> {{ u.correo }}</p>
+        <p *ngIf="u.celular"><strong>Celular:</strong> {{ u.celular }}</p>
+      </ion-card-content>
+
+      <ion-button color="danger" expand="block" (click)="eliminarUsuario(u.id_usuario)">
+        <ion-icon slot="start" name="trash-outline"></ion-icon>
+        Eliminar
+      </ion-button>
+    </ion-card>
+
+  </div>
 
   <ng-template #noUsuarios>
-    <p style="text-align:center; color: gray;">No hay usuarios registrados</p>
+    <p class="empty-text">No hay usuarios registrados</p>
   </ng-template>
 
 
-  <!-- ==================== EMPRESAS ==================== -->
-  <h2 style="margin-top:30px;">🏢 Empresas</h2>
-  <ion-list *ngIf="empresas.length > 0; else noEmpresas">
-    <ion-item *ngFor="let e of empresas">
-      <ion-label>
-        <h2>{{ e.nombre_empresa }}</h2>
+  <!-- ======================================================
+       🏢 EMPRESAS
+  ====================================================== -->
+  <h2 class="section-title">🏢 Empresas</h2>
+
+  <!-- PAGINACIÓN EMPRESAS -->
+  <div class="pagination-container">
+    <ion-button fill="outline" (click)="empresasAnterior()" [disabled]="empresaPage === 1">
+      ◀ Anterior
+    </ion-button>
+
+    <span class="page-label">Página {{ empresaPage }} de {{ empresaTotalPages }}</span>
+
+    <ion-button fill="outline" (click)="empresasSiguiente()" [disabled]="empresaPage === empresaTotalPages">
+      Siguiente ▶
+    </ion-button>
+  </div>
+
+  <!-- LISTADO EMPRESAS -->
+  <div *ngIf="empresas.length > 0; else noEmpresas"
+       [ngClass]="{ 'grid-desktop': !isMobile, 'grid-mobile': isMobile }">
+
+    <ion-card *ngFor="let e of empresas" class="card-item">
+      <ion-card-header>
+        <ion-card-title>{{ e.nombre_empresa }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
         <p><strong>Correo:</strong> {{ e.correo }}</p>
         <p><strong>Teléfono:</strong> {{ e.telefono }}</p>
+
         <p><strong>Estado:</strong>
-          <span [ngClass]="e.estado" style="font-weight: bold;">
-            {{ e.estado }}
+          <span class="estado-tag"
+                [ngClass]="(e.estado || 'Pendiente').toLowerCase()">
+            {{ e.estado || 'Pendiente' }}
           </span>
         </p>
-      </ion-label>
+      </ion-card-content>
 
-      <ion-buttons slot="end">
+      <!-- BOTONES -->
+      <div class="btn-group" [ngClass]="{ 'btn-mobile': isMobile }">
+
         <ion-button color="success" (click)="cambiarEstado(e.id_empresa, 'Aprobado')">
           <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
           Aprobar
@@ -68,13 +115,15 @@
           <ion-icon slot="start" name="trash-outline"></ion-icon>
           Eliminar
         </ion-button>
-      </ion-buttons>
-    </ion-item>
-  </ion-list>
+
+      </div>
+
+    </ion-card>
+
+  </div>
 
   <ng-template #noEmpresas>
-    <p style="text-align:center; color: gray;">No hay empresas registradas</p>
+    <p class="empty-text">No hay empresas registradas</p>
   </ng-template>
 
 </ion-content>
-
