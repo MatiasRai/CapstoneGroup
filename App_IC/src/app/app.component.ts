@@ -13,7 +13,8 @@ import {
   business,
   addCircle,
   clipboard,
-  apps
+  apps,
+  eye  // 👈 ✅ AGREGADO
 } from 'ionicons/icons';
 
 @Component({
@@ -37,7 +38,8 @@ export class AppComponent implements OnInit {
       business,
       addCircle,
       clipboard,
-      apps
+      apps,
+      eye  // 👈 ✅ REGISTRADO
     });
   }
 
