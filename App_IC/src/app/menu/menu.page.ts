@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { Platform, AlertController, ToastController, ActionSheetController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { AdmEmpresaService } from '../services/adm-empresa.service';
+import { AuthService } from '../services/auth.service';
 import * as L from 'leaflet';
 
 @Component({
@@ -37,20 +40,31 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   rutasPolylines: L.Polyline[] = [];
   rutasPublicas: any[] = [];
   
+  // 🆕 Servicios disponibles
+  serviciosDisponibles: any[] = [];
+  serviciosMarkers: L.Marker[] = [];
+  
   private lastMapUpdate: number = 0;
   private mapUpdateThrottle: number = 1000;
+
+  // 🆕 Estado de usuario
+  isUserLoggedIn: boolean = false;
 
   constructor(
     private platform: Platform,
     private http: HttpClient,
     private alertController: AlertController,
     private toastController: ToastController,
-    private actionSheetController: ActionSheetController
+    private actionSheetController: ActionSheetController,
+    private router: Router,
+    private admEmpresaService: AdmEmpresaService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     this.loadCurrentUser();
     this.getCurrentPosition();
+    this.cargarServiciosDisponibles(); // 🆕 Cargar servicios
   }
 
   ngAfterViewInit(): void {
@@ -67,12 +81,91 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     if (userStr) {
       const user = JSON.parse(userStr);
       this.currentUserId = user.id;
+      this.isUserLoggedIn = true; // 🆕 Usuario logueado
       
       if (this.currentUserId) {
         this.cargarRutasGuardadas();
         this.cargarRutasPublicas();
       }
+    } else {
+      this.isUserLoggedIn = false; // 🆕 No hay usuario logueado
+      this.cargarRutasPublicas(); // Cargar solo rutas públicas
     }
+  }
+
+  /* ======================================================
+     🆕 CARGAR SERVICIOS DISPONIBLES
+  ====================================================== */
+  cargarServiciosDisponibles() {
+    this.admEmpresaService.obtenerTodosLosServicios().subscribe({
+      next: (servicios: any[]) => {
+        this.serviciosDisponibles = servicios.filter(s => s.latitud && s.longitud);
+        console.log('🧩 Servicios cargados:', this.serviciosDisponibles.length);
+        
+        // Mostrar servicios en el mapa si ya está inicializado
+        if (this.map) {
+          this.mostrarServiciosEnMapa();
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar servicios:', err);
+      }
+    });
+  }
+
+  /* ======================================================
+     🆕 MOSTRAR SERVICIOS EN EL MAPA
+  ====================================================== */
+  private mostrarServiciosEnMapa() {
+    // Limpiar marcadores anteriores de servicios
+    this.serviciosMarkers.forEach(marker => this.map.removeLayer(marker));
+    this.serviciosMarkers = [];
+
+    // Crear ícono personalizado para servicios
+    const servicioIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+      iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    // Agregar marcador para cada servicio
+    this.serviciosDisponibles.forEach(servicio => {
+      if (servicio.latitud && servicio.longitud) {
+        const marker = L.marker([servicio.latitud, servicio.longitud], { icon: servicioIcon })
+          .addTo(this.map)
+          .bindPopup(`
+            <div style="min-width: 200px;">
+              <h3 style="margin: 0 0 8px 0; color: #f39c12;">🧩 ${servicio.nombre_servicio}</h3>
+              <p style="margin: 4px 0;"><strong>Empresa:</strong> ${servicio.nombre_empresa || 'N/A'}</p>
+              <p style="margin: 4px 0;">${servicio.descripcion_servicio || 'Sin descripción'}</p>
+              <p style="margin: 4px 0;"><strong>📍 Lugar:</strong> ${servicio.nombre_lugar || 'N/A'}</p>
+              <p style="margin: 4px 0;"><strong>📍 Dirección:</strong> ${servicio.direccion_lugar || 'N/A'}</p>
+              ${servicio.horario_disponible ? `<p style="margin: 4px 0;"><strong>🕒 Horario:</strong> ${servicio.horario_disponible}</p>` : ''}
+              <p style="margin: 4px 0;"><strong>💰 Costo:</strong> ${servicio.costo_servicio ? servicio.costo_servicio.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'}) : 'Consultar'}</p>
+              ${servicio.nombre_discapacidad ? `<p style="margin: 4px 0;"><strong>♿ Discapacidad:</strong> ${servicio.nombre_discapacidad}</p>` : ''}
+              ${servicio.empresa_telefono ? `<p style="margin: 4px 0;"><strong>📞 Contacto:</strong> ${servicio.empresa_telefono}</p>` : ''}
+              ${servicio.resenas && servicio.resenas.length > 0 ? `<p style="margin: 4px 0;"><strong>⭐ Valoración:</strong> ${this.calcularPromedioValoracion(servicio.resenas)}/5 (${servicio.resenas.length} reseña${servicio.resenas.length > 1 ? 's' : ''})</p>` : ''}
+            </div>
+          `);
+
+        this.serviciosMarkers.push(marker);
+      }
+    });
+
+    console.log(`✅ ${this.serviciosMarkers.length} servicios mostrados en el mapa`);
+  }
+
+  /* ======================================================
+     🆕 CALCULAR PROMEDIO DE VALORACIÓN
+  ====================================================== */
+  calcularPromedioValoracion(resenas: any[]): string {
+    if (!resenas || resenas.length === 0) return '0.0';
+    const suma = resenas.reduce((acc, r) => acc + (r.valoracion || 0), 0);
+    return (suma / resenas.length).toFixed(1);
   }
 
   async getCurrentPosition() {
@@ -96,7 +189,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           this.currentLocation = [position.coords.latitude, position.coords.longitude];
           
           if (this.map) {
-            this.map.setView(this.currentLocation, 17);
+            this.map.setView(this.currentLocation, 15); // Zoom 15 para ver servicios cercanos
             this.addCurrentLocationMarker();
           }
           
@@ -160,7 +253,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private usarUbicacionPorDefecto() {
-    this.currentLocation = [-41.4693, -72.9424];
+    this.currentLocation = [-41.4693, -72.9424]; // Puerto Montt por defecto
     if (this.map) {
       this.map.setView(this.currentLocation, 13);
     }
@@ -204,7 +297,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.map = L.map('map', {
       center: initialLocation,
-      zoom: this.currentLocation ? 17 : 13,
+      zoom: this.currentLocation ? 15 : 13,
       zoomControl: true,
       preferCanvas: false,
       zoomAnimation: true,
@@ -232,6 +325,8 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => {
       if (this.map) {
         this.map.invalidateSize();
+        // Mostrar servicios después de que el mapa esté listo
+        this.mostrarServiciosEnMapa();
       }
     }, 200);
 
@@ -240,9 +335,34 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /* ======================================================
+     🆕 VERIFICAR LOGIN ANTES DE GRABAR RUTA
+  ====================================================== */
   async startRecording() {
+    // 🔒 Verificar si el usuario está logueado
+    if (!this.isUserLoggedIn) {
+      const alert = await this.alertController.create({
+        header: '🔒 Inicio de Sesión Requerido',
+        message: 'Debes iniciar sesión para poder grabar rutas.<br><br>¿Deseas ir a la página de login?',
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel'
+          },
+          {
+            text: 'Ir a Login',
+            handler: () => {
+              this.router.navigate(['/login']);
+            }
+          }
+        ]
+      });
+      await alert.present();
+      return;
+    }
+
     if (!this.currentUserId) {
-      await this.showToast('⚠️ Debes iniciar sesión para grabar rutas', 'warning');
+      await this.showToast('⚠️ Error al obtener usuario', 'warning');
       return;
     }
 
@@ -647,9 +767,28 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.rutasPolylines = [];
   }
 
+  /* ======================================================
+     🆕 FUNCIONES PARA INICIAR SESIÓN O REGISTRARSE
+  ====================================================== */
+  irALogin() {
+    this.router.navigate(['/login']);
+  }
+
+  irARegistro() {
+    this.router.navigate(['/registro']);
+  }
+
   async verMisRutas() {
-    if (!this.currentUserId) {
-      await this.showToast('⚠️ Debes iniciar sesión', 'warning');
+    if (!this.isUserLoggedIn) {
+      const alert = await this.alertController.create({
+        header: '🔒 Inicio de Sesión Requerido',
+        message: 'Debes iniciar sesión para ver tus rutas guardadas.<br><br>¿Deseas ir a la página de login?',
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Ir a Login', handler: () => this.router.navigate(['/login']) }
+        ]
+      });
+      await alert.present();
       return;
     }
 

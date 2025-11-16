@@ -54,10 +54,14 @@ export class AdmEmpresaService {
     return this.http.get(`${this.apiUrlServicios}/${id_empresa}`);
   }
 
+  // 🆕 Obtener TODOS los servicios disponibles (para menú principal)
+  obtenerTodosLosServicios(): Observable<any> {
+    return this.http.get(`${this.apiUrlServicios}/todos/disponibles`);
+  }
+
   // Obtener un servicio específico (para edición)
   obtenerServicioPorId(id_servicio: number): Observable<any> {
     return this.http.get(`${this.apiUrlServicios}/detail/${id_servicio}`);
-    // ⚠️ Crea este endpoint en tu backend: GET /api/v1/servicios/detail/:id
   }
 
   // Editar servicio existente
