@@ -1,28 +1,336 @@
-.profile-container {
-  text-align: center;
-  margin-top: 24px;
-  margin-bottom: 16px;
+/* ======================================================
+   📋 ESTRUCTURA GENERAL
+====================================================== */
+ion-content {
+  --background: #f4f5f8;
 }
-.profile-avatar {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 10px;
-  border: 3px solid var(--ion-color-primary);
-}
-h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; }
-.role-text { color: var(--ion-color-medium); font-size: 0.9rem; }
-ion-item h3 { font-weight: 600; font-size: 1rem; }
-ion-item p  { color: var(--ion-color-medium); font-size: 0.92rem; }
-.empty-state { text-align: center; color: var(--ion-color-medium); margin-top: 40%; }
-.empty-state ion-icon { font-size: 50px; margin-bottom: 10px; }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: #666;
+}
+
+.loading-container p {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #999;
+}
+
+/* ======================================================
+   📊 ESTADÍSTICAS
+====================================================== */
+.stat-box {
+  text-align: center;
+  padding: 15px 5px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 5px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.stat-box:active {
+  transform: scale(0.95);
+}
+
+.stat-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 8px 0 4px 0;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+}
+
+ion-grid {
+  padding: 0;
+}
+
+ion-row {
+  margin: 0;
+}
+
+/* ======================================================
+   ⭐ RESEÑAS
+====================================================== */
+.resena-item {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 8px;
+  --background: #ffffff;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.resena-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.resena-servicio {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #007bff;
+  margin: 8px 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resena-servicio ion-icon {
+  font-size: 20px;
+}
+
+.resena-valoracion {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.star-icon {
+  font-size: 18px;
+}
+
+.valoracion-numero {
+  margin-left: 8px;
+  font-weight: 600;
+  color: #ffc107;
+  font-size: 1rem;
+}
+
+.resena-comentario {
+  font-size: 0.95rem;
+  color: #444;
+  font-style: italic;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-left: 3px solid #007bff;
+  border-radius: 4px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.resena-comentario ion-icon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.resena-fecha {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 8px 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.resena-fecha ion-icon {
+  font-size: 16px;
+}
+
+.resena-info {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.resena-info p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.resena-info ion-icon {
+  font-size: 16px;
+}
+
+/* Sin reseñas */
+.sin-reseñas {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.sin-reseñas ion-icon {
+  font-size: 64px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.sin-reseñas p {
+  font-size: 1rem;
+  margin: 10px 0;
+  color: #666;
+}
+
+.sin-reseñas .hint {
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* ======================================================
+   📋 TARJETAS GENERALES
+====================================================== */
 ion-card {
-  margin-top: 20px;
+  margin: 16px 0;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+ion-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+}
+
+ion-card-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+ion-card-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+ion-card-content {
+  padding: 16px;
+}
+
+/* ======================================================
+   📝 FORMULARIOS
+====================================================== */
+ion-item {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-top: 12px;
+  --inner-padding-bottom: 12px;
+  --border-radius: 8px;
+  margin-bottom: 12px;
+  --background: #fafafa;
+}
+
+ion-item ion-label {
+  font-weight: 500;
+  color: #333;
 }
 
 ion-button {
-  margin-top: 20px;
+  margin-top: 16px;
+  --border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
 }
 
+ion-button[color="success"] {
+  --background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+ion-button[fill="clear"][color="danger"] {
+  --color: #e74c3c;
+}
+
+ion-button[fill="clear"][color="danger"]:hover {
+  --background: rgba(231, 76, 60, 0.1);
+}
+
+/* ======================================================
+   📱 RESPONSIVE
+====================================================== */
+@media (max-width: 768px) {
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .stat-icon {
+    font-size: 28px;
+  }
+
+  .resena-servicio {
+    font-size: 1rem;
+  }
+
+  .resena-comentario {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  ion-card-title {
+    font-size: 1.1rem;
+  }
+
+  .stat-box {
+    padding: 10px 3px;
+  }
+
+  .stat-number {
+    font-size: 1.3rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+}
+
+/* ======================================================
+   🎨 ANIMACIONES
+====================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+ion-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ======================================================
+   🔘 BOTONES DE ACCIÓN
+====================================================== */
+ion-button[slot="end"] {
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+ion-button[slot="end"] ion-icon {
+  font-size: 22px;
+}
