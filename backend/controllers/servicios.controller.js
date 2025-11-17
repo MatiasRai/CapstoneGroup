@@ -1,8 +1,5 @@
 const db = require('../config/db');
 
-/* ======================================================
-   ✅ CREAR SERVICIO (con lugar y coordenadas opcionales)
-====================================================== */
 const createServicio = (req, res) => {
   const {
     nombre_servicio,
@@ -15,7 +12,7 @@ const createServicio = (req, res) => {
     direccion_lugar,
     latitud,
     longitud,
-    id_categoria // opcional
+    id_categoria
   } = req.body;
 
   if (!nombre_servicio || !costo_servicio || !Empresas_id_empresa) {
@@ -24,7 +21,6 @@ const createServicio = (req, res) => {
 
   const categoriaId = id_categoria || 1;
 
-  // 1️⃣ Insertar lugar
   const queryLugar = `
     INSERT INTO lugares (nombre_lugar, direccion_lugar, Empresas_id_empresa, Categoria_Lugar_id_categoria)
     VALUES (?, ?, ?, ?)
@@ -41,7 +37,6 @@ const createServicio = (req, res) => {
 
       const id_lugar = resultLugar.insertId;
 
-      // 2️⃣ Insertar coordenadas si se proporcionan
       if (latitud && longitud) {
         const queryCoord = `
           INSERT INTO coordenadas (latitud, longitud, id_lugar)
@@ -52,7 +47,6 @@ const createServicio = (req, res) => {
         });
       }
 
-      // 3️⃣ Insertar servicio
       const queryServicio = `
         INSERT INTO servicios (
           nombre_servicio, descripcion_servicio, horario_disponible,
@@ -88,9 +82,6 @@ const createServicio = (req, res) => {
   );
 };
 
-/* ======================================================
-   ✅ OBTENER SERVICIOS POR EMPRESA
-====================================================== */
 const getServiciosByEmpresa = (req, res) => {
   const { id_empresa } = req.params;
 
@@ -98,6 +89,7 @@ const getServiciosByEmpresa = (req, res) => {
     SELECT 
       s.id_servicio, s.nombre_servicio, s.descripcion_servicio,
       s.horario_disponible, s.costo_servicio,
+      s.Lugares_id_lugar,
       l.id_lugar, l.nombre_lugar, l.direccion_lugar,
       c.nombre_categoria AS categoria_lugar,
       d.nombre_discapacidad,
@@ -120,7 +112,6 @@ const getServiciosByEmpresa = (req, res) => {
       return res.status(500).json({ error: 'Error al obtener los servicios' });
     }
 
-    // Agrupar reseñas y coordenadas por servicio
     const servicios = {};
     rows.forEach((row) => {
       if (!servicios[row.id_servicio]) {
@@ -130,6 +121,8 @@ const getServiciosByEmpresa = (req, res) => {
           descripcion_servicio: row.descripcion_servicio,
           horario_disponible: row.horario_disponible,
           costo_servicio: row.costo_servicio,
+          Lugares_id_lugar: row.Lugares_id_lugar,
+          id_lugar: row.id_lugar,
           nombre_lugar: row.nombre_lugar,
           direccion_lugar: row.direccion_lugar,
           categoria_lugar: row.categoria_lugar,
@@ -139,7 +132,6 @@ const getServiciosByEmpresa = (req, res) => {
         };
       }
 
-      // Agregar coordenadas (evitar duplicados)
       if (row.id_coordenada && !servicios[row.id_servicio].coordenadas.find(c => c.id_coordenada === row.id_coordenada)) {
         servicios[row.id_servicio].coordenadas.push({
           id_coordenada: row.id_coordenada,
@@ -148,7 +140,6 @@ const getServiciosByEmpresa = (req, res) => {
         });
       }
 
-      // Agregar reseñas (evitar duplicados)
       if (row.id_resena && !servicios[row.id_servicio].resenas.find(r => r.id_resena === row.id_resena)) {
         servicios[row.id_servicio].resenas.push({
           id_resena: row.id_resena,
@@ -159,7 +150,6 @@ const getServiciosByEmpresa = (req, res) => {
       }
     });
 
-    // Simplificar coordenadas: si solo hay una, usar latitud/longitud directamente
     Object.values(servicios).forEach(servicio => {
       if (servicio.coordenadas.length === 1) {
         servicio.latitud = servicio.coordenadas[0].latitud;
@@ -171,20 +161,31 @@ const getServiciosByEmpresa = (req, res) => {
   });
 };
 
-/* ======================================================
-   🆕 OBTENER TODOS LOS SERVICIOS DISPONIBLES (para menú público)
-====================================================== */
 const getAllServicios = (req, res) => {
   const query = `
     SELECT 
-      s.id_servicio, s.nombre_servicio, s.descripcion_servicio,
-      s.horario_disponible, s.costo_servicio,
-      l.id_lugar, l.nombre_lugar, l.direccion_lugar,
+      s.id_servicio, 
+      s.nombre_servicio, 
+      s.descripcion_servicio,
+      s.horario_disponible, 
+      s.costo_servicio,
+      s.Empresas_id_empresa,
+      s.Lugares_id_lugar,
+      l.id_lugar, 
+      l.nombre_lugar, 
+      l.direccion_lugar,
       c.nombre_categoria AS categoria_lugar,
       d.nombre_discapacidad,
-      e.nombre_empresa, e.telefono AS empresa_telefono,
-      coord.id_coordenada, coord.latitud, coord.longitud,
-      r.id_resena, r.valoracion, r.comentarios, r.fecha_resena
+      e.id_empresa,
+      e.nombre_empresa, 
+      e.telefono AS empresa_telefono,
+      coord.id_coordenada, 
+      coord.latitud, 
+      coord.longitud,
+      r.id_resena, 
+      r.valoracion, 
+      r.comentarios, 
+      r.fecha_resena
     FROM servicios s
     INNER JOIN empresas e ON s.Empresas_id_empresa = e.id_empresa
     LEFT JOIN lugares l ON s.Lugares_id_lugar = l.id_lugar
@@ -202,7 +203,6 @@ const getAllServicios = (req, res) => {
       return res.status(500).json({ error: 'Error al obtener los servicios' });
     }
 
-    // Agrupar reseñas y coordenadas por servicio
     const servicios = {};
     rows.forEach((row) => {
       if (!servicios[row.id_servicio]) {
@@ -212,6 +212,9 @@ const getAllServicios = (req, res) => {
           descripcion_servicio: row.descripcion_servicio,
           horario_disponible: row.horario_disponible,
           costo_servicio: row.costo_servicio,
+          Empresas_id_empresa: row.Empresas_id_empresa,
+          Lugares_id_lugar: row.Lugares_id_lugar,
+          id_lugar: row.id_lugar,
           nombre_lugar: row.nombre_lugar,
           direccion_lugar: row.direccion_lugar,
           categoria_lugar: row.categoria_lugar,
@@ -223,7 +226,6 @@ const getAllServicios = (req, res) => {
         };
       }
 
-      // Agregar coordenadas (evitar duplicados)
       if (row.id_coordenada && !servicios[row.id_servicio].coordenadas.find(c => c.id_coordenada === row.id_coordenada)) {
         servicios[row.id_servicio].coordenadas.push({
           id_coordenada: row.id_coordenada,
@@ -232,7 +234,6 @@ const getAllServicios = (req, res) => {
         });
       }
 
-      // Agregar reseñas (evitar duplicados)
       if (row.id_resena && !servicios[row.id_servicio].resenas.find(r => r.id_resena === row.id_resena)) {
         servicios[row.id_servicio].resenas.push({
           id_resena: row.id_resena,
@@ -243,7 +244,6 @@ const getAllServicios = (req, res) => {
       }
     });
 
-    // Simplificar coordenadas: si solo hay una, usar latitud/longitud directamente
     Object.values(servicios).forEach(servicio => {
       if (servicio.coordenadas.length === 1) {
         servicio.latitud = servicio.coordenadas[0].latitud;
@@ -256,9 +256,6 @@ const getAllServicios = (req, res) => {
   });
 };
 
-/* ======================================================
-   ✏️ ACTUALIZAR SERVICIO POR ID
-====================================================== */
 const updateServicio = (req, res) => {
   const { id_servicio } = req.params;
   const { nombre_servicio, descripcion_servicio, horario_disponible, costo_servicio } = req.body;
@@ -275,9 +272,6 @@ const updateServicio = (req, res) => {
   });
 };
 
-/* ======================================================
-   🗑️ ELIMINAR SERVICIO POR ID
-====================================================== */
 const deleteServicio = (req, res) => {
   const { id_servicio } = req.params;
 
@@ -287,13 +281,10 @@ const deleteServicio = (req, res) => {
   });
 };
 
-/* ======================================================
-   📦 EXPORTAR FUNCIONES
-====================================================== */
 module.exports = {
   createServicio,
   getServiciosByEmpresa,
-  getAllServicios,  // 🆕 Nueva función exportada
+  getAllServicios,
   updateServicio,
   deleteServicio
 };

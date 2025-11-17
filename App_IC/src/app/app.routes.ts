@@ -6,7 +6,7 @@ import { AuthEmpresaGuard } from './guards/auth-empresa.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'menu', // 🔹 Ahora va directo al menú principal
+    redirectTo: 'menu',
     pathMatch: 'full',
   },
 
@@ -24,7 +24,6 @@ export const routes: Routes = [
   {
     path: 'menu',
     loadComponent: () => import('./menu/menu.page').then(m => m.MenuPage)
-    // ✅ Sin canActivate - accesible sin login
   },
 
   // 📋 Perfil de usuario - SÍ requiere autenticación
@@ -32,6 +31,12 @@ export const routes: Routes = [
     path: 'perfil-usuario',
     loadComponent: () => import('./perfil-usuario/perfil-usuario.page').then(m => m.PerfilUsuarioPage),
     canActivate: [AuthUserGuard]
+  },
+
+  // 📄 Información del servicio - ACCESIBLE SIN LOGIN
+  {
+    path: 'info-servicio',
+    loadComponent: () => import('./info-servicio/info-servicio.page').then(m => m.InfoServicioPage)
   },
 
   // 👨‍💻 Administrador del sistema
@@ -68,13 +73,9 @@ export const routes: Routes = [
     loadComponent: () => import('./registro-empresa/registro-empresa.page').then(m => m.RegistroEmpresaPage)
   },
 
-  // ❌ Si la ruta no existe, redirige al menú principal
+  // ❌ Si la ruta no existe, redirige al menú principal (SIEMPRE AL FINAL)
   {
     path: '**',
     redirectTo: 'menu'
-  },  {
-    path: 'info-servicio',
-    loadComponent: () => import('./info-servicio/info-servicio.page').then( m => m.InfoServicioPage)
   }
-
 ];
