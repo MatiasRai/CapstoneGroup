@@ -72,5 +72,9 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'menu'
+  },  {
+    path: 'info-servicio',
+    loadComponent: () => import('./info-servicio/info-servicio.page').then( m => m.InfoServicioPage)
   }
+
 ];
