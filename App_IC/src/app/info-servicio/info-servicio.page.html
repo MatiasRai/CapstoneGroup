@@ -223,12 +223,16 @@
           <h3 style="margin: 15px 0 10px 0; color: #333; font-size: 1rem;">
             Tu Comentario (opcional)
           </h3>
-          <ion-textarea
-            [(ngModel)]="nuevaResena.comentarios"
-            placeholder="Cuéntanos sobre tu experiencia con este servicio..."
-            rows="4"
-            style="--background: #f9f9f9; --border-radius: 8px; --padding-start: 12px; --padding-end: 12px;">
-          </ion-textarea>
+          
+          <ion-item lines="none">
+            <ion-textarea
+              [value]="nuevaResena.comentarios"
+              (ionInput)="onComentarioChange($event)"
+              placeholder="Cuéntanos sobre tu experiencia con este servicio..."
+              rows="4"
+              auto-grow="true">
+            </ion-textarea>
+          </ion-item>
         </div>
 
         <ion-button 

@@ -46,11 +46,10 @@ export class InfoServicioPage implements OnInit {
     if (userStr) {
       this.currentUser = JSON.parse(userStr);
       console.log('👤 Usuario completo:', this.currentUser);
-      console.log('👤 Propiedades:', Object.keys(this.currentUser));
     }
 
     if (!this.servicio) {
-      console.error('No se recibió el servicio');
+      console.error('❌ No se recibió el servicio');
       this.router.navigate(['/menu']);
       return;
     }
@@ -61,10 +60,10 @@ export class InfoServicioPage implements OnInit {
         this.empresa = empresasArray.find(
           (e: any) => e.id_empresa === this.servicio.Empresas_id_empresa
         );
-        console.log('Empresa cargada:', this.empresa);
+        console.log('🏢 Empresa cargada:', this.empresa);
       },
       error: (err) => {
-        console.error('Error al cargar empresa:', err);
+        console.error('❌ Error al cargar empresa:', err);
       }
     });
 
@@ -81,21 +80,26 @@ export class InfoServicioPage implements OnInit {
         
         if (servicioActualizado) {
           this.servicio = servicioActualizado;
-          console.log('Servicio actualizado:', this.servicio);
+          console.log('✅ Servicio actualizado:', this.servicio);
         }
         
         this.cargando = false;
       },
       error: (err) => {
-        console.error('Error al recargar servicio:', err);
+        console.error('❌ Error al recargar servicio:', err);
         this.cargando = false;
       }
     });
   }
 
+  onComentarioChange(event: any) {
+    this.nuevaResena.comentarios = event.detail.value || '';
+    console.log('📝 Comentario actualizado:', this.nuevaResena.comentarios);
+  }
+
   setRating(rating: number) {
     this.nuevaResena.valoracion = rating;
-    console.log('Valoración seleccionada:', rating);
+    console.log('⭐ Valoración seleccionada:', rating);
   }
 
   setHoverRating(rating: number) {
@@ -118,11 +122,6 @@ export class InfoServicioPage implements OnInit {
     }
   }
 
-  getStarColor(position: number): string {
-    const rating = this.nuevaResena.hoverRating || this.nuevaResena.valoracion;
-    return rating >= position - 0.5 ? '#FF9800' : '#BDBDBD';
-  }
-
   async enviarResena() {
     if (this.nuevaResena.valoracion === 0) {
       const toast = await this.toastController.create({
@@ -136,12 +135,7 @@ export class InfoServicioPage implements OnInit {
     }
 
     const lugarId = this.servicio.Lugares_id_lugar || this.servicio.id_lugar;
-    const usuarioId = this.currentUser?.id_usuario || this.currentUser?.id;
-
-    console.log('🔍 DEBUG - Lugar ID:', lugarId);
-    console.log('🔍 DEBUG - Usuario ID:', usuarioId);
-    console.log('🔍 DEBUG - Current User:', this.currentUser);
-    console.log('🔍 DEBUG - Servicio:', this.servicio);
+    const usuarioId = this.currentUser?.id || this.currentUser?.id_usuario;
 
     if (!lugarId) {
       const toast = await this.toastController.create({
@@ -151,8 +145,6 @@ export class InfoServicioPage implements OnInit {
         position: 'top'
       });
       await toast.present();
-      console.error('Propiedades del servicio:', Object.keys(this.servicio));
-      console.error('Servicio completo:', this.servicio);
       return;
     }
 
@@ -164,8 +156,6 @@ export class InfoServicioPage implements OnInit {
         position: 'top'
       });
       await toast.present();
-      console.error('Propiedades del usuario:', this.currentUser ? Object.keys(this.currentUser) : 'null');
-      console.error('Usuario completo:', this.currentUser);
       return;
     }
 
@@ -176,11 +166,13 @@ export class InfoServicioPage implements OnInit {
       id_usuario: usuarioId
     };
 
-    console.log('Enviando reseña:', resenaData);
+    console.log('📤 ENVIANDO AL BACKEND:', resenaData);
+    console.log('📤 Tipo comentarios:', typeof resenaData.comentarios);
+    console.log('📤 Longitud:', resenaData.comentarios.length);
 
     this.http.post(`${this.apiUrl}/resenas`, resenaData).subscribe({
       next: async (response) => {
-        console.log('Reseña creada:', response);
+        console.log('✅ Reseña creada:', response);
         
         const toast = await this.toastController.create({
           message: '✅ ¡Gracias por tu reseña!',
@@ -199,9 +191,10 @@ export class InfoServicioPage implements OnInit {
         this.recargarServicio();
       },
       error: async (err) => {
-        console.error('Error al crear reseña:', err);
+        console.error('❌ Error completo:', err);
+        
         const toast = await this.toastController.create({
-          message: '❌ Error al enviar la reseña. Intenta de nuevo.',
+          message: `❌ Error al enviar la reseña`,
           duration: 3000,
           color: 'danger',
           position: 'top'
