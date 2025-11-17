@@ -5,6 +5,7 @@ import { addIcons } from 'ionicons';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { AuthService } from './services/auth.service';
 
+// 🔹 Iconos
 import {
   logOut,
   logIn,
@@ -15,7 +16,8 @@ import {
   addCircle,
   clipboard,
   apps,
-  eye
+  eye,
+  informationCircle
 } from 'ionicons/icons';
 
 @Component({
@@ -26,6 +28,7 @@ import {
   imports: [CommonModule, RouterLink, RouterLinkActive, ...IONIC_IMPORTS],
 })
 export class AppComponent implements OnInit {
+
   currentUser: any = null;
   appPages: any[] = [];
 
@@ -40,14 +43,14 @@ export class AppComponent implements OnInit {
       addCircle,
       clipboard,
       apps,
-      eye
+      eye,
+      informationCircle
     });
   }
 
   ngOnInit() {
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
-      console.log('👤 Usuario actual:', user);
       this.actualizarMenu();
     });
   }
@@ -56,29 +59,44 @@ export class AppComponent implements OnInit {
   // 🔵 MENÚ DINÁMICO SEGÚN SESIÓN Y ROL
   // ==========================================
   actualizarMenu() {
-    // 👉 OPCIÓN A — Mostrar Registrar Empresa SOLO sin sesión
+
+    // 🆕 Opción visible para TODOS
+    const infoApp = {
+      title: 'Información de la App',
+      url: '/info-app',
+      icon: 'information-circle'
+    };
+
+    // 👉 NO HAY SESIÓN INICIADA
     if (!this.currentUser) {
       this.appPages = [
         { title: 'Login', url: '/login', icon: 'log-in' },
         { title: 'Registro Usuario', url: '/registro', icon: 'person-add' },
-        { title: 'Registrar Empresa', url: '/registro-empresa', icon: 'business' }  // 🔥 AGREGADO
+
+        // 🔥 AGREGAMOS → Registro Admin Empresa
+        { title: 'Registro Adm Empresa', url: '/registro-adm-empresa', icon: 'business' },
+
+        infoApp
       ];
       return;
     }
 
     // 👉 SESIÓN INICIADA
     switch (this.currentUser.role) {
+
       case 'adm_empresa':
         this.appPages = [
           { title: 'Menú Empresa', url: '/menu-emp', icon: 'briefcase' },
           { title: 'Publicar Servicio', url: '/publicar-servicio', icon: 'add-circle' },
-          { title: 'Servicio', url: '/servicio', icon: 'clipboard' }
+          { title: 'Servicio', url: '/servicio', icon: 'clipboard' },
+          infoApp
         ];
         break;
 
       case 'adm':
         this.appPages = [
-          { title: 'Menú Admin', url: '/menu-adm', icon: 'apps' }
+          { title: 'Menú Admin', url: '/menu-adm', icon: 'apps' },
+          infoApp
         ];
         break;
 
@@ -86,7 +104,8 @@ export class AppComponent implements OnInit {
       default:
         this.appPages = [
           { title: 'Menú', url: '/menu', icon: 'menu' },
-          { title: 'Perfil de Usuario', url: '/perfil-usuario', icon: 'person-circle' }
+          { title: 'Perfil de Usuario', url: '/perfil-usuario', icon: 'person-circle' },
+          infoApp
         ];
         break;
     }
