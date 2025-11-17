@@ -16,6 +16,7 @@ import { HttpClient } from '@angular/common/http';
   imports: [CommonModule, FormsModule, ...IONIC_IMPORTS],
 })
 export class PublicarServicioPage implements OnInit, AfterViewInit {
+
   servicio = {
     nombre_servicio: '',
     descripcion_servicio: '',
@@ -32,7 +33,6 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
 
   private map!: L.Map;
   private marker!: L.Marker;
-  ubicacionObtenida = false;
 
   tiposDiscapacidad: any[] = [];
   private host = window.location.hostname;
@@ -44,26 +44,42 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     private http: HttpClient
   ) {}
 
+  // ─────────────────────────────────────────────
+  // INICIO
+  // ─────────────────────────────────────────────
   ngOnInit() {
     const usuario = this.authService.getUser();
-    if (usuario?.id) {
-      this.servicio.Empresas_id_empresa = usuario.id;
-    }
-    
-    this.cargarTiposDiscapacidad();
+    if (usuario?.id) this.servicio.Empresas_id_empresa = usuario.id;
+
+    this.cargarTiposDiscapacidad();  // ⭐ YA EXISTE Y FUNCIONA
   }
 
   ngAfterViewInit() {
-    // 🧭 Arreglar íconos de Leaflet ANTES de inicializar el mapa
     this.fixLeafletIcons();
-    
-    // ⏱️ Esperar un poco antes de inicializar el mapa
-    setTimeout(() => {
-      this.inicializarMapa(-33.4489, -70.6693);
-    }, 100);
+    setTimeout(() => this.inicializarMapa(-33.4489, -70.6693), 200);
   }
 
-  // 🧭 Fix íconos de Leaflet (cargar desde CDN)
+  // ─────────────────────────────────────────────
+  // CARGAR TIPOS DE DISCAPACIDAD
+  // ─────────────────────────────────────────────
+  private cargarTiposDiscapacidad() {
+    const url = `http://${this.host}:3000/api/v1/discapacidades/tipos`;
+
+    this.http.get(url).subscribe({
+      next: (data: any) => {
+        this.tiposDiscapacidad = data;
+        console.log("Tipos de discapacidad cargados:", this.tiposDiscapacidad);
+      },
+      error: (err) => {
+        console.error("Error al cargar tipos:", err);
+        this.mostrarToast("Error al cargar tipos de discapacidad", "danger");
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  // LEAFLET - FIX ICONS
+  // ─────────────────────────────────────────────
   private fixLeafletIcons(): void {
     const iconDefault = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -77,177 +93,127 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     L.Marker.prototype.options.icon = iconDefault;
   }
 
-  cargarTiposDiscapacidad() {
-    const url = `http://${this.host}:3000/api/v1/discapacidades/tipos`;
-    
-    this.http.get(url).subscribe({
-      next: (data: any) => {
-        this.tiposDiscapacidad = data;
-        console.log('✅ Tipos de discapacidad cargados:', this.tiposDiscapacidad);
-      },
-      error: (err) => {
-        console.error('❌ Error al cargar tipos de discapacidad:', err);
-        this.mostrarToast('Error al cargar tipos de discapacidad', 'danger');
-      }
-    });
-  }
-
-  // 🗺️ INICIALIZAR MAPA CON ANIMACIONES (igual que menu.page.ts)
+  // ─────────────────────────────────────────────
+  // INICIALIZAR MAPA CORRECTAMENTE
+  // ─────────────────────────────────────────────
   private inicializarMapa(lat: number, lng: number) {
-    if (this.map) {
-      this.map.remove();
+    const contenedor = document.getElementById('map');
+    if (!contenedor) {
+      setTimeout(() => this.inicializarMapa(lat, lng), 200);
+      return;
     }
 
-    // ✅ Crear mapa CON animaciones activadas
+    if (this.map) {
+      try {
+        this.map.off();
+        this.map.remove();
+      } catch {}
+    }
+
     this.map = L.map('map', {
       center: [lat, lng],
       zoom: 15,
-      zoomControl: true,
-      preferCanvas: false,
-      zoomAnimation: true,           // ✅ Activar animación de zoom
-      fadeAnimation: true,            // ✅ Activar animación de fade
-      markerZoomAnimation: true,      // ✅ Activar animación de marcadores
-      trackResize: true               // ✅ Seguir cambios de tamaño
+      zoomAnimation: true,
+      fadeAnimation: true,
+      markerZoomAnimation: true,
     });
 
-    // ✅ Configurar tiles CON gestión de errores
-    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
-      minZoom: 10,
-      keepBuffer: 4,                  // ✅ Mantener tiles en buffer
-      updateWhenIdle: false,          // ✅ Actualizar mientras se mueve
-      updateWhenZooming: false,       // ✅ No actualizar durante zoom
-      updateInterval: 200,            // ✅ Intervalo de actualización
-      errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
-      crossOrigin: true,
-      opacity: 1.0,
-      className: 'map-tiles'
-    });
+    }).addTo(this.map);
 
-    tileLayer.addTo(this.map);
+    this.marker = L.marker([lat, lng]).addTo(this.map);
 
-    // ✅ Manejar errores de tiles
-    tileLayer.on('tileerror', (error: any) => {
-      console.warn('⚠️ Error cargando tile, intentando recargar...');
-    });
-
-    tileLayer.on('load', () => {
-      console.log('✅ Tiles del mapa cargadas');
-    });
-
-    // ✅ Redimensionar mapa después de inicializar
-    setTimeout(() => {
-      if (this.map) {
-        this.map.invalidateSize();
-        console.log('🗺️ Mapa redimensionado correctamente');
-      }
-    }, 200);
-
-    // ✅ Crear marcador inicial
-    this.marker = L.marker([lat, lng])
-      .addTo(this.map)
-      .bindPopup('📍 Ubicación actual o predeterminada')
-      .openPopup();
-
-    console.log('🗺️ Mapa inicializado con animaciones activadas');
+    setTimeout(() => this.map.invalidateSize(), 250);
   }
 
-  async obtenerUbicacion() {
-    try {
-      console.log('🔍 Solicitando ubicación GPS...');
-
-      if (!navigator.geolocation) {
-        console.error('❌ Geolocation no disponible');
-        this.mostrarToast('⚠️ Tu navegador no soporta geolocalización', 'danger');
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-
-          this.servicio.latitud = lat;
-          this.servicio.longitud = lng;
-          this.ubicacionObtenida = true;
-
-          console.log('✅ GPS obtenido:', { lat, lng });
-          console.log('📊 Precisión:', position.coords.accuracy, 'metros');
-          console.log('✅ Servicio actualizado:', this.servicio);
-
-          this.mostrarToast('Ubicación obtenida correctamente.', 'success');
-
-          // ✅ Actualizar mapa CON animación
-          this.map.setView([lat, lng], 16, {
-            animate: true,
-            duration: 0.5
-          });
-
-          this.marker.setLatLng([lat, lng])
-            .bindPopup('📍 Aquí se ubicará tu servicio')
-            .openPopup();
-        },
-        (error) => {
-          console.error('❌ Error GPS:', error);
-          let mensaje = 'No se pudo obtener la ubicación';
-          
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              mensaje = 'Permiso de ubicación denegado';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              mensaje = 'Ubicación no disponible';
-              break;
-            case error.TIMEOUT:
-              mensaje = 'Tiempo de espera agotado';
-              break;
-          }
-          
-          this.mostrarToast(mensaje, 'danger');
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 5000
-        }
-      );
-
-    } catch (error: any) {
-      console.error('❌ Error al obtener GPS:', error);
-      this.mostrarToast(`⚠️ Error GPS: ${error.message}`, 'warning');
+  // ─────────────────────────────────────────────
+  // GEOLOCALIZACIÓN
+  // ─────────────────────────────────────────────
+  obtenerUbicacion() {
+    if (!navigator.geolocation) {
+      this.mostrarToast("Tu navegador no soporta geolocalización.", "danger");
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        this.servicio.latitud = lat;
+        this.servicio.longitud = lng;
+
+        this.map.setView([lat, lng], 16, { animate: true });
+        this.marker.setLatLng([lat, lng]);
+
+        this.mostrarToast("Ubicación obtenida correctamente.", "success");
+      },
+      () => this.mostrarToast("Error al obtener la ubicación.", "danger"),
+      { enableHighAccuracy: true }
+    );
   }
 
-  registrarServicio() {
-    console.log('📤 Enviando servicio:', this.servicio);
+  // ─────────────────────────────────────────────
+  // VALIDACIÓN BACKEND
+  // ─────────────────────────────────────────────
+  private validarServicio(): string | null {
+    if (!this.servicio.nombre_servicio.trim() || this.servicio.nombre_servicio.length < 3)
+      return "El nombre debe tener mínimo 3 caracteres.";
 
-    if (!this.servicio.nombre_servicio || !this.servicio.descripcion_servicio) {
-      this.mostrarToast('Completa todos los campos obligatorios.', 'warning');
+    if (!this.servicio.descripcion_servicio.trim() || this.servicio.descripcion_servicio.length < 10)
+      return "La descripción debe tener mínimo 10 caracteres.";
+
+    if (!this.servicio.horario_disponible.trim())
+      return "Debes indicar un horario disponible.";
+
+    const costo = Number(this.servicio.costo_servicio);
+    if (isNaN(costo) || costo <= 0)
+      return "El costo debe ser mayor a 0.";
+
+    if (!this.servicio.direccion_lugar.trim())
+      return "Debes ingresar una dirección.";
+
+    if (!this.servicio.nombre_lugar.trim())
+      return "Debes ingresar el nombre del lugar.";
+
+    if (!this.servicio.id_discapacidad)
+      return "Debes seleccionar un tipo de discapacidad.";
+
+    if (!this.servicio.latitud || !this.servicio.longitud)
+      return "Debes obtener la ubicación en el mapa.";
+
+    return null;
+  }
+
+  // ─────────────────────────────────────────────
+  // REGISTRAR SERVICIO
+  // ─────────────────────────────────────────────
+  registrarServicio() {
+    const error = this.validarServicio();
+    if (error) {
+      this.mostrarToast("⚠️ " + error, "warning");
       return;
     }
 
     this.admEmpresaService.publicarServicio(this.servicio).subscribe({
-      next: (res) => {
-        console.log('✅ Servicio registrado:', res);
-        this.mostrarToast('Servicio registrado correctamente.', 'success');
+      next: () => {
+        this.mostrarToast("Servicio registrado correctamente.", "success");
         this.limpiarFormulario();
-        
-        // ✅ Reinicializar mapa con pequeño delay
+
         if (this.map) {
+          this.map.off();
           this.map.remove();
+          setTimeout(() => this.inicializarMapa(-33.4489, -70.6693), 150);
         }
-        setTimeout(() => {
-          this.inicializarMapa(-33.4489, -70.6693);
-        }, 100);
       },
-      error: (err) => {
-        console.error('❌ Error al registrar servicio:', err);
-        this.mostrarToast('Error al registrar el servicio.', 'danger');
-      },
+      error: () => this.mostrarToast("Error al registrar el servicio.", "danger"),
     });
   }
 
+  // ─────────────────────────────────────────────
+  // LIMPIAR FORMULARIO
+  // ─────────────────────────────────────────────
   limpiarFormulario() {
     const empresaId = this.authService.getUser()?.id || null;
 
@@ -264,16 +230,17 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
       longitud: null,
       id_categoria: 1,
     };
-
-    this.ubicacionObtenida = false;
   }
 
+  // ─────────────────────────────────────────────
+  // TOAST
+  // ─────────────────────────────────────────────
   async mostrarToast(message: string, color: string = 'primary') {
     const toast = await this.toastCtrl.create({
       message,
-      duration: 2000,
+      duration: 2500,
       color,
     });
-    await toast.present();
+    toast.present();
   }
 }

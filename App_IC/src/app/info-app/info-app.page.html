@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Sobre la Aplicación</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <h1 class="titulo">¿Qué es Rutas y Servicios Accesibles?</h1>
+
+  <p class="texto">
+    Esta aplicación está diseñada para ayudar a personas con discapacidad 
+    a encontrar rutas accesibles, lugares adaptados y servicios inclusivos.
+    El objetivo es crear una comunidad donde todos puedan desplazarse y 
+    acceder a la ciudad sin barreras.
+  </p>
+
+  <h2 class="subtitulo">¿Cómo funciona?</h2>
+  <ul class="lista">
+    <li>📌 Los usuarios pueden explorar rutas accesibles y servicios cercanos.</li>
+    <li>📍 Puedes guardar tus propias rutas y compartirlas.</li>
+    <li>🏢 Las empresas pueden registrar sus servicios accesibles.</li>
+    <li>♿ Servicios adaptados según tipos de discapacidad.</li>
+  </ul>
+
+  <h2 class="subtitulo">Para Empresas</h2>
+  <p class="texto">
+    Si tienes un negocio o servicio, puedes registrarlo aquí para hacerlo 
+    visible a cientos de usuarios. Esto ayuda a aumentar tu alcance y a promover 
+    la inclusión en tu comunidad.
+  </p>
+
+  <ion-button expand="block" color="primary" (click)="irRegistroEmpresa()">
+    Registrar mi Empresa
+  </ion-button>
+
+  <ion-button expand="block" color="secondary" (click)="irPublicarServicio()">
+    Publicar un Servicio Accesible
+  </ion-button>
+
+  <h2 class="subtitulo">Para Usuarios</h2>
+  <p class="texto">
+    Puedes crear tus propias rutas, compartir recomendaciones y ayudar a otros 
+    usuarios a movilizarse de manera más segura y accesible.
+  </p>
+
+  <ion-button expand="block" color="success" (click)="irCrearRuta()">
+    Crear mi Ruta Accesible
+  </ion-button>
+
+</ion-content>
+

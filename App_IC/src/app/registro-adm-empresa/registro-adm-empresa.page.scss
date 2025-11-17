@@ -1,0 +1,91 @@
+/* ============================================================
+   🎨 ESTILOS ACCESIBLES PARA DISCAPACIDAD VISUAL
+   Alto contraste, alto tamaño de texto y bordes reforzados
+============================================================ */
+
+/* Texto general más grande */
+ion-label,
+ion-input {
+  font-size: 1.1rem !important; /* +15% tamaño */
+}
+
+/* Títulos accesibles */
+h2 {
+  font-size: 1.6rem !important;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+
+/* ============================================================
+   ❌ MENSAJES DE ERROR – Alto contraste
+============================================================ */
+.error-text {
+  color: #d90429; /* Rojo fuerte accesible */
+  font-size: 1rem; /* Más grande que el estándar */
+  font-weight: 600;
+  margin: 6px 4px 12px 8px;
+}
+
+
+/* ============================================================
+   ❌ CAMPOS CON ERROR – Bordes reforzados y contrastados
+============================================================ */
+ion-item.invalid {
+  --highlight-color-focused: #d90429 !important;
+  --border-color: #d90429 !important;
+  border-left: 5px solid #d90429; /* grueso para baja visión */
+  background-color: #ffe8e8;     /* contraste alto pero leve */
+  transition: 0.25s ease-in-out;
+}
+
+/* Campo válido (verde accesible) */
+ion-item.valid {
+  --highlight-color-focused: #06d6a0 !important;
+  --border-color: #06d6a0 !important;
+  border-left: 5px solid #06d6a0;
+  background-color: #e8fff6;
+}
+
+
+/* ============================================================
+   🧭 CAMPOS – Mayor tamaño y espaciado
+============================================================ */
+ion-item {
+  padding: 12px 6px;
+  margin-bottom: 12px;
+  --border-radius: 12px;
+}
+
+
+/* ============================================================
+   ⌨️ ACCESIBLE CON TECLADO – Borde claro al enfocar
+============================================================ */
+ion-input:focus,
+ion-button:focus {
+  outline: 3px solid #118ab2 !important; /* azul accesible */
+  outline-offset: 4px;
+}
+
+
+/* ============================================================
+   🔵 BOTONES GRANDES Y ACCESIBLES
+============================================================ */
+ion-button {
+  font-size: 1.2rem;
+  padding: 14px;
+  --background: #0077b6;       /* azul fuerte accesible */
+  --background-activated: #023e8a;
+  --background-hover: #0096c7;
+  --color: white;
+  font-weight: 700;
+  border-radius: 12px;
+}
+
+/* Botón deshabilitado accesible */
+ion-button[disabled] {
+  opacity: 0.6;
+  --background: #cccccc;
+  --color: #555555;
+}
