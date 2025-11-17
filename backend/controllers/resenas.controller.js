@@ -1,8 +1,5 @@
 const db = require('../config/db');
 
-/* ======================================================
-   ⭐ OBTENER TODAS LAS RESEÑAS DE UN USUARIO
-====================================================== */
 const getResenasByUsuario = (req, res) => {
   const { id_usuario } = req.params;
 
@@ -43,15 +40,16 @@ const getResenasByUsuario = (req, res) => {
   });
 };
 
-/* ======================================================
-   ⭐ CREAR UNA NUEVA RESEÑA
-====================================================== */
 const createResena = (req, res) => {
   const { valoracion, comentarios, Lugares_id_lugar, id_usuario } = req.body;
 
-  console.log('📝 Intentando crear reseña:', { valoracion, Lugares_id_lugar, id_usuario });
+  console.log('📝 Intentando crear reseña:', { 
+    valoracion, 
+    comentarios, 
+    Lugares_id_lugar, 
+    id_usuario 
+  });
 
-  // Validaciones
   if (!valoracion || !Lugares_id_lugar || !id_usuario) {
     return res.status(400).json({ 
       error: 'Faltan datos obligatorios: valoracion, Lugares_id_lugar, id_usuario' 
@@ -64,6 +62,12 @@ const createResena = (req, res) => {
     });
   }
 
+  const comentarioFinal = comentarios && comentarios.trim() !== '' 
+    ? comentarios.trim() 
+    : null;
+
+  console.log('📝 Comentario procesado:', comentarioFinal);
+
   const query = `
     INSERT INTO resenas (valoracion, comentarios, fecha_resena, Lugares_id_lugar, Usuario_id_usuario)
     VALUES (?, ?, CURDATE(), ?, ?)
@@ -71,7 +75,7 @@ const createResena = (req, res) => {
 
   db.query(
     query,
-    [valoracion, comentarios || '', Lugares_id_lugar, id_usuario],
+    [valoracion, comentarioFinal, Lugares_id_lugar, id_usuario],
     (err, result) => {
       if (err) {
         console.error('❌ Error al crear reseña:', err.sqlMessage);
@@ -83,10 +87,12 @@ const createResena = (req, res) => {
       }
 
       console.log(`✅ Reseña ${result.insertId} creada correctamente`);
+      console.log(`📝 Comentario guardado: "${comentarioFinal}"`);
+      
       res.status(201).json({
         id_resena: result.insertId,
         valoracion,
-        comentarios,
+        comentarios: comentarioFinal,
         Lugares_id_lugar,
         id_usuario,
         message: '✅ Reseña creada correctamente'
@@ -95,16 +101,12 @@ const createResena = (req, res) => {
   );
 };
 
-/* ======================================================
-   ⭐ ACTUALIZAR UNA RESEÑA
-====================================================== */
 const updateResena = (req, res) => {
   const { id } = req.params;
   const { valoracion, comentarios } = req.body;
 
   console.log(`✏️ Actualizando reseña ${id}...`);
 
-  // Validación
   if (valoracion && (valoracion < 1 || valoracion > 5)) {
     return res.status(400).json({ 
       error: 'La valoración debe estar entre 1 y 5' 
@@ -121,7 +123,7 @@ const updateResena = (req, res) => {
 
   if (comentarios !== undefined) {
     fields.push('comentarios = ?');
-    values.push(comentarios);
+    values.push(comentarios && comentarios.trim() !== '' ? comentarios.trim() : null);
   }
 
   if (fields.length === 0) {
@@ -152,9 +154,6 @@ const updateResena = (req, res) => {
   });
 };
 
-/* ======================================================
-   ⭐ ELIMINAR UNA RESEÑA
-====================================================== */
 const deleteResena = (req, res) => {
   const { id } = req.params;
 
@@ -178,9 +177,6 @@ const deleteResena = (req, res) => {
   });
 };
 
-/* ======================================================
-   ⭐ OBTENER RESEÑAS DE UN LUGAR ESPECÍFICO
-====================================================== */
 const getResenasByLugar = (req, res) => {
   const { id_lugar } = req.params;
 
@@ -214,9 +210,6 @@ const getResenasByLugar = (req, res) => {
   });
 };
 
-/* ======================================================
-   🧪 VERIFICAR ESTADO DE LA TABLA (para debugging)
-====================================================== */
 const checkTableStatus = (req, res) => {
   db.query('SHOW TABLES LIKE "resenas"', (err, tables) => {
     if (err) {
@@ -253,9 +246,6 @@ const checkTableStatus = (req, res) => {
   });
 };
 
-/* ======================================================
-   📦 EXPORTAR FUNCIONES
-====================================================== */
 module.exports = {
   getResenasByUsuario,
   createResena,

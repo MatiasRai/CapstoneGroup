@@ -14,7 +14,7 @@ import {
   IonCard,
   IonCardHeader,
   IonCardTitle,
-  IonCardSubtitle,  // 👈 agregado
+  IonCardSubtitle,
   IonCardContent,
   IonIcon,
   IonGrid,
@@ -30,7 +30,8 @@ import {
   IonMenuToggle,
   IonRouterOutlet,
   IonSpinner,
-  IonText,       // 👈 agregado
+  IonText,
+  IonTextarea  // ⬅️ AGREGAR ESTA LÍNEA
 } from '@ionic/angular/standalone';
 
 export const IONIC_IMPORTS = [
@@ -49,7 +50,7 @@ export const IONIC_IMPORTS = [
   IonCard,
   IonCardHeader,
   IonCardTitle,
-  IonCardSubtitle,  // 👈 agregado
+  IonCardSubtitle,
   IonCardContent,
   IonIcon,
   IonGrid,
@@ -65,5 +66,6 @@ export const IONIC_IMPORTS = [
   IonMenuToggle,
   IonRouterOutlet,
   IonSpinner,
-  IonText,       // 👈 agregado
+  IonText,
+  IonTextarea  // ⬅️ AGREGAR ESTA LÍNEA
 ];
