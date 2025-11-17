@@ -43,6 +43,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   // 🆕 Servicios disponibles
   serviciosDisponibles: any[] = [];
   serviciosMarkers: L.Marker[] = [];
+  servicioSeleccionado: any = null; // 🆕 Servicio seleccionado al hacer clic en el mapa
   
   private lastMapUpdate: number = 0;
   private mapUpdateThrottle: number = 1000;
@@ -114,7 +115,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /* ======================================================
-     🆕 MOSTRAR SERVICIOS EN EL MAPA
+     🆕 MOSTRAR SERVICIOS EN EL MAPA (MODIFICADO)
   ====================================================== */
   private mostrarServiciosEnMapa() {
     // Limpiar marcadores anteriores de servicios
@@ -136,27 +137,61 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.serviciosDisponibles.forEach(servicio => {
       if (servicio.latitud && servicio.longitud) {
         const marker = L.marker([servicio.latitud, servicio.longitud], { icon: servicioIcon })
-          .addTo(this.map)
-          .bindPopup(`
-            <div style="min-width: 200px;">
-              <h3 style="margin: 0 0 8px 0; color: #f39c12;">🧩 ${servicio.nombre_servicio}</h3>
-              <p style="margin: 4px 0;"><strong>Empresa:</strong> ${servicio.nombre_empresa || 'N/A'}</p>
-              <p style="margin: 4px 0;">${servicio.descripcion_servicio || 'Sin descripción'}</p>
-              <p style="margin: 4px 0;"><strong>📍 Lugar:</strong> ${servicio.nombre_lugar || 'N/A'}</p>
-              <p style="margin: 4px 0;"><strong>📍 Dirección:</strong> ${servicio.direccion_lugar || 'N/A'}</p>
-              ${servicio.horario_disponible ? `<p style="margin: 4px 0;"><strong>🕒 Horario:</strong> ${servicio.horario_disponible}</p>` : ''}
-              <p style="margin: 4px 0;"><strong>💰 Costo:</strong> ${servicio.costo_servicio ? servicio.costo_servicio.toLocaleString('es-CL', {style: 'currency', currency: 'CLP'}) : 'Consultar'}</p>
-              ${servicio.nombre_discapacidad ? `<p style="margin: 4px 0;"><strong>♿ Discapacidad:</strong> ${servicio.nombre_discapacidad}</p>` : ''}
-              ${servicio.empresa_telefono ? `<p style="margin: 4px 0;"><strong>📞 Contacto:</strong> ${servicio.empresa_telefono}</p>` : ''}
-              ${servicio.resenas && servicio.resenas.length > 0 ? `<p style="margin: 4px 0;"><strong>⭐ Valoración:</strong> ${this.calcularPromedioValoracion(servicio.resenas)}/5 (${servicio.resenas.length} reseña${servicio.resenas.length > 1 ? 's' : ''})</p>` : ''}
-            </div>
-          `);
+          .addTo(this.map);
+        
+        // 🆕 Al hacer clic, seleccionar el servicio en lugar de mostrar popup
+        marker.on('click', () => {
+          this.seleccionarServicio(servicio);
+        });
 
         this.serviciosMarkers.push(marker);
       }
     });
 
     console.log(`✅ ${this.serviciosMarkers.length} servicios mostrados en el mapa`);
+  }
+
+  /* ======================================================
+     🆕 SELECCIONAR SERVICIO AL HACER CLIC EN EL MAPA
+  ====================================================== */
+  seleccionarServicio(servicio: any) {
+    this.servicioSeleccionado = servicio;
+    console.log('🧩 Servicio seleccionado:', servicio.nombre_servicio);
+    
+    // Centrar el mapa en el servicio seleccionado
+    if (servicio.latitud && servicio.longitud) {
+      this.map.setView([servicio.latitud, servicio.longitud], 16, {
+        animate: true,
+        duration: 0.5
+      });
+    }
+    
+    // Scroll automático a la sección de servicios
+    setTimeout(() => {
+      const serviciosSection = document.getElementById('servicios-section');
+      if (serviciosSection) {
+        serviciosSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
+
+  /* ======================================================
+     🆕 LIMPIAR SELECCIÓN DE SERVICIO
+  ====================================================== */
+  limpiarSeleccionServicio() {
+    this.servicioSeleccionado = null;
+  }
+
+  /* ======================================================
+     🆕 VER MÁS INFORMACIÓN DEL SERVICIO
+  ====================================================== */
+  verMasInformacion() {
+    if (!this.servicioSeleccionado) return;
+    
+    // Navegar a info-servicio pasando el servicio seleccionado
+    this.router.navigate(['/info-servicio'], {
+      state: { servicio: this.servicioSeleccionado }
+    });
   }
 
   /* ======================================================

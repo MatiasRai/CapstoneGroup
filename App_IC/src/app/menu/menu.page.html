@@ -157,68 +157,129 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- 🧩 SECCIÓN DE SERVICIOS DISPONIBLES -->
-  <ion-card>
+  <!-- 🧩 SECCIÓN DE SERVICIOS DISPONIBLES (MODIFICADA) -->
+  <ion-card id="servicios-section">
     <ion-card-header>
       <ion-card-title>
         🧩 Servicios Disponibles
       </ion-card-title>
       <ion-card-subtitle>
-        {{ serviciosDisponibles.length }} servicio(s) para personas con discapacidad
+        {{ servicioSeleccionado ? 'Información del servicio seleccionado' : 'Haz clic en un marcador amarillo 🟡 en el mapa para ver detalles' }}
       </ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-      <!-- Lista de servicios -->
-      <div *ngIf="serviciosDisponibles.length > 0">
-        <p style="margin-bottom: 15px;">
-          Los servicios están marcados en el mapa con íconos 🟡 amarillos. Haz clic en ellos para ver más detalles.
-        </p>
+      <!-- ✅ Si hay un servicio seleccionado, mostrar solo ese -->
+      <div *ngIf="servicioSeleccionado; else noSeleccionado">
+        <!-- Botón para limpiar selección -->
+        <ion-button 
+          fill="outline" 
+          size="small" 
+          color="medium" 
+          (click)="limpiarSeleccionServicio()"
+          style="margin-bottom: 15px;">
+          <ion-icon slot="start" name="close-circle"></ion-icon>
+          Limpiar selección
+        </ion-button>
 
-        <!-- Lista expandible de servicios -->
-        <ion-list>
-          <ion-item *ngFor="let servicio of serviciosDisponibles" lines="full">
-            <ion-label class="ion-text-wrap">
-              <h2><strong>🧩 {{ servicio.nombre_servicio }}</strong></h2>
-              <h3>{{ servicio.nombre_empresa }}</h3>
-              <p>{{ servicio.descripcion_servicio }}</p>
+        <!-- Información detallada del servicio seleccionado -->
+        <ion-card style="margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <ion-card-header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <ion-card-title>{{ servicioSeleccionado.nombre_servicio }}</ion-card-title>
+            <ion-card-subtitle style="color: rgba(255,255,255,0.9);">
+              {{ servicioSeleccionado.nombre_empresa }}
+            </ion-card-subtitle>
+          </ion-card-header>
+
+          <ion-card-content>
+            <p style="margin: 10px 0;">
+              <strong>📝 Descripción:</strong><br>
+              {{ servicioSeleccionado.descripcion_servicio || 'Sin descripción disponible' }}
+            </p>
+            
+            <div style="margin: 15px 0; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+              <p style="margin: 5px 0; font-size: 14px;">
+                <strong>📍 Lugar:</strong> {{ servicioSeleccionado.nombre_lugar || 'N/A' }}
+              </p>
+              <p style="margin: 5px 0; font-size: 14px;">
+                <strong>📌 Dirección:</strong> {{ servicioSeleccionado.direccion_lugar || 'N/A' }}
+              </p>
+              <p *ngIf="servicioSeleccionado.horario_disponible" style="margin: 5px 0; font-size: 14px;">
+                <strong>🕐 Horario:</strong> {{ servicioSeleccionado.horario_disponible }}
+              </p>
+              <p style="margin: 5px 0; font-size: 14px;">
+                <strong>💰 Costo:</strong> {{ servicioSeleccionado.costo_servicio ? (servicioSeleccionado.costo_servicio | currency:'CLP':'symbol-narrow':'1.0-0') : 'Consultar' }}
+              </p>
+              <p *ngIf="servicioSeleccionado.nombre_discapacidad" style="margin: 5px 0; font-size: 14px;">
+                <strong>♿ Discapacidad:</strong> {{ servicioSeleccionado.nombre_discapacidad }}
+              </p>
+              <p *ngIf="servicioSeleccionado.empresa_telefono" style="margin: 5px 0; font-size: 14px;">
+                <strong>📞 Contacto:</strong> {{ servicioSeleccionado.empresa_telefono }}
+              </p>
+            </div>
+
+            <!-- Reseñas del servicio seleccionado -->
+            <div *ngIf="servicioSeleccionado.resenas && servicioSeleccionado.resenas.length > 0" style="margin-top: 15px;">
+              <h4 style="margin: 10px 0 10px 0; color: #667eea;">⭐ Reseñas ({{ servicioSeleccionado.resenas.length }})</h4>
+              <p style="margin: 5px 0 10px 0; font-size: 14px; color: #666;">
+                <strong>Valoración promedio:</strong> 
+                <span style="color: #f39c12; font-size: 16px;">{{ calcularPromedioValoracion(servicioSeleccionado.resenas) }}/5 ⭐</span>
+              </p>
               
-              <div style="margin-top: 8px;">
-                <p style="margin: 2px 0; font-size: 12px;">
-                  📍 <strong>Lugar:</strong> {{ servicio.nombre_lugar || 'N/A' }}
+              <div *ngFor="let resena of servicioSeleccionado.resenas" 
+                   style="padding: 10px; background: white; border-left: 3px solid #f39c12; border-radius: 4px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                  <ion-icon 
+                    *ngFor="let star of [1,2,3,4,5]" 
+                    [name]="star <= resena.valoracion ? 'star' : 'star-outline'"
+                    [style.color]="star <= resena.valoracion ? '#f39c12' : '#ccc'"
+                    style="font-size: 16px;">
+                  </ion-icon>
+                  <span style="margin-left: 10px; font-weight: 600; color: #f39c12;">{{ resena.valoracion }}/5</span>
+                </div>
+                <p style="margin: 5px 0; font-size: 13px; font-style: italic; color: #444;">
+                  "{{ resena.comentarios || 'Sin comentario' }}"
                 </p>
-                <p style="margin: 2px 0; font-size: 12px;">
-                  📌 <strong>Dirección:</strong> {{ servicio.direccion_lugar || 'N/A' }}
-                </p>
-                <p *ngIf="servicio.horario_disponible" style="margin: 2px 0; font-size: 12px;">
-                  🕐 <strong>Horario:</strong> {{ servicio.horario_disponible }}
-                </p>
-                <p style="margin: 2px 0; font-size: 12px;">
-                  💰 <strong>Costo:</strong> {{ servicio.costo_servicio ? (servicio.costo_servicio | currency:'CLP':'symbol-narrow':'1.0-0') : 'Consultar' }}
-                </p>
-                <p *ngIf="servicio.nombre_discapacidad" style="margin: 2px 0; font-size: 12px;">
-                  ♿ <strong>Discapacidad:</strong> {{ servicio.nombre_discapacidad }}
-                </p>
-                <p *ngIf="servicio.empresa_telefono" style="margin: 2px 0; font-size: 12px;">
-                  📞 <strong>Contacto:</strong> {{ servicio.empresa_telefono }}
-                </p>
-                <p *ngIf="servicio.resenas && servicio.resenas.length > 0" style="margin: 2px 0; font-size: 12px;">
-                  ⭐ <strong>Valoración:</strong> {{ calcularPromedioValoracion(servicio.resenas) }}/5 
-                  ({{ servicio.resenas.length }} reseña{{ servicio.resenas.length > 1 ? 's' : '' }})
+                <p style="margin: 5px 0; font-size: 11px; color: #999;">
+                  {{ resena.fecha_resena | date:'dd/MM/yyyy' }}
                 </p>
               </div>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+            </div>
+
+            <!-- Sin reseñas -->
+            <div *ngIf="!servicioSeleccionado.resenas || servicioSeleccionado.resenas.length === 0" style="margin-top: 15px;">
+              <p style="text-align: center; color: #999; font-size: 14px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                ⭐ No hay reseñas para este servicio aún.
+              </p>
+            </div>
+
+            <!-- 🆕 Botón "Más información" -->
+            <ion-button 
+              expand="block" 
+              color="primary" 
+              (click)="verMasInformacion()"
+              style="margin-top: 20px;">
+              <ion-icon slot="start" name="information-circle"></ion-icon>
+              Ver más información
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
       </div>
 
-      <!-- Mensaje si no hay servicios -->
-      <div *ngIf="serviciosDisponibles.length === 0">
-        <p style="text-align: center; color: #666;">
-          🧩 No hay servicios disponibles en este momento.<br>
-          Pronto habrá más servicios registrados.
-        </p>
-      </div>
+      <!-- ✅ Si no hay servicio seleccionado, mostrar mensaje -->
+      <ng-template #noSeleccionado>
+        <div style="text-align: center; padding: 40px 20px; background: #f9f9f9; border-radius: 12px; border: 2px dashed #ddd;">
+          <ion-icon name="hand-right" size="large" color="medium" style="font-size: 64px; margin-bottom: 15px; opacity: 0.5;"></ion-icon>
+          <h3 style="margin: 10px 0; color: #666;">Selecciona un punto en el mapa</h3>
+          <p style="margin: 5px 0; color: #999; font-size: 14px;">
+            Haz clic en cualquier marcador amarillo 🟡 en el mapa<br>
+            para ver la información detallada del servicio
+          </p>
+          <p style="margin: 15px 0 5px 0; color: #999; font-size: 13px;">
+            <strong>{{ serviciosDisponibles.length }}</strong> servicio{{ serviciosDisponibles.length !== 1 ? 's' : '' }} disponible{{ serviciosDisponibles.length !== 1 ? 's' : '' }} en el mapa
+          </p>
+        </div>
+      </ng-template>
     </ion-card-content>
   </ion-card>
 

@@ -1,13 +1,325 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>info-servicio</ion-title>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="volverAlMenu()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Información del Servicio</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">info-servicio</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  
+  <div *ngIf="cargando" class="loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando información...</p>
+  </div>
+
+  <div *ngIf="!cargando && servicio">
+
+    <ion-card>
+      <ion-card-header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <ion-card-title>{{ servicio.nombre_servicio }}</ion-card-title>
+        <ion-card-subtitle style="color: rgba(255,255,255,0.9);">
+          Servicio para personas con discapacidad
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div style="margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0; color: #667eea;">
+            <ion-icon name="document-text" style="vertical-align: middle;"></ion-icon>
+            Descripción
+          </h3>
+          <p style="margin: 0; line-height: 1.6; color: #444;">
+            {{ servicio.descripcion_servicio || 'Sin descripción disponible' }}
+          </p>
+        </div>
+
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+          <h3 style="margin: 0 0 15px 0; color: #667eea;">
+            <ion-icon name="information-circle" style="vertical-align: middle;"></ion-icon>
+            Detalles del Servicio
+          </h3>
+
+          <ion-grid style="padding: 0;">
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <div class="info-item">
+                  <ion-icon name="time" color="primary"></ion-icon>
+                  <div>
+                    <strong>Horario:</strong>
+                    <p>{{ servicio.horario_disponible || 'No especificado' }}</p>
+                  </div>
+                </div>
+              </ion-col>
+
+              <ion-col size="12" size-md="6">
+                <div class="info-item">
+                  <ion-icon name="cash" color="success"></ion-icon>
+                  <div>
+                    <strong>Costo:</strong>
+                    <p>{{ servicio.costo_servicio ? (servicio.costo_servicio | currency:'CLP':'symbol-narrow':'1.0-0') : 'Consultar' }}</p>
+                  </div>
+                </div>
+              </ion-col>
+
+              <ion-col size="12" size-md="6">
+                <div class="info-item">
+                  <ion-icon name="accessibility" color="warning"></ion-icon>
+                  <div>
+                    <strong>Tipo de Discapacidad:</strong>
+                    <p>{{ servicio.nombre_discapacidad || 'No especificado' }}</p>
+                  </div>
+                </div>
+              </ion-col>
+
+              <ion-col size="12" size-md="6">
+                <div class="info-item">
+                  <ion-icon name="location" color="danger"></ion-icon>
+                  <div>
+                    <strong>Lugar:</strong>
+                    <p>{{ servicio.nombre_lugar || 'No especificado' }}</p>
+                  </div>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </div>
+
+        <div *ngIf="servicio.direccion_lugar" style="background: #fff; padding: 15px; border-radius: 10px; border-left: 4px solid #667eea; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 8px 0; color: #667eea;">
+            <ion-icon name="navigate" style="vertical-align: middle;"></ion-icon>
+            Dirección
+          </h4>
+          <p style="margin: 0; color: #666;">
+            {{ servicio.direccion_lugar }}
+          </p>
+        </div>
+
+        <div *ngIf="servicio.latitud && servicio.longitud" style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+          <h4 style="margin: 0 0 8px 0; color: #4caf50;">
+            <ion-icon name="map" style="vertical-align: middle;"></ion-icon>
+            Ubicación GPS
+          </h4>
+          <p style="margin: 0; font-size: 13px; color: #555;">
+            <strong>Latitud:</strong> {{ servicio.latitud }}<br>
+            <strong>Longitud:</strong> {{ servicio.longitud }}
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="empresa">
+      <ion-card-header style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white;">
+        <ion-card-title>
+          <ion-icon name="business" style="vertical-align: middle;"></ion-icon>
+          {{ empresa.nombre_empresa }}
+        </ion-card-title>
+        <ion-card-subtitle style="color: rgba(255,255,255,0.9);">
+          Información de la Empresa
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div *ngIf="empresa.descripcion_empresa" style="margin-bottom: 20px;">
+          <h3 style="margin: 0 0 10px 0; color: #f39c12;">
+            <ion-icon name="document-text" style="vertical-align: middle;"></ion-icon>
+            Acerca de la Empresa
+          </h3>
+          <p style="margin: 0; line-height: 1.6; color: #444;">
+            {{ empresa.descripcion_empresa }}
+          </p>
+        </div>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+          <h3 style="margin: 0 0 15px 0; color: #f39c12;">
+            <ion-icon name="call" style="vertical-align: middle;"></ion-icon>
+            Contacto
+          </h3>
+
+          <div class="info-item" *ngIf="empresa.telefono">
+            <ion-icon name="call" color="primary"></ion-icon>
+            <div>
+              <strong>Teléfono:</strong>
+              <p><a href="tel:{{ empresa.telefono }}">{{ empresa.telefono }}</a></p>
+            </div>
+          </div>
+
+          <div class="info-item" *ngIf="empresa.Correo">
+            <ion-icon name="mail" color="primary"></ion-icon>
+            <div>
+              <strong>Correo:</strong>
+              <p><a href="mailto:{{ empresa.Correo }}">{{ empresa.Correo }}</a></p>
+            </div>
+          </div>
+
+          <div class="info-item" *ngIf="empresa.direccion_empresa">
+            <ion-icon name="location" color="danger"></ion-icon>
+            <div>
+              <strong>Dirección:</strong>
+              <p>{{ empresa.direccion_empresa }}</p>
+            </div>
+          </div>
+
+          <div class="info-item" *ngIf="empresa.horarios">
+            <ion-icon name="time" color="warning"></ion-icon>
+            <div>
+              <strong>Horarios:</strong>
+              <p>{{ empresa.horarios }}</p>
+            </div>
+          </div>
+
+          <div class="info-item" *ngIf="empresa.sitio_web">
+            <ion-icon name="globe" color="success"></ion-icon>
+            <div>
+              <strong>Sitio Web:</strong>
+              <p><a [href]="empresa.sitio_web" target="_blank">{{ empresa.sitio_web }}</a></p>
+            </div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="agregar-resena-card">
+      <ion-card-header style="background: linear-gradient(135deg, #10dc60 0%, #0cd176 100%); color: white;">
+        <ion-card-title>
+          <ion-icon name="create" style="vertical-align: middle;"></ion-icon>
+          Comparte tu Experiencia
+        </ion-card-title>
+        <ion-card-subtitle style="color: rgba(255,255,255,0.9);">
+          Tu opinión es importante para otros usuarios
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="rating-section">
+          <h3 style="margin: 0 0 10px 0; color: #333; font-size: 1rem;">
+            Tu Valoración
+          </h3>
+          
+          <div style="display: flex; gap: 8px; justify-content: center; padding: 15px 0;">
+            <ion-icon 
+              *ngFor="let star of [1, 2, 3, 4, 5]"
+              [name]="getStarIcon(star)"
+              [color]="(nuevaResena.hoverRating || nuevaResena.valoracion) >= star - 0.5 ? 'warning' : 'medium'"
+              style="font-size: 40px; cursor: pointer;"
+              (click)="setRating(star)"
+              (mouseenter)="setHoverRating(star)"
+              (mouseleave)="clearHoverRating()">
+            </ion-icon>
+          </div>
+
+          <p class="rating-text" *ngIf="nuevaResena.valoracion > 0" style="text-align: center; font-weight: bold; color: #FF9800; margin: 10px 0;">
+            {{ nuevaResena.valoracion }} de 5 estrellas
+          </p>
+          <p class="rating-text" *ngIf="nuevaResena.valoracion === 0" style="text-align: center; color: #999; margin: 10px 0;">
+            Haz clic en las estrellas para valorar
+          </p>
+        </div>
+
+        <div class="comentario-section">
+          <h3 style="margin: 15px 0 10px 0; color: #333; font-size: 1rem;">
+            Tu Comentario (opcional)
+          </h3>
+          <ion-textarea
+            [(ngModel)]="nuevaResena.comentarios"
+            placeholder="Cuéntanos sobre tu experiencia con este servicio..."
+            rows="4"
+            style="--background: #f9f9f9; --border-radius: 8px; --padding-start: 12px; --padding-end: 12px;">
+          </ion-textarea>
+        </div>
+
+        <ion-button 
+          expand="block" 
+          color="success" 
+          (click)="enviarResena()"
+          [disabled]="nuevaResena.valoracion === 0"
+          style="margin-top: 15px;">
+          <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+          Publicar Reseña
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="servicio.resenas && servicio.resenas.length > 0">
+      <ion-card-header style="background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%); color: white;">
+        <ion-card-title>
+          <ion-icon name="star" style="vertical-align: middle;"></ion-icon>
+          Reseñas y Valoraciones
+        </ion-card-title>
+        <ion-card-subtitle style="color: rgba(255,255,255,0.9);">
+          {{ servicio.resenas.length }} reseña{{ servicio.resenas.length !== 1 ? 's' : '' }} disponible{{ servicio.resenas.length !== 1 ? 's' : '' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div style="text-align: center; background: #fff3cd; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+          <h2 style="margin: 0 0 5px 0; color: #f39c12; font-size: 3rem;">
+            {{ calcularPromedioValoracion(servicio.resenas) }}
+          </h2>
+          <div style="margin: 10px 0;">
+            <ion-icon 
+              *ngFor="let star of [1,2,3,4,5]" 
+              [name]="star <= parseFloat(calcularPromedioValoracion(servicio.resenas)) ? 'star' : 'star-outline'"
+              [color]="star <= parseFloat(calcularPromedioValoracion(servicio.resenas)) ? 'warning' : 'medium'"
+              style="font-size: 32px;">
+            </ion-icon>
+          </div>
+          <p style="margin: 5px 0; color: #666; font-size: 14px;">
+            Basado en {{ servicio.resenas.length }} valoración{{ servicio.resenas.length !== 1 ? 'es' : '' }}
+          </p>
+        </div>
+
+        <div class="resenas-list">
+          <div *ngFor="let resena of servicio.resenas" class="resena-card">
+            <div class="resena-header">
+              <div class="estrellas">
+                <ion-icon 
+                  *ngFor="let star of [1,2,3,4,5]" 
+                  [name]="star <= resena.valoracion ? 'star' : 'star-outline'"
+                  [color]="star <= resena.valoracion ? 'warning' : 'medium'"
+                  style="font-size: 20px;">
+                </ion-icon>
+              </div>
+              <span class="valoracion-numero">{{ resena.valoracion }}/5</span>
+            </div>
+            
+            <p class="resena-comentario">
+              <ion-icon name="chatbox" color="medium" style="vertical-align: middle;"></ion-icon>
+              "{{ resena.comentarios || 'Sin comentario' }}"
+            </p>
+            
+            <p class="resena-fecha">
+              <ion-icon name="calendar" color="medium"></ion-icon>
+              {{ resena.fecha_resena | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="!servicio.resenas || servicio.resenas.length === 0">
+      <ion-card-content>
+        <div style="text-align: center; padding: 30px; color: #999;">
+          <ion-icon name="star-outline" size="large" color="medium" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></ion-icon>
+          <h3 style="margin: 10px 0; color: #666;">Sin reseñas aún</h3>
+          <p style="margin: 5px 0; font-size: 14px;">
+            Este servicio aún no tiene valoraciones.<br>
+            Sé el primero en compartir tu experiencia.
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div style="padding: 20px;">
+      <ion-button expand="block" color="medium" (click)="volverAlMenu()">
+        <ion-icon slot="start" name="arrow-back"></ion-icon>
+        Volver al Mapa
+      </ion-button>
+    </div>
+
+  </div>
+
 </ion-content>
