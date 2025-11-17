@@ -1,28 +1,65 @@
 <ion-header>
   <ion-toolbar>
-    <!-- 👇 Botón hamburguesa -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-
     <ion-title>Registro Admin Empresa</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <h2 style="text-align:center; margin-bottom:20px;">Crear cuenta de administrador</h2>
 
-  <ion-item>
-    <ion-label position="floating">Correo</ion-label>
-    <ion-input [(ngModel)]="admEmpresa.correo" type="email"></ion-input>
-  </ion-item>
+  <h2 style="text-align:center; margin-bottom:20px;">
+    Crear cuenta de administrador
+  </h2>
 
-  <ion-item>
-    <ion-label position="floating">Contraseña</ion-label>
-    <ion-input [(ngModel)]="admEmpresa.contrasena" type="password"></ion-input>
-  </ion-item>
+  <form #formAdm="ngForm" (ngSubmit)="onRegistrar()">
 
-  <ion-button expand="block" style="margin-top:20px;" (click)="onRegistrar()">
-    Registrarse
-  </ion-button>
+    <!-- Correo -->
+    <ion-item [class.invalid]="correo.invalid && correo.touched">
+      <ion-label position="floating">Correo *</ion-label>
+
+      <ion-input
+        type="email"
+        name="correo"
+        required
+        email
+        [(ngModel)]="admEmpresa.correo"
+        #correo="ngModel">
+      </ion-input>
+    </ion-item>
+
+    <div class="error-text" *ngIf="correo.invalid && correo.touched">
+      Ingrese un correo válido (ejemplo@correo.com).
+    </div>
+
+    <!-- Contraseña -->
+    <ion-item [class.invalid]="contrasena.invalid && contrasena.touched">
+      <ion-label position="floating">Contraseña *</ion-label>
+
+      <ion-input
+        type="password"
+        name="contrasena"
+        required
+        minlength="6"
+        [(ngModel)]="admEmpresa.contrasena"
+        #contrasena="ngModel">
+      </ion-input>
+    </ion-item>
+
+    <div class="error-text" *ngIf="contrasena.invalid && contrasena.touched">
+      La contraseña debe tener al menos 6 caracteres.
+    </div>
+
+    <!-- Botón -->
+    <ion-button 
+      expand="block"
+      style="margin-top:20px;"
+      type="submit"
+      [disabled]="formAdm.invalid">
+      Registrarse
+    </ion-button>
+
+  </form>
+
 </ion-content>

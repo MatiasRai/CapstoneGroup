@@ -32,8 +32,7 @@ app.use((req, res, next) => {
 });
 
 
-/* ============================================
-   ❗ MANEJO GLOBAL DE ERRORES
+
 app.use((err, req, res, next) => {
   console.error("🔥 Error en el servidor:", err);
 
@@ -43,8 +42,7 @@ app.use((err, req, res, next) => {
 });
 
 
-/* ============================================
-   🚀 INICIAR SERVIDOR
+
 const PORT = 3000;
 const HOST = "0.0.0.0";
 

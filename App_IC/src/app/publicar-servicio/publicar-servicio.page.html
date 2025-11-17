@@ -8,61 +8,135 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
+
   <h2 style="text-align:center; margin-bottom:20px;">Registrar nuevo servicio</h2>
 
-  <form (ngSubmit)="registrarServicio()" #servicioForm="ngForm">
+  <form (ngSubmit)="registrarServicio()" #formServicio="ngForm">
 
-    <ion-item>
-      <ion-label position="floating">Nombre</ion-label>
-      <ion-input type="text" [(ngModel)]="servicio.nombre_servicio" name="nombre_servicio" required></ion-input>
+    <!-- NOMBRE -->
+    <ion-item [class.invalid]="nombre.invalid && nombre.touched">
+      <ion-label position="floating">Nombre *</ion-label>
+      <ion-input
+        type="text"
+        name="nombre_servicio"
+        [(ngModel)]="servicio.nombre_servicio"
+        #nombre="ngModel"
+        required
+        minlength="3"
+      ></ion-input>
     </ion-item>
+    <div class="error-text" *ngIf="nombre.invalid && nombre.touched">
+      El nombre debe tener al menos 3 caracteres.
+    </div>
 
-    <ion-item>
-      <ion-label position="floating">Descripción</ion-label>
-      <ion-input type="text" [(ngModel)]="servicio.descripcion_servicio" name="descripcion_servicio" required></ion-input>
+    <!-- DESCRIPCIÓN -->
+    <ion-item [class.invalid]="descripcion.invalid && descripcion.touched">
+      <ion-label position="floating">Descripción *</ion-label>
+      <ion-input
+        type="text"
+        name="descripcion_servicio"
+        [(ngModel)]="servicio.descripcion_servicio"
+        #descripcion="ngModel"
+        required
+        minlength="10"
+      ></ion-input>
     </ion-item>
+    <div class="error-text" *ngIf="descripcion.invalid && descripcion.touched">
+      La descripción debe tener mínimo 10 caracteres.
+    </div>
 
-    <ion-item>
-      <ion-label position="floating">Costo (CLP)</ion-label>
-      <ion-input type="number" [(ngModel)]="servicio.costo_servicio" name="costo_servicio"></ion-input>
+    <!-- COSTO -->
+    <ion-item [class.invalid]="costo.invalid && costo.touched">
+      <ion-label position="floating">Costo (CLP) *</ion-label>
+      <ion-input
+        type="number"
+        name="costo_servicio"
+        [(ngModel)]="servicio.costo_servicio"
+        #costo="ngModel"
+        required
+        min="1"
+      ></ion-input>
     </ion-item>
+    <div class="error-text" *ngIf="costo.invalid && costo.touched">
+      El costo debe ser un número mayor a 0.
+    </div>
 
-    <ion-item>
-      <ion-label position="floating">Dirección</ion-label>
-      <ion-input type="text" [(ngModel)]="servicio.direccion_lugar" name="direccion_lugar"></ion-input>
+    <!-- HORARIOS -->
+    <ion-item [class.invalid]="horario.invalid && horario.touched">
+      <ion-label position="floating">Horarios *</ion-label>
+      <ion-input
+        type="text"
+        name="horario_disponible"
+        [(ngModel)]="servicio.horario_disponible"
+        #horario="ngModel"
+        required
+      ></ion-input>
     </ion-item>
+    <div class="error-text" *ngIf="horario.invalid && horario.touched">
+      El horario es obligatorio.
+    </div>
 
-    <ion-item>
-      <ion-label position="floating">Nombre del lugar</ion-label>
-      <ion-input type="text" [(ngModel)]="servicio.nombre_lugar" name="nombre_lugar"></ion-input>
+    <!-- DIRECCIÓN -->
+    <ion-item [class.invalid]="direccion.invalid && direccion.touched">
+      <ion-label position="floating">Dirección *</ion-label>
+      <ion-input
+        type="text"
+        name="direccion_lugar"
+        [(ngModel)]="servicio.direccion_lugar"
+        #direccion="ngModel"
+        required
+        minlength="5"
+      ></ion-input>
     </ion-item>
+    <div class="error-text" *ngIf="direccion.invalid && direccion.touched">
+      La dirección debe tener mínimo 5 caracteres.
+    </div>
 
-    <!-- 👇 CAMBIAR ESTO -->
-    <ion-item>
-      <ion-label>Tipo de discapacidad</ion-label>
-      <ion-select 
-        placeholder="Selecciona una opción" 
-        [(ngModel)]="servicio.id_discapacidad" 
-        name="id_discapacidad">
-        <ion-select-option 
-          *ngFor="let tipo of tiposDiscapacidad" 
-          [value]="tipo.id_discapacidad">
+    <!-- NOMBRE LUGAR -->
+    <ion-item [class.invalid]="lugar.invalid && lugar.touched">
+      <ion-label position="floating">Nombre del Lugar *</ion-label>
+      <ion-input
+        type="text"
+        name="nombre_lugar"
+        [(ngModel)]="servicio.nombre_lugar"
+        #lugar="ngModel"
+        required
+      ></ion-input>
+    </ion-item>
+    <div class="error-text" *ngIf="lugar.invalid && lugar.touched">
+      Debes ingresar el nombre del lugar.
+    </div>
+
+    <!-- TIPO DISCAPACIDAD -->
+    <ion-item [class.invalid]="discapacidad.invalid && discapacidad.touched">
+      <ion-label>Tipo de discapacidad *</ion-label>
+      <ion-select
+        name="id_discapacidad"
+        [(ngModel)]="servicio.id_discapacidad"
+        #discapacidad="ngModel"
+        required
+      >
+        <ion-select-option *ngFor="let tipo of tiposDiscapacidad" [value]="tipo.id_discapacidad">
           {{ tipo.nombre_discapacidad }}
         </ion-select-option>
       </ion-select>
     </ion-item>
+    <div class="error-text" *ngIf="discapacidad.invalid && discapacidad.touched">
+      Debes seleccionar un tipo de discapacidad.
+    </div>
 
-    <!-- 📍 Botón de geolocalización -->
+    <!-- UBICACIÓN -->
     <ion-button expand="block" color="medium" (click)="obtenerUbicacion()">
       📍 Usar mi ubicación actual
     </ion-button>
 
-    <!-- 🗺️ Mapa -->
-    <div id="map" style="height: 250px; margin-top: 10px; border-radius: 8px;"></div>
+    <div id="map"></div>
 
-    <ion-button expand="block" type="submit" color="success" style="margin-top: 20px;">
+    <!-- BOTÓN -->
+    <ion-button expand="block" type="submit" color="success" [disabled]="formServicio.invalid">
       Registrar Servicio
     </ion-button>
 
   </form>
+
 </ion-content>

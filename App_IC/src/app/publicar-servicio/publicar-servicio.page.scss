@@ -3,17 +3,33 @@ h2 {
   color: #2f2f2f;
 }
 
+ion-item.invalid {
+  --border-color: #ff4d4d;
+  --highlight-color-invalid: #ff4d4d;
+}
+
+.error-text {
+  color: #ff4d4d;
+  font-size: 13px;
+  margin-top: 4px;
+  margin-left: 5px;
+}
+
 ion-item {
   margin-bottom: 10px;
   border-radius: 8px;
   --background: #fff;
 }
 
-ion-textarea, ion-input {
+ion-input, ion-textarea {
   font-size: 15px;
 }
 
 #map {
+  height: 250px;
+  width: 100%;
+  border-radius: 10px;
+  margin: 15px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -21,13 +37,4 @@ ion-button[color="medium"] {
   --background: #f4f4f4;
   --color: #000;
   font-weight: 500;
-}
-
-
-#mapa {
-  height: 250px;
-  width: 100%;
-  border-radius: 10px;
-  margin: 15px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
