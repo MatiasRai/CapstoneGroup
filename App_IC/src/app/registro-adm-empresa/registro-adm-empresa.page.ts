@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonInput, IonButton } from '@ionic/angular/standalone';
+import { 
+  IonContent, IonHeader, IonTitle, IonToolbar, 
+  IonItem, IonLabel, IonInput, IonButton 
+} from '@ionic/angular/standalone';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { AdmEmpresaService } from 'src/app/services/adm-empresa.service';
 import { Router } from '@angular/router';
@@ -18,6 +21,7 @@ import { Router } from '@angular/router';
   ]
 })
 export class RegistroAdmEmpresaPage {
+
   admEmpresa = {
     correo: '',
     contrasena: ''
@@ -28,28 +32,65 @@ export class RegistroAdmEmpresaPage {
     private router: Router
   ) {}
 
+  // ============================
+  //   VALIDACIONES MANUALES
+  // ============================
+  validarCampos(): string | null {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!this.admEmpresa.correo.trim()) {
+      return "El correo es obligatorio.";
+    }
+
+    if (!emailRegex.test(this.admEmpresa.correo)) {
+      return "El correo no tiene un formato válido.";
+    }
+
+    if (!this.admEmpresa.contrasena.trim()) {
+      return "La contraseña es obligatoria.";
+    }
+
+    if (this.admEmpresa.contrasena.length < 6) {
+      return "La contraseña debe tener al menos 6 caracteres.";
+    }
+
+    return null; // Todo válido
+  }
+
+  // ============================
+  //   REGISTRAR ADMIN
+  // ============================
   onRegistrar() {
+
+    // ❗ Validar antes de enviar
+    const error = this.validarCampos();
+    if (error) {
+      alert("⚠️ " + error);
+      return;
+    }
+
     this.admEmpresaService.registrarAdmEmpresa(this.admEmpresa).subscribe({
       next: (res) => {
-        // El backend puede devolver id_adm_empresa o id_adm_Empresa (aseguramos ambos)
+
         const id = res?.id_adm_empresa ?? res?.id_adm_Empresa;
+
         if (!id) {
-          alert('No se recibió el ID del administrador. Revisa la respuesta del backend.');
+          alert('❌ No se recibió el ID del administrador. Revisa el backend.');
           console.error('Respuesta sin ID:', res);
           return;
         }
 
-        // Guarda el ID para usarlo en el registro de la empresa
+        // Guardar para usar luego en el registro de empresa
         localStorage.setItem('id_adm_Empresa', String(id));
 
-        // Redirige a la página de registro de empresa con el ID como query param (por si lo quieres leer también desde la URL)
+        // Redirigir
         this.router.navigate(['/registro-empresa'], {
           queryParams: { id_adm_Empresa: id }
         });
       },
       error: (err) => {
         alert('❌ Error al registrar administrador');
-        console.error('Error backend:', err);
+        console.error('Backend error:', err);
       }
     });
   }
