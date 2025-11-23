@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Detalle de Ruta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  
+  <!-- 🔄 SPINNER DE CARGA -->
+  <div *ngIf="cargando" class="loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando ruta...</p>
+  </div>
+
+  <!-- 📍 CONTENIDO DE LA RUTA -->
+  <div *ngIf="!cargando && ruta">
+
+    <!-- MAPA -->
+    <div id="map" class="mapa-detalle"></div>
+
+    <!-- INFORMACIÓN PRINCIPAL -->
+    <ion-card class="info-card">
+      <ion-card-header>
+        <ion-card-title>{{ ruta.nombre_ruta }}</ion-card-title>
+        <ion-card-subtitle>
+          <ion-icon name="person-circle"></ion-icon>
+          Creado por: {{ ruta.usuario_nombre || 'Usuario' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p *ngIf="ruta.descripcion_ruta" class="descripcion">
+          {{ ruta.descripcion_ruta }}
+        </p>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <ion-icon name="flag" color="primary"></ion-icon>
+            <div>
+              <h3>{{ ruta.longitud_ruta || 0 }}</h3>
+              <p>Kilómetros</p>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <ion-icon name="navigate-circle" color="success"></ion-icon>
+            <div>
+              <h3>{{ ruta.coordenadas?.length || 0 }}</h3>
+              <p>Puntos GPS</p>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <ion-icon name="layers" color="warning"></ion-icon>
+            <div>
+              <h3>{{ ruta.nombre_tipo_ruta || 'GPS' }}</h3>
+              <p>Tipo de ruta</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="acciones">
+          <ion-button expand="block" color="primary" (click)="verEnMapa()">
+            <ion-icon slot="start" name="map"></ion-icon>
+            Ver en el mapa principal
+          </ion-button>
+
+          <ion-button expand="block" fill="outline" color="secondary" (click)="compartirRuta()">
+            <ion-icon slot="start" name="share-social"></ion-icon>
+            Compartir ruta
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- INFORMACIÓN DEL CREADOR -->
+    <ion-card class="creador-card">
+      <ion-card-header>
+        <ion-card-title>Sobre el creador</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="creador-info">
+          <ion-icon name="person-circle" size="large" color="primary"></ion-icon>
+          <div>
+            <h3>{{ ruta.usuario_nombre || 'Usuario' }}</h3>
+            <p>{{ ruta.usuario_correo || 'Colaborador de la comunidad' }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- COORDENADAS DETALLADAS (OPCIONAL) -->
+    <ion-card *ngIf="mostrarCoordenadas" class="coordenadas-card">
+      <ion-card-header>
+        <ion-card-title>Puntos GPS de la Ruta</ion-card-title>
+        <ion-card-subtitle>{{ ruta.coordenadas?.length || 0 }} coordenadas registradas</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let coord of ruta.coordenadas; let i = index">
+            <ion-label>
+              <h3>Punto {{ i + 1 }}</h3>
+              <p>Lat: {{ coord.latitud }}, Lng: {{ coord.longitud }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button 
+      expand="block" 
+      fill="clear" 
+      (click)="mostrarCoordenadas = !mostrarCoordenadas"
+      class="toggle-coords-btn">
+      <ion-icon slot="start" [name]="mostrarCoordenadas ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      {{ mostrarCoordenadas ? 'Ocultar' : 'Mostrar' }} coordenadas detalladas
+    </ion-button>
+
+  </div>
+
+  <!-- ⚠️ ERROR AL CARGAR -->
+  <div *ngIf="!cargando && !ruta" class="error-container">
+    <ion-icon name="alert-circle" size="large" color="danger"></ion-icon>
+    <h2>No se pudo cargar la ruta</h2>
+    <p>La ruta solicitada no existe o ha sido eliminada</p>
+    <ion-button color="primary" (click)="volver()">
+      <ion-icon slot="start" name="arrow-back"></ion-icon>
+      Volver atrás
+    </ion-button>
+  </div>
+
+</ion-content>

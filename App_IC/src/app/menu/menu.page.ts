@@ -50,6 +50,10 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
   // 🆕 Estado de usuario
   isUserLoggedIn: boolean = false;
+  
+irARutasRecomendadas() {
+  this.router.navigate(['/rutas-recomendadas']);
+}
 
   constructor(
     private platform: Platform,
