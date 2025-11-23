@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { addIcons } from 'ionicons';
+import * as icons from 'ionicons/icons';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { AuthService } from './services/auth.service';
 
+addIcons(icons);
 // 🔹 Iconos
 import {
   logOut,
@@ -15,9 +17,13 @@ import {
   business,
   addCircle,
   clipboard,
+  globe,
+  locate,
+  navigateCircle,
   apps,
   eye,
-  informationCircle
+  informationCircle,
+  arrowBack
 } from 'ionicons/icons';
 
 @Component({
@@ -44,7 +50,10 @@ export class AppComponent implements OnInit {
       clipboard,
       apps,
       eye,
-      informationCircle
+      informationCircle,
+      globe,
+      locate,
+      navigateCircle
     });
   }
 
