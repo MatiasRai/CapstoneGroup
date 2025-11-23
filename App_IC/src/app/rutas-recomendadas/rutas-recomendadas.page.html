@@ -1,0 +1,113 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Rutas Recomendadas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <h1 class="titulo-principal">Descubre Nuevas Rutas</h1>
+
+  <!-- 🔍 BUSCADOR -->
+  <ion-searchbar
+    [(ngModel)]="searchTerm"
+    (ionInput)="filtrarRutas()"
+    placeholder="Buscar por nombre..."
+    animated
+    debounce="500">
+  </ion-searchbar>
+
+  <!-- 🔄 SPINNER DE CARGA -->
+  <div *ngIf="cargando" class="loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando rutas...</p>
+  </div>
+
+  <!-- 📋 LISTA DE RUTAS -->
+  <div *ngIf="!cargando && rutasFiltradas.length > 0" class="rutas-grid">
+    <ion-card 
+      *ngFor="let ruta of rutasFiltradas" 
+      class="ruta-card"
+      (click)="verDetalle(ruta.id_ruta)">
+      
+      <!-- ✅ IMAGEN CON ÍCONO (SIN PLACEHOLDER EXTERNO) -->
+      <div class="ruta-imagen">
+        <div class="ruta-imagen-fallback">
+          <ion-icon name="map" class="map-icon"></ion-icon>
+          <div class="gradient-overlay"></div>
+        </div>
+        
+        <div class="ruta-badge">
+          <ion-icon name="navigate-circle"></ion-icon>
+          {{ ruta.total_puntos || 0 }} puntos
+        </div>
+      </div>
+
+      <!-- Contenido de la tarjeta -->
+      <ion-card-header>
+        <ion-card-title class="ruta-titulo">
+          {{ ruta.nombre_ruta }}
+        </ion-card-title>
+        <ion-card-subtitle class="ruta-autor">
+          <ion-icon name="person-circle"></ion-icon>
+          Por: {{ ruta.usuario_nombre || 'Usuario' }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p class="ruta-descripcion">
+          {{ ruta.descripcion_ruta || 'Sin descripción disponible' }}
+        </p>
+
+        <!-- Información adicional -->
+        <div class="ruta-info">
+          <div class="info-item">
+            <ion-icon name="flag"></ion-icon>
+            <span>{{ ruta.longitud_ruta || 0 }} km</span>
+          </div>
+          <div class="info-item">
+            <ion-icon name="time"></ion-icon>
+            <span>{{ ruta.nombre_tipo_ruta || 'Ruta GPS' }}</span>
+          </div>
+        </div>
+
+        <ion-button expand="block" fill="outline" color="primary">
+          <ion-icon slot="start" name="eye"></ion-icon>
+          Ver Detalles
+        </ion-button>
+      </ion-card-content>
+
+    </ion-card>
+  </div>
+
+  <!-- ⚠️ SIN RESULTADOS -->
+  <div *ngIf="!cargando && rutasFiltradas.length === 0" class="sin-resultados">
+    <ion-icon name="map-outline" size="large"></ion-icon>
+    <h2>No se encontraron rutas</h2>
+    <p>Intenta con otro término de búsqueda</p>
+  </div>
+
+  <!-- 📊 ESTADÍSTICAS -->
+  <ion-card *ngIf="!cargando && todasLasRutas.length > 0" class="stats-card">
+    <ion-card-content>
+      <div class="stats-container">
+        <div class="stat-item">
+          <h3>{{ todasLasRutas.length }}</h3>
+          <p>Rutas disponibles</p>
+        </div>
+        <div class="stat-item">
+          <h3>{{ calcularDistanciaTotal() }}</h3>
+          <p>km totales</p>
+        </div>
+        <div class="stat-item">
+          <h3>{{ contarUsuarios() }}</h3>
+          <p>Usuarios activos</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

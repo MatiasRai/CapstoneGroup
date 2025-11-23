@@ -79,18 +79,32 @@ export const routes: Routes = [
       import('./registro-empresa/registro-empresa.page').then(m => m.RegistroEmpresaPage)
   },
 
-  // 📝 Página informativa COMPLETAMENTE NUEVA
+  // 📝 Página informativa
   {
     path: 'info-app',
     loadComponent: () =>
       import('./info-app/info-app.page').then(m => m.InfoAppPage)
   },
 
-  // Información del servicio (tú la tenías)
+  // Información del servicio
   {
     path: 'info-servicio',
     loadComponent: () =>
       import('./info-servicio/info-servicio.page').then(m => m.InfoServicioPage)
+  },
+
+  // 🆕 RUTAS RECOMENDADAS (NUEVO)
+  {
+    path: 'rutas-recomendadas',
+    loadComponent: () =>
+      import('./rutas-recomendadas/rutas-recomendadas.page').then(m => m.RutasRecomendadasPage)
+  },
+
+  // 🆕 DETALLE DE RUTA (NUEVO)
+  {
+    path: 'ruta-detalle/:id',
+    loadComponent: () =>
+      import('./ruta-detalle/ruta-detalle.page').then(m => m.RutaDetallePage)
   },
 
   // ❌ Wildcard siempre debe ser lo último
