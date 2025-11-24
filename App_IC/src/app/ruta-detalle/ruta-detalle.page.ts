@@ -15,13 +15,12 @@ import * as L from 'leaflet';
   imports: [CommonModule, FormsModule, HttpClientModule, ...IONIC_IMPORTS]
 })
 export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
-  
+
   ruta: any = null;
   cargando: boolean = true;
-  mostrarCoordenadas: boolean = false;
-  
   private map!: L.Map;
   private routePolyline: L.Polyline | null = null;
+
   private host = window.location.hostname;
   private apiUrl = `http://${this.host}:3000/api/v1/rutas`;
 
@@ -29,178 +28,143 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private toastController: ToastController
+    private toast: ToastController
   ) {}
 
   ngOnInit() {
-    const idRuta = this.route.snapshot.paramMap.get('id');
-    if (idRuta) {
-      this.cargarRuta(parseInt(idRuta));
-    } else {
-      this.mostrarToast('ID de ruta inválido', 'danger');
+    const idRuta = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (!idRuta) {
+      this.mostrarToast("Ruta no válida", "danger");
       this.volver();
+      return;
     }
+
+    this.cargarRuta(idRuta);
   }
 
   ngAfterViewInit() {
     this.fixLeafletIcons();
+
     setTimeout(() => {
-      if (this.ruta && this.ruta.coordenadas && this.ruta.coordenadas.length > 0) {
+      if (this.ruta?.coordenadas?.length > 0) {
         this.initMap();
       }
     }, 500);
   }
 
   ngOnDestroy() {
-    if (this.map) {
-      this.map.remove();
-    }
+    if (this.map) this.map.remove();
   }
 
   /* ======================================================
-     📍 CARGAR RUTA
+     ✔ FIX LEAFLET ICONS 
+  ====================================================== */
+  private fixLeafletIcons() {
+    const DefaultIcon = L.icon({
+      iconRetinaUrl:
+        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl:
+        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl:
+        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+    });
+
+    L.Marker.prototype.options.icon = DefaultIcon;
+  }
+
+  /* ======================================================
+     📌 Cargar ruta desde backend
   ====================================================== */
   cargarRuta(idRuta: number) {
     this.cargando = true;
-    
+
     this.http.get(`${this.apiUrl}/${idRuta}`).subscribe({
       next: (data: any) => {
         this.ruta = data;
         this.cargando = false;
-        console.log('✅ Ruta cargada:', this.ruta);
-        
-        // Si el mapa ya está inicializado, actualizar
-        if (this.map && this.ruta.coordenadas && this.ruta.coordenadas.length > 0) {
+
+        if (this.map && this.ruta.coordenadas?.length > 0) {
           this.mostrarRutaEnMapa();
         }
       },
-      error: (err) => {
-        console.error('❌ Error al cargar ruta:', err);
+      error: () => {
         this.cargando = false;
         this.ruta = null;
-        this.mostrarToast('Error al cargar la ruta', 'danger');
+        this.mostrarToast("No se pudo cargar la ruta", "danger");
       }
     });
   }
 
   /* ======================================================
-     🗺️ INICIALIZAR MAPA
+     🗺 Inicializar mapa
   ====================================================== */
-  private fixLeafletIcons(): void {
-    const iconDefault = L.icon({
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-    L.Marker.prototype.options.icon = iconDefault;
-  }
+  private initMap() {
+    const coords = this.ruta.coordenadas;
 
-  private initMap(): void {
-    if (!this.ruta || !this.ruta.coordenadas || this.ruta.coordenadas.length === 0) {
-      console.warn('⚠️ No hay coordenadas para mostrar');
-      return;
-    }
+    const inicio: [number, number] = [
+      coords[0].latitud,
+      coords[0].longitud,
+    ];
 
-    const primeraCoord = this.ruta.coordenadas[0];
-    const initialLocation: [number, number] = [primeraCoord.latitud, primeraCoord.longitud];
-
-    this.map = L.map('map', {
-      center: initialLocation,
+    this.map = L.map("map", {
+      center: inicio,
       zoom: 14,
       zoomControl: true
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19,
-      minZoom: 10
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
     }).addTo(this.map);
 
     setTimeout(() => {
-      if (this.map) {
-        this.map.invalidateSize();
-        this.mostrarRutaEnMapa();
-      }
-    }, 200);
+      this.map.invalidateSize();
+      this.mostrarRutaEnMapa();
+    }, 350);
   }
 
   /* ======================================================
-     🛣️ MOSTRAR RUTA EN EL MAPA
+     🛣 Dibujar ruta + marcadores inicio/fin
   ====================================================== */
-  private mostrarRutaEnMapa(): void {
-    if (!this.map || !this.ruta || !this.ruta.coordenadas || this.ruta.coordenadas.length === 0) {
-      return;
-    }
+  private mostrarRutaEnMapa() {
+    if (!this.map || !this.ruta?.coordenadas?.length) return;
 
-    // Limpiar polyline anterior
     if (this.routePolyline) {
       this.map.removeLayer(this.routePolyline);
     }
 
-    const coords = this.ruta.coordenadas.map((c: any) => 
-      [c.latitud, c.longitud] as [number, number]
-    );
+    const coords = this.ruta.coordenadas.map((c: any) => [
+      c.latitud,
+      c.longitud,
+    ]) as [number, number][];
 
-    // Crear polyline de la ruta
     this.routePolyline = L.polyline(coords, {
-      color: '#667eea',
+      color: "#007BFF",
       weight: 5,
-      opacity: 0.8,
-      smoothFactor: 1.0,
-      lineJoin: 'round',
-      lineCap: 'round'
+      opacity: 0.9
     }).addTo(this.map);
 
-    // Íconos personalizados
-    const greenIcon = this.createColoredIcon('green');
-    const redIcon = this.createColoredIcon('red');
+    // Punto inicio
+    L.marker(coords[0]).addTo(this.map).bindPopup("📍 Inicio").openPopup();
 
-    // Marcador de inicio
-    L.marker(coords[0], { icon: greenIcon })
-      .addTo(this.map)
-      .bindPopup(`
-        <b>🚩 Inicio: ${this.ruta.nombre_ruta}</b><br>
-        ${this.ruta.descripcion_ruta || ''}<br>
-        <small>📏 Distancia total: ${this.ruta.longitud_ruta} km</small><br>
-        <small>📍 ${coords.length} puntos GPS</small>
-      `)
-      .openPopup();
+    // Punto fin
+    L.marker(coords[coords.length - 1]).addTo(this.map).bindPopup("🏁 Fin");
 
-    // Marcador de fin
-    L.marker(coords[coords.length - 1], { icon: redIcon })
-      .addTo(this.map)
-      .bindPopup(`<b>🏁 Fin: ${this.ruta.nombre_ruta}</b>`);
-
-    // Ajustar vista al recorrido
     const bounds = L.latLngBounds(coords);
-    this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
-  }
-
-  private createColoredIcon(color: string): L.Icon {
-    return L.icon({
-      iconRetinaUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
-      iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+    this.map.fitBounds(bounds, { padding: [20, 20] });
   }
 
   /* ======================================================
-     🔙 VOLVER
+     🔙 Volver
   ====================================================== */
   volver() {
     this.router.navigate(['/rutas-recomendadas']);
   }
 
   /* ======================================================
-     🗺️ VER EN MAPA PRINCIPAL
+     🗺 Ver en mapa principal
   ====================================================== */
   verEnMapa() {
     this.router.navigate(['/menu'], {
@@ -209,40 +173,37 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /* ======================================================
-     📤 COMPARTIR RUTA
+     📤 Compartir ruta
   ====================================================== */
   async compartirRuta() {
     const url = `${window.location.origin}/ruta-detalle/${this.ruta.id_ruta}`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: this.ruta.nombre_ruta,
-          text: `Descubre esta ruta: ${this.ruta.nombre_ruta} - ${this.ruta.longitud_ruta} km`,
-          url: url
+          text: "Revisa esta ruta accesible:",
+          url
         });
-        this.mostrarToast('✅ Ruta compartida', 'success');
-      } catch (err) {
-        console.log('Error al compartir:', err);
+        this.mostrarToast("Ruta compartida", "success");
+      } catch (error) {
+        console.log(error);
       }
     } else {
-      // Copiar al portapapeles
-      navigator.clipboard.writeText(url).then(() => {
-        this.mostrarToast('📋 Enlace copiado al portapapeles', 'success');
-      });
+      await navigator.clipboard.writeText(url);
+      this.mostrarToast("Enlace copiado", "primary");
     }
   }
 
   /* ======================================================
-     🔔 MOSTRAR TOAST
+     🔔 Toast
   ====================================================== */
-  async mostrarToast(mensaje: string, color: string = 'primary') {
-    const toast = await this.toastController.create({
-      message: mensaje,
-      duration: 2000,
+  async mostrarToast(msg: string, color: string) {
+    const t = await this.toast.create({
+      message: msg,
       color,
-      position: 'bottom'
+      duration: 1800
     });
-    await toast.present();
+    t.present();
   }
 }

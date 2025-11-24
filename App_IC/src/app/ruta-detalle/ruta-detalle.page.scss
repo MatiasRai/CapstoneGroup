@@ -1,10 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════
-   🎨 ESTILOS RUTA DETALLE
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ─────────────────────────────────────────────────────────────
-   🔄 LOADING
-────────────────────────────────────────────────────────────── */
+/* LOADING */
 .loading-container,
 .error-container {
   display: flex;
@@ -39,9 +33,7 @@
   }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   🗺️ MAPA
-────────────────────────────────────────────────────────────── */
+/* MAPA */
 .mapa-detalle {
   width: 100%;
   height: 400px;
@@ -49,12 +41,9 @@
   background-color: #ffffff !important;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   📋 TARJETAS
-────────────────────────────────────────────────────────────── */
+/* TARJETAS */
 .info-card,
-.creador-card,
-.coordenadas-card {
+.creador-card {
   margin: 16px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -62,14 +51,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 ion-card-header {
@@ -81,99 +64,52 @@ ion-card-header {
 ion-card-title {
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 0 8px 0;
 }
 
 ion-card-subtitle {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-
-  ion-icon {
-    font-size: 20px;
-  }
 }
 
-ion-card-content {
-  padding: 20px;
-}
-
+/* DESCRIPCIÓN */
 .descripcion {
   font-size: 1rem;
-  line-height: 1.6;
   color: #555;
-  margin: 0 0 20px 0;
+  margin-bottom: 20px;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   📊 ESTADÍSTICAS
-────────────────────────────────────────────────────────────── */
+/* ESTADÍSTICAS */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 15px;
-  margin: 20px 0;
 }
 
 .stat-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
   padding: 20px 10px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #f5f7fa;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: translateY(-3px);
-  }
 
   ion-icon {
     font-size: 32px;
   }
-
-  h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    color: #333;
-  }
-
-  p {
-    font-size: 0.85rem;
-    margin: 0;
-    color: #666;
-    font-weight: 500;
-  }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   🔘 ACCIONES
-────────────────────────────────────────────────────────────── */
+/* ACCIONES */
 .acciones {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-
-  ion-button {
-    --border-radius: 10px;
-    font-weight: 600;
-    text-transform: none;
-  }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   👤 INFORMACIÓN DEL CREADOR
-────────────────────────────────────────────────────────────── */
+/* CREADOR */
 .creador-info {
   display: flex;
-  align-items: center;
   gap: 15px;
   padding: 10px;
   background: #f9f9f9;
@@ -181,114 +117,5 @@ ion-card-content {
 
   ion-icon {
     font-size: 48px;
-  }
-
-  h3 {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 0 0 5px 0;
-    color: #333;
-  }
-
-  p {
-    font-size: 0.9rem;
-    margin: 0;
-    color: #666;
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   📍 COORDENADAS DETALLADAS
-────────────────────────────────────────────────────────────── */
-.coordenadas-card {
-  ion-list {
-    background: transparent;
-  }
-
-  ion-item {
-    --padding-start: 12px;
-    --inner-padding-end: 12px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    background: #f9f9f9;
-
-    h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #667eea;
-      margin: 0 0 4px 0;
-    }
-
-    p {
-      font-size: 0.85rem;
-      color: #666;
-      margin: 0;
-      font-family: 'Courier New', monospace;
-    }
-  }
-}
-
-.toggle-coords-btn {
-  margin: 0 16px 20px 16px;
-  --color: #667eea;
-  font-weight: 600;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   📱 RESPONSIVE
-────────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .mapa-detalle {
-    height: 300px;
-  }
-
-  ion-card-title {
-    font-size: 1.3rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .stat-box {
-    padding: 15px 5px;
-
-    ion-icon {
-      font-size: 28px;
-    }
-
-    h3 {
-      font-size: 1.3rem;
-    }
-
-    p {
-      font-size: 0.75rem;
-    }
-  }
-
-  .creador-info {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .mapa-detalle {
-    height: 250px;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-box {
-    flex-direction: row;
-    justify-content: flex-start;
-    padding: 15px;
-
-    ion-icon {
-      font-size: 32px;
-    }
   }
 }

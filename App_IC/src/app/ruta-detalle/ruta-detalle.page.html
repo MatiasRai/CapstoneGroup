@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content>
-  
+
   <!-- 🔄 SPINNER DE CARGA -->
   <div *ngIf="cargando" class="loading-container">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
@@ -95,33 +95,6 @@
         </div>
       </ion-card-content>
     </ion-card>
-
-    <!-- COORDENADAS DETALLADAS (OPCIONAL) -->
-    <ion-card *ngIf="mostrarCoordenadas" class="coordenadas-card">
-      <ion-card-header>
-        <ion-card-title>Puntos GPS de la Ruta</ion-card-title>
-        <ion-card-subtitle>{{ ruta.coordenadas?.length || 0 }} coordenadas registradas</ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list>
-          <ion-item *ngFor="let coord of ruta.coordenadas; let i = index">
-            <ion-label>
-              <h3>Punto {{ i + 1 }}</h3>
-              <p>Lat: {{ coord.latitud }}, Lng: {{ coord.longitud }}</p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-button 
-      expand="block" 
-      fill="clear" 
-      (click)="mostrarCoordenadas = !mostrarCoordenadas"
-      class="toggle-coords-btn">
-      <ion-icon slot="start" [name]="mostrarCoordenadas ? 'chevron-up' : 'chevron-down'"></ion-icon>
-      {{ mostrarCoordenadas ? 'Ocultar' : 'Mostrar' }} coordenadas detalladas
-    </ion-button>
 
   </div>
 

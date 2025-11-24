@@ -1,40 +1,80 @@
+/* 🎨 TÍTULOS */
 h2 {
-  font-weight: 600;
-  color: #2f2f2f;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 26px;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* 🎯 ÍTEMS DE FORMULARIO */
+ion-item {
+  --background: #ffffff;
+  border-radius: 10px;
+  border: 2px solid #c8c8c8;
+  margin-bottom: 16px;
+  padding: 4px;
 }
 
 ion-item.invalid {
-  --border-color: #ff4d4d;
-  --highlight-color-invalid: #ff4d4d;
+  border-color: #ff4d4d !important;
 }
 
-.error-text {
-  color: #ff4d4d;
-  font-size: 13px;
-  margin-top: 4px;
-  margin-left: 5px;
+/* 📌 ETIQUETAS Y TEXTOS */
+ion-label {
+  font-size: 18px !important;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
-ion-item {
-  margin-bottom: 10px;
-  border-radius: 8px;
-  --background: #fff;
-}
-
+/* 📝 INPUTS */
 ion-input, ion-textarea {
-  font-size: 15px;
-}
-
-#map {
-  height: 250px;
-  width: 100%;
-  border-radius: 10px;
-  margin: 15px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-ion-button[color="medium"] {
-  --background: #f4f4f4;
+  font-size: 18px !important;
+  padding: 14px !important;
   --color: #000;
-  font-weight: 500;
+}
+
+/* Estado de foco accesible */
+ion-item.ion-focused {
+  border-color: #005fcc !important;
+  box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.2);
+}
+
+/* ❌ MENSAJES DE ERROR */
+.error-text {
+  color: #d90429;
+  font-size: 16px;
+  margin-left: 2px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* 🗺️ MAPA */
+#map {
+  height: 260px;
+  width: 100%;
+  border-radius: 14px;
+  margin: 20px 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* 📍 BOTÓN UBICACIÓN */
+ion-button[color="medium"] {
+  --background: #e9e9e9;
+  --color: #000;
+  font-size: 18px;
+  font-weight: 600;
+  height: 55px;
+  border-radius: 10px;
+}
+
+/* 🟢 BOTÓN REGISTRAR */
+ion-button[color="success"] {
+  --background: #007b00;
+  --background-focused: #005f00;
+  font-size: 20px;
+  height: 55px;
+  border-radius: 10px;
+  font-weight: 700;
 }

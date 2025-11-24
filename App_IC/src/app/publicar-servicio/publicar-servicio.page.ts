@@ -1,5 +1,5 @@
 import * as L from 'leaflet';
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastController } from '@ionic/angular';
@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
   imports: [CommonModule, FormsModule, ...IONIC_IMPORTS],
 })
-export class PublicarServicioPage implements OnInit, AfterViewInit {
+export class PublicarServicioPage implements OnInit, OnDestroy {
 
   servicio = {
     nombre_servicio: '',
@@ -44,42 +44,41 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     private http: HttpClient
   ) {}
 
-  // ─────────────────────────────────────────────
-  // INICIO
-  // ─────────────────────────────────────────────
   ngOnInit() {
     const usuario = this.authService.getUser();
     if (usuario?.id) this.servicio.Empresas_id_empresa = usuario.id;
 
-    this.cargarTiposDiscapacidad();  // ⭐ YA EXISTE Y FUNCIONA
+    this.cargarTiposDiscapacidad();
   }
 
-  ngAfterViewInit() {
+  ionViewDidEnter() {
     this.fixLeafletIcons();
-    setTimeout(() => this.inicializarMapa(-33.4489, -70.6693), 200);
+
+    setTimeout(() => {
+      this.inicializarMapa(-33.4489, -70.6693);
+    }, 300);
   }
 
-  // ─────────────────────────────────────────────
-  // CARGAR TIPOS DE DISCAPACIDAD
-  // ─────────────────────────────────────────────
+  ngOnDestroy() {
+    if (this.map) {
+      this.map.off();
+      this.map.remove();
+    }
+  }
+
   private cargarTiposDiscapacidad() {
     const url = `http://${this.host}:3000/api/v1/discapacidades/tipos`;
 
     this.http.get(url).subscribe({
       next: (data: any) => {
         this.tiposDiscapacidad = data;
-        console.log("Tipos de discapacidad cargados:", this.tiposDiscapacidad);
       },
-      error: (err) => {
-        console.error("Error al cargar tipos:", err);
+      error: () => {
         this.mostrarToast("Error al cargar tipos de discapacidad", "danger");
       }
     });
   }
 
-  // ─────────────────────────────────────────────
-  // LEAFLET - FIX ICONS
-  // ─────────────────────────────────────────────
   private fixLeafletIcons(): void {
     const iconDefault = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -93,21 +92,17 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     L.Marker.prototype.options.icon = iconDefault;
   }
 
-  // ─────────────────────────────────────────────
-  // INICIALIZAR MAPA CORRECTAMENTE
-  // ─────────────────────────────────────────────
   private inicializarMapa(lat: number, lng: number) {
     const contenedor = document.getElementById('map');
+
     if (!contenedor) {
       setTimeout(() => this.inicializarMapa(lat, lng), 200);
       return;
     }
 
     if (this.map) {
-      try {
-        this.map.off();
-        this.map.remove();
-      } catch {}
+      this.map.off();
+      this.map.remove();
     }
 
     this.map = L.map('map', {
@@ -119,17 +114,16 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+      attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
     this.marker = L.marker([lat, lng]).addTo(this.map);
 
-    setTimeout(() => this.map.invalidateSize(), 250);
+    setTimeout(() => {
+      this.map.invalidateSize();
+    }, 400);
   }
 
-  // ─────────────────────────────────────────────
-  // GEOLOCALIZACIÓN
-  // ─────────────────────────────────────────────
   obtenerUbicacion() {
     if (!navigator.geolocation) {
       this.mostrarToast("Tu navegador no soporta geolocalización.", "danger");
@@ -144,19 +138,16 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
         this.servicio.latitud = lat;
         this.servicio.longitud = lng;
 
-        this.map.setView([lat, lng], 16, { animate: true });
+        this.map.setView([lat, lng], 16);
         this.marker.setLatLng([lat, lng]);
 
-        this.mostrarToast("Ubicación obtenida correctamente.", "success");
+        this.mostrarToast("Ubicación obtenida.", "success");
       },
       () => this.mostrarToast("Error al obtener la ubicación.", "danger"),
       { enableHighAccuracy: true }
     );
   }
 
-  // ─────────────────────────────────────────────
-  // VALIDACIÓN BACKEND
-  // ─────────────────────────────────────────────
   private validarServicio(): string | null {
     if (!this.servicio.nombre_servicio.trim() || this.servicio.nombre_servicio.length < 3)
       return "El nombre debe tener mínimo 3 caracteres.";
@@ -167,8 +158,7 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     if (!this.servicio.horario_disponible.trim())
       return "Debes indicar un horario disponible.";
 
-    const costo = Number(this.servicio.costo_servicio);
-    if (isNaN(costo) || costo <= 0)
+    if (Number(this.servicio.costo_servicio) <= 0)
       return "El costo debe ser mayor a 0.";
 
     if (!this.servicio.direccion_lugar.trim())
@@ -186,9 +176,6 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     return null;
   }
 
-  // ─────────────────────────────────────────────
-  // REGISTRAR SERVICIO
-  // ─────────────────────────────────────────────
   registrarServicio() {
     const error = this.validarServicio();
     if (error) {
@@ -204,16 +191,14 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
         if (this.map) {
           this.map.off();
           this.map.remove();
-          setTimeout(() => this.inicializarMapa(-33.4489, -70.6693), 150);
         }
+
+        setTimeout(() => this.inicializarMapa(-33.4489, -70.6693), 200);
       },
       error: () => this.mostrarToast("Error al registrar el servicio.", "danger"),
     });
   }
 
-  // ─────────────────────────────────────────────
-  // LIMPIAR FORMULARIO
-  // ─────────────────────────────────────────────
   limpiarFormulario() {
     const empresaId = this.authService.getUser()?.id || null;
 
@@ -232,9 +217,6 @@ export class PublicarServicioPage implements OnInit, AfterViewInit {
     };
   }
 
-  // ─────────────────────────────────────────────
-  // TOAST
-  // ─────────────────────────────────────────────
   async mostrarToast(message: string, color: string = 'primary') {
     const toast = await this.toastCtrl.create({
       message,
