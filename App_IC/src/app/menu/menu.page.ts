@@ -17,7 +17,10 @@ import * as L from 'leaflet';
   imports: [CommonModule, FormsModule, HttpClientModule, IONIC_IMPORTS]
 })
 export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
+  // ───────────────── MAPA / ESTADO ─────────────────
   private map!: L.Map;
+  private defaultIcon!: L.Icon;
+
   currentLocation: [number, number] | null = null;
   private currentUserId: number | null = null;
   private host = window.location.hostname;
@@ -32,28 +35,23 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   totalDistance: number = 0;
   startTime: number = 0;
   recordingInterval: any = null;
-  
+
   currentSpeed: number = 0;
   elapsedTime: string = '00:00:00';
-  
+
   rutasGuardadas: any[] = [];
   rutasPolylines: L.Polyline[] = [];
   rutasPublicas: any[] = [];
-  
-  // 🆕 Servicios disponibles
+
+  // Servicios disponibles
   serviciosDisponibles: any[] = [];
   serviciosMarkers: L.Marker[] = [];
-  servicioSeleccionado: any = null; // 🆕 Servicio seleccionado al hacer clic en el mapa
-  
+  servicioSeleccionado: any = null;
+
   private lastMapUpdate: number = 0;
   private mapUpdateThrottle: number = 1000;
 
-  // 🆕 Estado de usuario
   isUserLoggedIn: boolean = false;
-  
-irARutasRecomendadas() {
-  this.router.navigate(['/rutas-recomendadas']);
-}
 
   constructor(
     private platform: Platform,
@@ -66,10 +64,16 @@ irARutasRecomendadas() {
     private authService: AuthService
   ) {}
 
+  // ───────────────── NAVEGACIÓN ─────────────────
+  irARutasRecomendadas() {
+    this.router.navigate(['/rutas-recomendadas']);
+  }
+
+  // ───────────────── CICLO DE VIDA ─────────────────
   ngOnInit() {
     this.loadCurrentUser();
     this.getCurrentPosition();
-    this.cargarServiciosDisponibles(); // 🆕 Cargar servicios
+    this.cargarServiciosDisponibles();
   }
 
   ngAfterViewInit(): void {
@@ -81,33 +85,30 @@ irARutasRecomendadas() {
     this.stopRecording();
   }
 
+  // ───────────────── USUARIO / SESIÓN ─────────────────
   private loadCurrentUser() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const user = JSON.parse(userStr);
       this.currentUserId = user.id;
-      this.isUserLoggedIn = true; // 🆕 Usuario logueado
-      
+      this.isUserLoggedIn = true;
+
       if (this.currentUserId) {
         this.cargarRutasGuardadas();
         this.cargarRutasPublicas();
       }
     } else {
-      this.isUserLoggedIn = false; // 🆕 No hay usuario logueado
-      this.cargarRutasPublicas(); // Cargar solo rutas públicas
+      this.isUserLoggedIn = false;
+      this.cargarRutasPublicas();
     }
   }
 
-  /* ======================================================
-     🆕 CARGAR SERVICIOS DISPONIBLES
-  ====================================================== */
+  // ───────────────── SERVICIOS EN MAPA ─────────────────
   cargarServiciosDisponibles() {
     this.admEmpresaService.obtenerTodosLosServicios().subscribe({
       next: (servicios: any[]) => {
         this.serviciosDisponibles = servicios.filter(s => s.latitud && s.longitud);
         console.log('🧩 Servicios cargados:', this.serviciosDisponibles.length);
-        
-        // Mostrar servicios en el mapa si ya está inicializado
         if (this.map) {
           this.mostrarServiciosEnMapa();
         }
@@ -118,32 +119,18 @@ irARutasRecomendadas() {
     });
   }
 
-  /* ======================================================
-     🆕 MOSTRAR SERVICIOS EN EL MAPA (MODIFICADO)
-  ====================================================== */
   private mostrarServiciosEnMapa() {
-    // Limpiar marcadores anteriores de servicios
-    this.serviciosMarkers.forEach(marker => this.map.removeLayer(marker));
+    if (!this.map) return;
+
+    // limpiar marcadores anteriores
+    this.serviciosMarkers.forEach(m => this.map.removeLayer(m));
     this.serviciosMarkers = [];
 
-    // Crear ícono personalizado para servicios
-    const servicioIcon = L.icon({
-      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
-      iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-
-    // Agregar marcador para cada servicio
     this.serviciosDisponibles.forEach(servicio => {
       if (servicio.latitud && servicio.longitud) {
-        const marker = L.marker([servicio.latitud, servicio.longitud], { icon: servicioIcon })
+        const marker = L.marker([servicio.latitud, servicio.longitud])
           .addTo(this.map);
-        
-        // 🆕 Al hacer clic, seleccionar el servicio en lugar de mostrar popup
+
         marker.on('click', () => {
           this.seleccionarServicio(servicio);
         });
@@ -155,22 +142,17 @@ irARutasRecomendadas() {
     console.log(`✅ ${this.serviciosMarkers.length} servicios mostrados en el mapa`);
   }
 
-  /* ======================================================
-     🆕 SELECCIONAR SERVICIO AL HACER CLIC EN EL MAPA
-  ====================================================== */
   seleccionarServicio(servicio: any) {
     this.servicioSeleccionado = servicio;
     console.log('🧩 Servicio seleccionado:', servicio.nombre_servicio);
-    
-    // Centrar el mapa en el servicio seleccionado
-    if (servicio.latitud && servicio.longitud) {
+
+    if (servicio.latitud && servicio.longitud && this.map) {
       this.map.setView([servicio.latitud, servicio.longitud], 16, {
         animate: true,
         duration: 0.5
       });
     }
-    
-    // Scroll automático a la sección de servicios
+
     setTimeout(() => {
       const serviciosSection = document.getElementById('servicios-section');
       if (serviciosSection) {
@@ -179,34 +161,25 @@ irARutasRecomendadas() {
     }, 100);
   }
 
-  /* ======================================================
-     🆕 LIMPIAR SELECCIÓN DE SERVICIO
-  ====================================================== */
   limpiarSeleccionServicio() {
     this.servicioSeleccionado = null;
   }
 
-  /* ======================================================
-     🆕 VER MÁS INFORMACIÓN DEL SERVICIO
-  ====================================================== */
   verMasInformacion() {
     if (!this.servicioSeleccionado) return;
-    
-    // Navegar a info-servicio pasando el servicio seleccionado
+
     this.router.navigate(['/info-servicio'], {
       state: { servicio: this.servicioSeleccionado }
     });
   }
 
-  /* ======================================================
-     🆕 CALCULAR PROMEDIO DE VALORACIÓN
-  ====================================================== */
   calcularPromedioValoracion(resenas: any[]): string {
     if (!resenas || resenas.length === 0) return '0.0';
     const suma = resenas.reduce((acc, r) => acc + (r.valoracion || 0), 0);
     return (suma / resenas.length).toFixed(1);
   }
 
+  // ───────────────── GEOLOCALIZACIÓN ─────────────────
   async getCurrentPosition() {
     try {
       if (!navigator.geolocation) {
@@ -215,9 +188,9 @@ irARutasRecomendadas() {
         return;
       }
 
-      const isSecure = window.location.protocol === 'https:' || 
-                       window.location.hostname === 'localhost' ||
-                       window.location.hostname === '127.0.0.1';
+      const isSecure = window.location.protocol === 'https:' ||
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
 
       if (!isSecure) {
         await this.showAlertHTTPS();
@@ -226,12 +199,12 @@ irARutasRecomendadas() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           this.currentLocation = [position.coords.latitude, position.coords.longitude];
-          
+
           if (this.map) {
-            this.map.setView(this.currentLocation, 15); // Zoom 15 para ver servicios cercanos
+            this.map.setView(this.currentLocation, 15);
             this.addCurrentLocationMarker();
           }
-          
+
           this.showToast('✅ GPS conectado correctamente', 'success');
         },
         (error) => this.handleLocationError(error),
@@ -292,7 +265,7 @@ irARutasRecomendadas() {
   }
 
   private usarUbicacionPorDefecto() {
-    this.currentLocation = [-41.4693, -72.9424]; // Puerto Montt por defecto
+    this.currentLocation = [-41.4693, -72.9424]; // Puerto Montt
     if (this.map) {
       this.map.setView(this.currentLocation, 13);
     }
@@ -301,13 +274,13 @@ irARutasRecomendadas() {
   private addCurrentLocationMarker(): void {
     if (!this.currentLocation || !this.map) return;
 
-    const blueIcon = this.createColoredIcon('blue');
+    const icon = this.createColoredIcon('blue');
 
     if (this.currentMarker) {
       this.map.removeLayer(this.currentMarker);
     }
 
-    this.currentMarker = L.marker(this.currentLocation, { icon: blueIcon })
+    this.currentMarker = L.marker(this.currentLocation, { icon })
       .addTo(this.map)
       .bindPopup(`
         <b>📍 Tu ubicación GPS</b><br>
@@ -317,8 +290,9 @@ irARutasRecomendadas() {
       .openPopup();
   }
 
+  // ───────────────── LEAFLET ICONS / MAP ─────────────────
   private fixLeafletIcons(): void {
-    const iconDefault = L.icon({
+    this.defaultIcon = L.icon({
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -327,7 +301,7 @@ irARutasRecomendadas() {
       popupAnchor: [1, -34],
       shadowSize: [41, 41]
     });
-    L.Marker.prototype.options.icon = iconDefault;
+    L.Marker.prototype.options.icon = this.defaultIcon;
   }
 
   private initMap(): void {
@@ -364,7 +338,6 @@ irARutasRecomendadas() {
     setTimeout(() => {
       if (this.map) {
         this.map.invalidateSize();
-        // Mostrar servicios después de que el mapa esté listo
         this.mostrarServiciosEnMapa();
       }
     }, 200);
@@ -374,26 +347,15 @@ irARutasRecomendadas() {
     }
   }
 
-  /* ======================================================
-     🆕 VERIFICAR LOGIN ANTES DE GRABAR RUTA
-  ====================================================== */
+  // ───────────────── GRABAR RUTA ─────────────────
   async startRecording() {
-    // 🔒 Verificar si el usuario está logueado
     if (!this.isUserLoggedIn) {
       const alert = await this.alertController.create({
         header: '🔒 Inicio de Sesión Requerido',
         message: 'Debes iniciar sesión para poder grabar rutas.<br><br>¿Deseas ir a la página de login?',
         buttons: [
-          {
-            text: 'Cancelar',
-            role: 'cancel'
-          },
-          {
-            text: 'Ir a Login',
-            handler: () => {
-              this.router.navigate(['/login']);
-            }
-          }
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Ir a Login', handler: () => this.router.navigate(['/login']) }
         ]
       });
       await alert.present();
@@ -424,12 +386,12 @@ irARutasRecomendadas() {
             longitud: position.coords.longitude,
             timestamp: Date.now()
           };
-          
+
           this.recordedPoints.push(startPoint);
           this.currentLocation = [startPoint.latitud, startPoint.longitud];
 
-          const greenIcon = this.createColoredIcon('green');
-          this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon: greenIcon })
+          const icon = this.createColoredIcon('green');
+          this.startMarker = L.marker([startPoint.latitud, startPoint.longitud], { icon })
             .addTo(this.map)
             .bindPopup('<b>🚩 Inicio de tu ruta</b>')
             .openPopup();
@@ -461,13 +423,13 @@ irARutasRecomendadas() {
 
           this.showToast('✅ Grabación iniciada. ¡Camina!', 'success');
         },
-        (error) => {
+        () => {
           this.showToast('❌ Error al obtener ubicación inicial', 'danger');
           this.isRecording = false;
         }
       );
 
-    } catch (error) {
+    } catch {
       await this.showToast('❌ Error al iniciar grabación', 'danger');
       this.isRecording = false;
     }
@@ -519,13 +481,13 @@ irARutasRecomendadas() {
   }
 
   private updateCurrentMarker(lat: number, lng: number) {
-    const blueIcon = this.createColoredIcon('blue');
+    const icon = this.createColoredIcon('blue');
 
     if (this.currentMarker) {
       this.map.removeLayer(this.currentMarker);
     }
 
-    this.currentMarker = L.marker([lat, lng], { icon: blueIcon })
+    this.currentMarker = L.marker([lat, lng], { icon })
       .addTo(this.map)
       .bindPopup(`<b>📍 Tu ubicación</b><br>Velocidad: ${this.currentSpeed.toFixed(1)} km/h`);
   }
@@ -559,9 +521,9 @@ irARutasRecomendadas() {
 
     if (this.recordedPoints.length > 1) {
       const lastPoint = this.recordedPoints[this.recordedPoints.length - 1];
-      
-      const redIcon = this.createColoredIcon('red');
-      L.marker([lastPoint.latitud, lastPoint.longitud], { icon: redIcon })
+
+      const icon = this.createColoredIcon('red');
+      L.marker([lastPoint.latitud, lastPoint.longitud], { icon })
         .addTo(this.map)
         .bindPopup('<b>🏁 Fin de tu ruta</b>')
         .openPopup();
@@ -634,7 +596,7 @@ irARutasRecomendadas() {
         this.clearRecording();
         this.cargarRutasGuardadas();
       },
-      error: async (error) => {
+      error: async () => {
         await this.showToast('❌ Error al guardar la ruta', 'danger');
       }
     });
@@ -657,13 +619,14 @@ irARutasRecomendadas() {
     }
   }
 
+  // ───────────────── RUTAS GUARDADAS / PÚBLICAS ─────────────────
   private cargarRutasGuardadas() {
     if (!this.currentUserId) return;
 
     this.http.get(`${this.apiUrl}/rutas/usuario/${this.currentUserId}`).subscribe({
       next: async (rutas: any) => {
         this.rutasGuardadas = [];
-        
+
         for (const ruta of rutas) {
           try {
             const rutaDetalle: any = await this.http.get(`${this.apiUrl}/rutas/${ruta.id_ruta}`).toPromise();
@@ -681,7 +644,7 @@ irARutasRecomendadas() {
     this.http.get(`${this.apiUrl}/rutas`).subscribe({
       next: async (todasRutas: any) => {
         this.rutasPublicas = [];
-        
+
         for (const ruta of todasRutas) {
           if (ruta.id_usuario !== this.currentUserId) {
             try {
@@ -724,10 +687,7 @@ irARutasRecomendadas() {
 
       this.rutasPolylines.push(polyline);
 
-      const greenIcon = this.createColoredIcon('green');
-      const redIcon = this.createColoredIcon('red');
-
-      L.marker(coords[0], { icon: greenIcon })
+      const startMarker = L.marker(coords[0])
         .addTo(this.map)
         .bindPopup(`
           <b>🚩 ${ruta.nombre_ruta}</b><br>
@@ -735,7 +695,7 @@ irARutasRecomendadas() {
           <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      L.marker(coords[coords.length - 1], { icon: redIcon })
+      const endMarker = L.marker(coords[coords.length - 1])
         .addTo(this.map)
         .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
     });
@@ -776,10 +736,7 @@ irARutasRecomendadas() {
 
       this.rutasPolylines.push(polyline);
 
-      const violetIcon = this.createColoredIcon('violet');
-      const orangeIcon = this.createColoredIcon('orange');
-
-      L.marker(coords[0], { icon: violetIcon })
+      const startMarker = L.marker(coords[0])
         .addTo(this.map)
         .bindPopup(`
           <b>🌍 ${ruta.nombre_ruta}</b><br>
@@ -788,7 +745,7 @@ irARutasRecomendadas() {
           <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      L.marker(coords[coords.length - 1], { icon: orangeIcon })
+      const endMarker = L.marker(coords[coords.length - 1])
         .addTo(this.map)
         .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
     });
@@ -806,9 +763,7 @@ irARutasRecomendadas() {
     this.rutasPolylines = [];
   }
 
-  /* ======================================================
-     🆕 FUNCIONES PARA INICIAR SESIÓN O REGISTRARSE
-  ====================================================== */
+  // ───────────────── MENÚ RUTAS / ACCIONES ─────────────────
   irALogin() {
     this.router.navigate(['/login']);
   }
@@ -962,7 +917,7 @@ irARutasRecomendadas() {
         this.limpiarRutasDelMapa();
         this.cargarRutasGuardadas();
       },
-      error: async (error) => {
+      error: async () => {
         await this.showToast('❌ Error al eliminar la ruta', 'danger');
       }
     });
@@ -1033,7 +988,7 @@ irARutasRecomendadas() {
     this.limpiarRutasDelMapa();
 
     const coords = ruta.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
-    
+
     const color = esPublica ? '#9b59b6' : '#0066ff';
     const dashArray = esPublica ? '5, 10' : undefined;
 
@@ -1049,10 +1004,7 @@ irARutasRecomendadas() {
 
     this.rutasPolylines.push(polyline);
 
-    const greenIcon = this.createColoredIcon(esPublica ? 'violet' : 'green');
-    const redIcon = this.createColoredIcon(esPublica ? 'orange' : 'red');
-
-    const startMarker = L.marker(coords[0], { icon: greenIcon })
+    const startMarker = L.marker(coords[0])
       .addTo(this.map)
       .bindPopup(`
         <b>${esPublica ? '🌍' : '🚩'} Inicio: ${ruta.nombre_ruta}</b><br>
@@ -1062,7 +1014,7 @@ irARutasRecomendadas() {
         <small>📍 Puntos GPS: ${coords.length}</small>
       `);
 
-    const endMarker = L.marker(coords[coords.length - 1], { icon: redIcon })
+    const endMarker = L.marker(coords[coords.length - 1])
       .addTo(this.map)
       .bindPopup(`<b>🏁 Fin: ${ruta.nombre_ruta}</b>`);
 
@@ -1074,6 +1026,7 @@ irARutasRecomendadas() {
     await this.showToast(`📍 ${ruta.nombre_ruta} - ${ruta.longitud_ruta} km`, 'primary');
   }
 
+  // ───────────────── UTILIDADES ─────────────────
   private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371;
     const dLat = this.deg2rad(lat2 - lat1);
@@ -1090,16 +1043,9 @@ irARutasRecomendadas() {
     return deg * (Math.PI / 180);
   }
 
+  // 🔹 Ahora todos los marcadores usan el mismo icono por fiabilidad
   private createColoredIcon(color: string): L.Icon {
-    return L.icon({
-      iconRetinaUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
-      iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
+    return this.defaultIcon || (L.Marker.prototype.options.icon as L.Icon);
   }
 
   async showToast(message: string, color: string) {
