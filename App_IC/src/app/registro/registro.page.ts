@@ -2,12 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
-import { 
-  IonContent, IonHeader, IonTitle, IonToolbar, 
-  IonButton, IonInput, IonItem, IonLabel, IonList, 
-  IonSelect, IonSelectOption 
+
+import {
+  IonContent, IonHeader, IonTitle, IonToolbar,
+  IonButton, IonInput, IonItem, IonLabel, IonList,
+  IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
+
 import { UsuarioService } from '../services/usuario.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registro',
@@ -15,15 +18,14 @@ import { UsuarioService } from '../services/usuario.service';
   styleUrls: ['./registro.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, 
-    IonButton, IonInput, IonItem, IonLabel, IonList, 
+    IonContent, IonHeader, IonTitle, IonToolbar,
+    IonButton, IonInput, IonItem, IonLabel, IonList,
     IonSelect, IonSelectOption,
     CommonModule, FormsModule, IONIC_IMPORTS
   ]
 })
 export class RegistroPage implements OnInit {
-  
-  // Objeto usuario con todos los campos de la tabla
+
   usuario = {
     nombre: '',
     correo: '',
@@ -33,12 +35,15 @@ export class RegistroPage implements OnInit {
     Discapacidades_id_discapacidad: null
   };
 
-  discapacidades: any[] = [];   // 👈 Aquí guardaremos lo que venga de la BD
+  fotoFile: File | null = null;
+  discapacidades: any[] = [];
 
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(
+    private usuarioService: UsuarioService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    // Llamamos al service para traer las discapacidades al cargar la página
     this.usuarioService.getDiscapacidades().subscribe({
       next: (data) => {
         this.discapacidades = data;
@@ -49,24 +54,28 @@ export class RegistroPage implements OnInit {
     });
   }
 
+  // Capturar archivo
   onFileSelected(event: any) {
-    const file = event.target.files && event.target.files[0];
-      if (file) {
-        this.usuario.foto_perfil = file.name; // 👈 solo guardamos el nombre
-      } else {
-        this.usuario.foto_perfil = ''; // 👈 evitamos undefined
-      }
+    const file = event.target.files?.[0];
+    this.fotoFile = file ?? null;
+
+    // Solo guardamos el nombre (backend aún no guarda imagen)
+    this.usuario.foto_perfil = this.fotoFile ? this.fotoFile.name : '';
   }
+
+  // Registrar usuario + REDIRECCIONAR AL LOGIN
   onRegistrar() {
     this.usuarioService.registrarUsuario(this.usuario).subscribe({
       next: (res: any) => {
-        alert(`✅ Usuario registrado: ${res.nombre}`);
+        alert('Usuario registrado exitosamente');
         console.log('Usuario creado:', res);
-        // Aquí puedes redirigir a otra página si quieres
+
+        // 👉 Redirección automática al login
+        this.router.navigate(['/login']);
       },
       error: (err) => {
+        console.error('Error al registrar usuario:', err);
         alert('❌ Error al registrar usuario');
-        console.error(err);
       }
     });
   }
