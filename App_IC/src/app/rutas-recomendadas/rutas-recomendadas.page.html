@@ -11,7 +11,7 @@
   
   <h1 class="titulo-principal">Descubre Nuevas Rutas</h1>
 
-  <!-- 🔍 BUSCADOR -->
+  
   <ion-searchbar
     [(ngModel)]="searchTerm"
     (ionInput)="filtrarRutas()"
@@ -20,20 +20,20 @@
     debounce="500">
   </ion-searchbar>
 
-  <!-- 🔄 SPINNER DE CARGA -->
+  
   <div *ngIf="cargando" class="loading-container">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando rutas...</p>
   </div>
 
-  <!-- 📋 LISTA DE RUTAS -->
+  
   <div *ngIf="!cargando && rutasFiltradas.length > 0" class="rutas-grid">
     <ion-card 
       *ngFor="let ruta of rutasFiltradas" 
       class="ruta-card"
       (click)="verDetalle(ruta.id_ruta)">
       
-      <!-- ✅ IMAGEN CON ÍCONO (SIN PLACEHOLDER EXTERNO) -->
+      
       <div class="ruta-imagen">
         <div class="ruta-imagen-fallback">
           <ion-icon name="map" class="map-icon"></ion-icon>
@@ -46,7 +46,7 @@
         </div>
       </div>
 
-      <!-- Contenido de la tarjeta -->
+      
       <ion-card-header>
         <ion-card-title class="ruta-titulo">
           {{ ruta.nombre_ruta }}
@@ -62,7 +62,7 @@
           {{ ruta.descripcion_ruta || 'Sin descripción disponible' }}
         </p>
 
-        <!-- Información adicional -->
+        
         <div class="ruta-info">
           <div class="info-item">
             <ion-icon name="flag"></ion-icon>
@@ -83,14 +83,14 @@
     </ion-card>
   </div>
 
-  <!-- ⚠️ SIN RESULTADOS -->
+  
   <div *ngIf="!cargando && rutasFiltradas.length === 0" class="sin-resultados">
     <ion-icon name="map-outline" size="large"></ion-icon>
     <h2>No se encontraron rutas</h2>
     <p>Intenta con otro término de búsqueda</p>
   </div>
 
-  <!-- 📊 ESTADÍSTICAS -->
+  
   <ion-card *ngIf="!cargando && todasLasRutas.length > 0" class="stats-card">
     <ion-card-content>
       <div class="stats-container">

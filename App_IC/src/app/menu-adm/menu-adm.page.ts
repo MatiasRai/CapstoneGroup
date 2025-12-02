@@ -40,29 +40,21 @@ import { ToastController } from '@ionic/angular';
 })
 export class MenuADMPage implements OnInit, OnDestroy {
 
-  /* =====================================================
-      📌 LISTAS
-  ===================================================== */
+  
   usuarios: any[] = [];
   empresas: any[] = [];
 
-  /* =====================================================
-      📌 PAGINACIÓN USUARIOS
-  ===================================================== */
+  
   usuarioPage: number = 1;
   usuarioLimit: number = 10;
   usuarioTotalPages: number = 1;
 
-  /* =====================================================
-      📌 PAGINACIÓN EMPRESAS
-  ===================================================== */
+  
   empresaPage: number = 1;
   empresaLimit: number = 10;
   empresaTotalPages: number = 1;
 
-  /* =====================================================
-      📱 RESPONSIVE
-  ===================================================== */
+  
   isMobile: boolean = false;
   resizeListener: any;
 
@@ -71,9 +63,7 @@ export class MenuADMPage implements OnInit, OnDestroy {
     private toastCtrl: ToastController
   ) {}
 
-  /* =====================================================
-     🔵 CICLO DE VIDA
-  ===================================================== */
+  
   ngOnInit() {
     this.detectarResponsive();
     this.addResizeListener();
@@ -88,9 +78,7 @@ export class MenuADMPage implements OnInit, OnDestroy {
     }
   }
 
-  /* =====================================================
-      📱 RESPONSIVE
-  ===================================================== */
+  
   detectarResponsive() {
     this.isMobile = window.innerWidth < 768;
   }
@@ -102,9 +90,7 @@ export class MenuADMPage implements OnInit, OnDestroy {
     window.addEventListener('resize', this.resizeListener);
   }
 
-  /* =====================================================
-      🍞 TOAST GLOBAL
-  ===================================================== */
+  
   async presentToast(message: string, color: string = 'success') {
     const toast = await this.toastCtrl.create({
       message,
@@ -115,9 +101,7 @@ export class MenuADMPage implements OnInit, OnDestroy {
     toast.present();
   }
 
-  /* =====================================================
-      👤 USUARIOS (PAGINADO)
-  ===================================================== */
+  
   cargarUsuarios() {
     this.usuarioService
       .getUsuariosPaginados(this.usuarioPage, this.usuarioLimit)
@@ -158,9 +142,7 @@ export class MenuADMPage implements OnInit, OnDestroy {
     });
   }
 
-  /* =====================================================
-      🏢 EMPRESAS (PAGINADO)
-  ===================================================== */
+  
   cargarEmpresas() {
     this.usuarioService
       .getEmpresasPaginadas(this.empresaPage, this.empresaLimit)

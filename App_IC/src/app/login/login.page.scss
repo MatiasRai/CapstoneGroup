@@ -1,6 +1,4 @@
-/* ==========================================
-   FORZAR ION-CONTENT A OCUPAR *TODO EL ALTO*
-========================================== */
+
 ion-content.login-content {
   --background: #f4f7fa;
 
@@ -9,16 +7,14 @@ ion-content.login-content {
   justify-content: center;
   align-items: center;
 
-  height: 100vh;   /* 🔥 OCUPA TODA LA ALTURA */
+  height: 100vh;   
   padding: 0;
 
   --padding-start: 0;
   --padding-end: 0;
 }
 
-/* ==========================================
-   PANEL COMPLETO (ANCHO + ALTO)
-========================================== */
+
 .login-container {
   width: 108%;
   height: 108%;
@@ -36,20 +32,16 @@ ion-content.login-content {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   border-radius: 0;
 
-  margin-top: -60px;   /* 🔥🔥 SUBE TODO EL PANEL */
+  margin-top: -60px;   
 }
 
-/* ==========================================
-   FORMULARIO INTERNO
-========================================== */
+
 form {
   width: 100%;
   max-width: 700px;
 }
 
-/* ==========================================
-   TITULO
-========================================== */
+
 h2 {
   text-align: center;
   font-size: 3rem;
@@ -58,9 +50,7 @@ h2 {
   font-weight: 700;
 }
 
-/* ==========================================
-   INPUTS
-========================================== */
+
 ion-item {
   margin-bottom: 24px;
   border-radius: 12px;
@@ -73,9 +63,7 @@ ion-input {
   --color: #333;
 }
 
-/* ==========================================
-   BOTÓN
-========================================== */
+
 .login-button {
   height: 60px;
   font-size: 1.3rem;

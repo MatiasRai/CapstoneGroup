@@ -1,4 +1,4 @@
-/* 🎨 TÍTULOS */
+
 h2 {
   font-weight: 700;
   color: #1a1a1a;
@@ -7,7 +7,7 @@ h2 {
   margin-bottom: 25px;
 }
 
-/* 🎯 ÍTEMS DE FORMULARIO */
+
 ion-item {
   --background: #ffffff;
   border-radius: 10px;
@@ -20,27 +20,27 @@ ion-item.invalid {
   border-color: #ff4d4d !important;
 }
 
-/* 📌 ETIQUETAS Y TEXTOS */
+
 ion-label {
   font-size: 18px !important;
   font-weight: 600;
   color: #1a1a1a;
 }
 
-/* 📝 INPUTS */
+
 ion-input, ion-textarea {
   font-size: 18px !important;
   padding: 14px !important;
   --color: #000;
 }
 
-/* Estado de foco accesible */
+
 ion-item.ion-focused {
   border-color: #005fcc !important;
   box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.2);
 }
 
-/* ❌ MENSAJES DE ERROR */
+
 .error-text {
   color: #d90429;
   font-size: 16px;
@@ -50,7 +50,7 @@ ion-item.ion-focused {
   font-weight: 600;
 }
 
-/* 🗺️ MAPA */
+
 #map {
   height: 260px;
   width: 100%;
@@ -59,7 +59,7 @@ ion-item.ion-focused {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
 }
 
-/* 📍 BOTÓN UBICACIÓN */
+
 ion-button[color="medium"] {
   --background: #e9e9e9;
   --color: #000;
@@ -69,7 +69,7 @@ ion-button[color="medium"] {
   border-radius: 10px;
 }
 
-/* 🟢 BOTÓN REGISTRAR */
+
 ion-button[color="success"] {
   --background: #007b00;
   --background-focused: #005f00;

@@ -15,7 +15,7 @@
 
   <form #formAdm="ngForm" (ngSubmit)="onRegistrar()">
 
-    <!-- Correo -->
+    
     <ion-item [class.invalid]="correo.invalid && correo.touched">
       <ion-label position="floating">Correo *</ion-label>
 
@@ -33,7 +33,7 @@
       Ingrese un correo válido (ejemplo@correo.com).
     </div>
 
-    <!-- Contraseña -->
+    
     <ion-item [class.invalid]="contrasena.invalid && contrasena.touched">
       <ion-label position="floating">Contraseña *</ion-label>
 
@@ -51,7 +51,7 @@
       La contraseña debe tener al menos 6 caracteres.
     </div>
 
-    <!-- Botón -->
+    
     <ion-button 
       expand="block"
       style="margin-top:20px;"

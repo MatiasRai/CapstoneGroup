@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <!-- 🍔 Menú lateral -->
+    
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
@@ -9,10 +9,10 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- 🔹 Empresa cargada -->
+  
   <ng-container *ngIf="empresa; else cargando">
     
-    <!-- 🏢 Datos de la empresa -->
+    
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ empresa.nombre_empresa }}</ion-card-title>
@@ -34,7 +34,7 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- 🧾 Lista de servicios -->
+    
     <ion-card>
       <ion-card-header>
         <ion-card-title>🧾 Servicios Publicados</ion-card-title>
@@ -52,7 +52,7 @@
                 <p><strong>📍 Lugar:</strong> {{ s.nombre_lugar }} - {{ s.direccion_lugar }}</p>
                 <p><strong>♿ Discapacidad:</strong> {{ s.nombre_discapacidad || 'No especificado' }}</p>
 
-                <!-- ⭐ Reseñas -->
+                
                 <div *ngIf="s.resenas?.length > 0" class="resenas-container">
                   <ion-list>
                     <ion-item *ngFor="let r of s.resenas">
@@ -69,7 +69,7 @@
                   No hay reseñas para este servicio.
                 </p>
 
-                <!-- ✏️🗑️ Botones -->
+                
                 <div class="acciones-servicio">
                   <ion-button color="warning" fill="outline" size="small" (click)="editarServicio(s)">
                     ✏️ Editar
@@ -83,7 +83,7 @@
           </ion-list>
         </ng-container>
 
-        <!-- 🚫 Si no hay servicios -->
+        
         <ng-template #sinServicios>
           <div class="sin-servicios">
             <ion-icon name="information-circle-outline" size="large" color="medium"></ion-icon>
@@ -94,7 +94,7 @@
     </ion-card>
   </ng-container>
 
-  <!-- 🔄 Cargando datos -->
+  
   <ng-template #cargando>
     <div class="cargando">
       <ion-spinner name="crescent"></ion-spinner>

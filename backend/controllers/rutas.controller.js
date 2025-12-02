@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-// 📍 Crear una nueva ruta con sus coordenadas
+
 const createRuta = (req, res) => {
   const {
     nombre_ruta,
@@ -8,10 +8,10 @@ const createRuta = (req, res) => {
     id_tipo_ruta,
     id_usuario,
     longitud_ruta,
-    coordenadas // Array de objetos: [{latitud: -41.46, longitud: -72.94}, ...]
+    coordenadas 
   } = req.body;
 
-  // Validaciones básicas
+  
   if (!id_usuario) {
     return res.status(400).json({ error: '⚠️ El id_usuario es requerido' });
   }
@@ -20,7 +20,7 @@ const createRuta = (req, res) => {
     return res.status(400).json({ error: '⚠️ Se requieren al menos 2 coordenadas para crear una ruta' });
   }
 
-  // Insertar la ruta principal
+  
   const queryRuta = `
     INSERT INTO rutas_recomendadas 
     (nombre_ruta, descripcion_ruta, id_tipo_ruta, id_usuario, longitud_ruta)
@@ -38,7 +38,7 @@ const createRuta = (req, res) => {
 
       const id_ruta = result.insertId;
 
-      // Insertar las coordenadas asociadas
+      
       const queryCoordenadas = `
         INSERT INTO coordenadas (latitud, longitud, id_ruta)
         VALUES ?
@@ -53,7 +53,7 @@ const createRuta = (req, res) => {
       db.query(queryCoordenadas, [coordenadasValues], (err2) => {
         if (err2) {
           console.error('❌ Error al insertar coordenadas:', err2);
-          // Si falla, eliminamos la ruta creada
+          
           db.query('DELETE FROM rutas_recomendadas WHERE id_ruta = ?', [id_ruta]);
           return res.status(500).json({ error: err2.message });
         }
@@ -71,7 +71,7 @@ const createRuta = (req, res) => {
   );
 };
 
-// 📍 Obtener todas las rutas de un usuario
+
 const getRutasByUsuario = (req, res) => {
   const { id_usuario } = req.params;
 
@@ -101,11 +101,11 @@ const getRutasByUsuario = (req, res) => {
   });
 };
 
-// 📍 Obtener detalle completo de una ruta con todas sus coordenadas
+
 const getRutaById = (req, res) => {
   const { id } = req.params;
 
-  // Primero obtenemos la información de la ruta
+  
   const queryRuta = `
     SELECT 
       r.*,
@@ -131,7 +131,7 @@ const getRutaById = (req, res) => {
 
     const ruta = rutaRows[0];
 
-    // Luego obtenemos todas las coordenadas de la ruta
+    
     const queryCoordenadas = `
       SELECT 
         id_coordenada,
@@ -148,7 +148,7 @@ const getRutaById = (req, res) => {
         return res.status(500).json({ error: err2.message });
       }
 
-      // Combinamos la información
+      
       const resultado = {
         ...ruta,
         coordenadas: coordRows
@@ -159,7 +159,7 @@ const getRutaById = (req, res) => {
   });
 };
 
-// 📍 Obtener todas las rutas (para admin o vista general)
+
 const getAllRutas = (req, res) => {
   const query = `
     SELECT 
@@ -188,18 +188,18 @@ const getAllRutas = (req, res) => {
   });
 };
 
-// 📍 Eliminar una ruta (y sus coordenadas en cascada)
+
 const deleteRuta = (req, res) => {
   const { id } = req.params;
 
-  // Primero eliminamos las coordenadas (aunque hay CASCADE, lo hacemos explícito)
+  
   db.query('DELETE FROM coordenadas WHERE id_ruta = ?', [id], (err) => {
     if (err) {
       console.error('❌ Error al eliminar coordenadas:', err);
       return res.status(500).json({ error: err.message });
     }
 
-    // Luego eliminamos la ruta
+    
     db.query('DELETE FROM rutas_recomendadas WHERE id_ruta = ?', [id], (err2, result) => {
       if (err2) {
         console.error('❌ Error al eliminar ruta:', err2);
@@ -215,7 +215,7 @@ const deleteRuta = (req, res) => {
   });
 };
 
-// 📍 Actualizar información de una ruta
+
 const updateRuta = (req, res) => {
   const { id } = req.params;
   const { nombre_ruta, descripcion_ruta, id_tipo_ruta, longitud_ruta } = req.body;
@@ -244,7 +244,7 @@ const updateRuta = (req, res) => {
   );
 };
 
-// 📍 Obtener tipos de ruta disponibles
+
 const getTiposRuta = (req, res) => {
   db.query('SELECT * FROM tipos_ruta', (err, rows) => {
     if (err) {

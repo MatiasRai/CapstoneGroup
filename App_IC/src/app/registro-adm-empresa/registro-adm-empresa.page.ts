@@ -32,9 +32,7 @@ export class RegistroAdmEmpresaPage {
     private router: Router
   ) {}
 
-  // ============================
-  //   VALIDACIONES MANUALES
-  // ============================
+  
   validarCampos(): string | null {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -54,15 +52,13 @@ export class RegistroAdmEmpresaPage {
       return "La contraseña debe tener al menos 6 caracteres.";
     }
 
-    return null; // Todo válido
+    return null; 
   }
 
-  // ============================
-  //   REGISTRAR ADMIN
-  // ============================
+  
   onRegistrar() {
 
-    // ❗ Validar antes de enviar
+    
     const error = this.validarCampos();
     if (error) {
       alert("⚠️ " + error);
@@ -80,10 +76,10 @@ export class RegistroAdmEmpresaPage {
           return;
         }
 
-        // Guardar para usar luego en el registro de empresa
+        
         localStorage.setItem('id_adm_Empresa', String(id));
 
-        // Redirigir
+        
         this.router.navigate(['/registro-empresa'], {
           queryParams: { id_adm_Empresa: id }
         });

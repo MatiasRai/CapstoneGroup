@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AdmEmpresaService {
 
-  private baseHost = window.location.hostname; // Detecta localhost o IP LAN automáticamente
+  private baseHost = window.location.hostname; 
 
   private apiUrlAdm = `http://${this.baseHost}:3000/api/v1/adm_empresa`;
   private apiUrlEmpresas = `http://${this.baseHost}:3000/api/v1/empresas`;

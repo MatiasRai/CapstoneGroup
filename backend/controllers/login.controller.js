@@ -2,7 +2,7 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto'); // para MD5
 
-// 🔑 Función para detectar si es hash bcrypt
+
 function isBcryptHash(str) {
   return typeof str === 'string' && /^\$2[aby]\$/.test(str);
 }
@@ -11,9 +11,7 @@ const login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
   try {
-    // ==============================
-    // 🔹 ADMINISTRADOR DE EMPRESA
-    // ==============================
+    
     db.query('SELECT * FROM adm_empresa WHERE correo = ?', [correo], async (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
 
@@ -44,9 +42,7 @@ const login = async (req, res) => {
         }
       }
 
-      // ==============================
-      // 🔹 USUARIO NORMAL
-      // ==============================
+      
       db.query('SELECT * FROM usuario WHERE correo = ?', [correo], async (err2, rows2) => {
         if (err2) return res.status(500).json({ error: err2.message });
 
@@ -77,9 +73,7 @@ const login = async (req, res) => {
           }
         }
 
-        // ==============================
-        // 🔹 ADMINISTRADOR DEL SISTEMA
-        // ==============================
+        
         db.query('SELECT * FROM adm WHERE Correo = ?', [correo], async (err3, rows3) => {
           if (err3) return res.status(500).json({ error: err3.message });
 
@@ -87,7 +81,7 @@ const login = async (req, res) => {
             const adm = rows3[0];
             let match = false;
 
-            // Usamos la columna real Contrasena
+            
             if (isBcryptHash(adm.Contrasena)) {
               match = await bcrypt.compare(contrasena, adm.Contrasena);
             } else {
@@ -111,7 +105,7 @@ const login = async (req, res) => {
             }
           }
 
-          // ❌ Si no encontró en ninguna tabla
+          
           return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
         });
       });

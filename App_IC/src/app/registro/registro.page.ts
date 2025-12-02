@@ -54,23 +54,23 @@ export class RegistroPage implements OnInit {
     });
   }
 
-  // Capturar archivo
+  
   onFileSelected(event: any) {
     const file = event.target.files?.[0];
     this.fotoFile = file ?? null;
 
-    // Solo guardamos el nombre (backend aún no guarda imagen)
+    
     this.usuario.foto_perfil = this.fotoFile ? this.fotoFile.name : '';
   }
 
-  // Registrar usuario + REDIRECCIONAR AL LOGIN
+  
   onRegistrar() {
     this.usuarioService.registrarUsuario(this.usuario).subscribe({
       next: (res: any) => {
         alert('Usuario registrado exitosamente');
         console.log('Usuario creado:', res);
 
-        // 👉 Redirección automática al login
+        
         this.router.navigate(['/login']);
       },
       error: (err) => {

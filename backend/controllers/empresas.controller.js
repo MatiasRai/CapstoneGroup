@@ -1,8 +1,6 @@
 const db = require('../config/db');
 
-/* ======================================================
-   📌 EMPRESAS PAGINADAS (CORRECTO PARA IONIC)
-====================================================== */
+
 const getEmpresasPaginadas = (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -44,9 +42,7 @@ const getEmpresasPaginadas = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Obtener todas las empresas
-====================================================== */
+
 const getEmpresas = (req, res) => {
   db.query('SELECT * FROM empresas', (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -55,9 +51,7 @@ const getEmpresas = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Crear empresa
-====================================================== */
+
 const createEmpresa = (req, res) => {
   const {
     nombre_empresa,
@@ -101,9 +95,7 @@ const createEmpresa = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Actualizar estado de empresa
-====================================================== */
+
 const updateEstadoEmpresa = (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
@@ -115,9 +107,7 @@ const updateEstadoEmpresa = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Obtener empresa por ID del administrador
-====================================================== */
+
 const getEmpresaByAdm = (req, res) => {
   const { id_adm_empresa } = req.params;
 
@@ -138,9 +128,7 @@ const getEmpresaByAdm = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Obtener servicios por empresa
-====================================================== */
+
 const getServiciosByEmpresa = (req, res) => {
   const { id_adm_empresa } = req.params;
 
@@ -163,7 +151,7 @@ const getServiciosByEmpresa = (req, res) => {
   db.query(query, [id_adm_empresa], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
 
-    // Agrupar servicios con sus reseñas
+    
     const servicios = {};
     for (const row of rows) {
       if (!servicios[row.id_servicio]) {
@@ -195,9 +183,7 @@ const getServiciosByEmpresa = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Eliminar servicio
-====================================================== */
+
 const deleteServicio = (req, res) => {
   const { id } = req.params;
 
@@ -212,9 +198,7 @@ const deleteServicio = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Actualizar servicio
-====================================================== */
+
 const updateServicio = (req, res) => {
   const { id } = req.params;
   const {
@@ -277,9 +261,7 @@ const updateServicio = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Actualizar empresa
-====================================================== */
+
 const updateEmpresa = (req, res) => {
   const { id } = req.params;
   const {
@@ -312,13 +294,11 @@ const updateEmpresa = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 Eliminar empresa COMPLETA (cascada)
-====================================================== */
+
 const deleteEmpresa = (req, res) => {
   const { id } = req.params;
 
-  // 1. Eliminar reseñas
+  
   const deleteResenas = `
     DELETE r FROM resenas r
     INNER JOIN lugares l ON r.Lugares_id_lugar = l.id_lugar
@@ -328,7 +308,7 @@ const deleteEmpresa = (req, res) => {
   db.query(deleteResenas, [id], (err) => {
     if (err) return res.status(500).json({ error: "Error al eliminar reseñas" });
 
-    // 2. Eliminar servicios
+    
     const deleteServicios = `
       DELETE s FROM servicios s
       INNER JOIN lugares l ON s.Lugares_id_lugar = l.id_lugar
@@ -338,13 +318,13 @@ const deleteEmpresa = (req, res) => {
     db.query(deleteServicios, [id], (err) => {
       if (err) return res.status(500).json({ error: "Error al eliminar servicios" });
 
-      // 3. Eliminar lugares
+      
       const deleteLugares = `DELETE FROM lugares WHERE Empresas_id_empresa = ?`;
 
       db.query(deleteLugares, [id], (err) => {
         if (err) return res.status(500).json({ error: "Error al eliminar lugares" });
 
-        // 4. Eliminar empresa
+        
         const deleteEmpresaQuery = `DELETE FROM empresas WHERE id_empresa = ?`;
 
         db.query(deleteEmpresaQuery, [id], (err, result) => {
@@ -361,9 +341,7 @@ const deleteEmpresa = (req, res) => {
 };
 
 
-/* ======================================================
-   📌 EXPORTACIONES
-====================================================== */
+
 module.exports = {
   getEmpresas,
   createEmpresa,
@@ -374,5 +352,5 @@ module.exports = {
   updateServicio,
   updateEmpresa,
   deleteEmpresa,
-  getEmpresasPaginadas      // 👈 IMPORTANTE
+  getEmpresasPaginadas      
 };

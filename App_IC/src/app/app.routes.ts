@@ -5,14 +5,14 @@ import { AuthEmpresaGuard } from './guards/auth-empresa.guard';
 
 export const routes: Routes = [
 
-  // 🔹 Ruta por defecto
+  
   {
     path: '',
     redirectTo: 'menu',
     pathMatch: 'full',
   },
 
-  // 🔹 Autenticación
+  
   {
     path: 'login',
     loadComponent: () =>
@@ -24,14 +24,14 @@ export const routes: Routes = [
       import('./registro/registro.page').then(m => m.RegistroPage)
   },
 
-  // 👤 Usuario normal (no requiere login)
+  //  Usuario normal (no requiere login)
   {
     path: 'menu',
     loadComponent: () =>
       import('./menu/menu.page').then(m => m.MenuPage)
   },
 
-  // 📋 Perfil de usuario (requiere login de usuario)
+  //  Perfil de usuario (requiere login de usuario)
   {
     path: 'perfil-usuario',
     loadComponent: () =>
@@ -39,7 +39,7 @@ export const routes: Routes = [
     canActivate: [AuthUserGuard]
   },
 
-  // 👨‍💻 Administrador del sistema
+  //  Administrador del sistema
   {
     path: 'menu-adm',
     loadComponent: () =>
@@ -47,7 +47,7 @@ export const routes: Routes = [
     canActivate: [AuthAdmGuard]
   },
 
-  // 🏢 Administrador de empresa
+  //  Administrador de empresa
   {
     path: 'menu-emp',
     loadComponent: () =>
@@ -67,7 +67,7 @@ export const routes: Routes = [
     canActivate: [AuthEmpresaGuard]
   },
 
-  // 📋 Otros formularios
+  //  Otros formularios
   {
     path: 'registro-adm-empresa',
     loadComponent: () =>
@@ -79,7 +79,7 @@ export const routes: Routes = [
       import('./registro-empresa/registro-empresa.page').then(m => m.RegistroEmpresaPage)
   },
 
-  // 📝 Página informativa
+  //  Página informativa
   {
     path: 'info-app',
     loadComponent: () =>
@@ -93,21 +93,21 @@ export const routes: Routes = [
       import('./info-servicio/info-servicio.page').then(m => m.InfoServicioPage)
   },
 
-  // 🆕 RUTAS RECOMENDADAS (NUEVO)
+  //  RUTAS RECOMENDADAS (NUEVO)
   {
     path: 'rutas-recomendadas',
     loadComponent: () =>
       import('./rutas-recomendadas/rutas-recomendadas.page').then(m => m.RutasRecomendadasPage)
   },
 
-  // 🆕 DETALLE DE RUTA (NUEVO)
+  //  DETALLE DE RUTA (NUEVO)
   {
     path: 'ruta-detalle/:id',
     loadComponent: () =>
       import('./ruta-detalle/ruta-detalle.page').then(m => m.RutaDetallePage)
   },
 
-  // ❌ Wildcard siempre debe ser lo último
+  
   {
     path: '**',
     redirectTo: 'menu'

@@ -1,4 +1,4 @@
-// Variables de color y estilo
+
 $primary-color: #007bff;
 $secondary-color: #4caf50;
 $background-color: #f4f7fa;
@@ -7,7 +7,7 @@ $border-radius: 8px;
 $input-padding: 16px 18px;
 $button-padding: 14px 20px;
 
-// Fondo general
+
 body {
   font-family: 'Roboto', sans-serif;
   background-color: $background-color;
@@ -20,7 +20,7 @@ body {
   box-sizing: border-box;
 }
 
-// Contenedor principal
+
 ion-content {
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@ ion-content {
   height: 100%;
 }
 
-// Formularios
+
 form {
   background-color: #fff;
   padding: 40px;
@@ -53,7 +53,7 @@ form {
   }
 }
 
-// Títulos
+
 h2 {
   font-size: 2.2rem;
   color: $primary-color;
@@ -63,7 +63,7 @@ h2 {
   letter-spacing: 1px;
 }
 
-// Campos de formulario
+
 ion-item {
   --padding-start: 16px;
   --padding-end: 16px;
@@ -115,7 +115,7 @@ input[type='file'] {
   background-color: #fafafa;
 }
 
-// Botones
+
 ion-button {
   --background: $primary-color;
   --color: white;
@@ -133,7 +133,7 @@ ion-button {
   }
 }
 
-// Responsividad
+
 @media (max-width: 600px) {
   ion-content {
     padding: 15px;
@@ -157,9 +157,7 @@ ion-button {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   🗺️ ESTILOS DEL MAPA LEAFLET - MEJORADOS PARA EVITAR GRIS
-   ═══════════════════════════════════════════════════════════════════ */
+
 
 #map {
   width: 100%;
@@ -171,49 +169,49 @@ ion-button {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   position: relative;
   
-  /* 🔧 CRÍTICO: Fondo blanco para que no se vea gris */
+  
   background-color: #ffffff !important;
   
-  /* Asegurar que el contenedor tenga el tamaño correcto */
+  
   min-height: 500px;
   display: block;
 }
 
-/* Asegurar que los tiles se carguen correctamente */
+
 .leaflet-tile-container {
   background-color: #ffffff !important;
 }
 
-/* Tiles del mapa con transición suave */
+
 .map-tiles {
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Evitar que el pane del mapa se ponga transparente */
+
 .leaflet-pane {
   background-color: transparent;
 }
 
-/* Capa de tiles específica */
+
 .leaflet-tile-pane {
   opacity: 1 !important;
   background-color: #f0f0f0;
 }
 
-/* Tiles individuales */
+
 .leaflet-tile {
   opacity: 1 !important;
-  /* Mantener tiles mientras cargan */
+  
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
 }
 
-/* Tiles que están cargando */
+
 .leaflet-tile-loading {
   opacity: 0.5;
 }
 
-/* Controles del mapa */
+
 .leaflet-control {
   border-radius: 8px !important;
   background-color: rgba(255, 255, 255, 0.95) !important;
@@ -221,7 +219,7 @@ ion-button {
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Botones de zoom */
+
 .leaflet-control-zoom {
   a {
     background-color: white !important;
@@ -233,7 +231,7 @@ ion-button {
   }
 }
 
-/* Popup del marcador - mejorado */
+
 .leaflet-popup-content-wrapper {
   border-radius: 10px;
   padding: 10px;
@@ -259,13 +257,13 @@ ion-button {
   }
 }
 
-/* Punta del popup */
+
 .leaflet-popup-tip {
   background: #ffffff;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Botón de cerrar popup */
+
 .leaflet-popup-close-button {
   color: #999 !important;
   font-size: 20px !important;
@@ -275,30 +273,30 @@ ion-button {
   }
 }
 
-/* Atribución */
+
 .leaflet-control-attribution {
   font-size: 10px;
   background-color: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Container principal del mapa */
+
 .leaflet-container {
   background-color: #ffffff !important;
   font-family: 'Roboto', sans-serif;
 }
 
-/* Asegurar que el mapa sea visible durante animaciones */
+
 .leaflet-zoom-animated {
   will-change: auto !important;
 }
 
-/* Prevenir que las capas desaparezcan */
+
 .leaflet-layer {
   opacity: 1 !important;
   display: block !important;
 }
 
-/* Estilo para las polylines (rutas) */
+
 .leaflet-interactive {
   cursor: pointer;
   
@@ -308,9 +306,7 @@ ion-button {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   📱 ESTILOS RESPONSIVE PARA EL MAPA
-   ═══════════════════════════════════════════════════════════════════ */
+
 
 @media (max-width: 768px) {
   #map {
@@ -332,9 +328,7 @@ ion-button {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   🎨 ESTILOS ADICIONALES
-   ═══════════════════════════════════════════════════════════════════ */
+
 
 /* Loading spinner para tiles */
 .leaflet-tile-container::before {
@@ -349,9 +343,7 @@ ion-button {
   z-index: -1;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   ✅ ESTILOS PARA LA LISTA DE RUTAS GUARDADAS (SOLUCIÓN AL PROBLEMA)
-   ═══════════════════════════════════════════════════════════════════ */
+
 
 /* Reducir espacios entre items de rutas guardadas */
 ion-card ion-list {
@@ -370,7 +362,7 @@ ion-card ion-list ion-item {
   background-color: #f9f9f9;
 }
 
-/* Estilos para el contenido de cada ruta */
+
 ion-card ion-list ion-item ion-label {
   margin: 8px 0 !important;
 }
@@ -393,7 +385,7 @@ ion-card ion-list ion-item ion-label small {
   color: #888;
 }
 
-/* Botón de ver ruta (ícono del ojo) */
+
 ion-card ion-list ion-item ion-button[slot="end"] {
   margin: 0 !important;
   height: 36px !important;
@@ -407,14 +399,14 @@ ion-card ion-list ion-item ion-button[slot="end"] ion-icon {
   color: $primary-color !important;
 }
 
-/* Botón "Ver todas" */
+
 ion-card ion-button[fill="outline"] {
   margin-top: 12px !important;
   --border-color: $primary-color !important;
   --color: $primary-color !important;
 }
 
-/* Espaciado del card de rutas guardadas */
+
 ion-card {
   margin: 16px 0 !important;
 }
@@ -428,9 +420,7 @@ ion-card ion-card-content p {
   font-size: 0.9rem !important;
   line-height: 1.5 !important;
 
-/* ═══════════════════════════════════════════════════════════════
-   🗺️ TARJETA DE RUTAS RECOMENDADAS
-   ═══════════════════════════════════════════════════════════════ */
+
 
 .rutas-recomendadas-card {
   margin: 16px 0;

@@ -1,6 +1,4 @@
-/* ======================================================
-   📋 ESTRUCTURA GENERAL
-====================================================== */
+
 ion-content {
   --background: #f4f5f8;
 }
@@ -20,9 +18,7 @@ ion-content {
   color: #999;
 }
 
-/* ======================================================
-   📊 ESTADÍSTICAS
-====================================================== */
+
 .stat-box {
   text-align: center;
   padding: 15px 5px;
@@ -64,9 +60,7 @@ ion-row {
   margin: 0;
 }
 
-/* ======================================================
-   ⭐ RESEÑAS
-====================================================== */
+
 .resena-item {
   --padding-start: 12px;
   --padding-end: 12px;
@@ -167,7 +161,7 @@ ion-row {
   font-size: 16px;
 }
 
-/* Sin reseñas */
+
 .sin-reseñas {
   text-align: center;
   padding: 40px 20px;
@@ -192,9 +186,7 @@ ion-row {
   font-style: italic;
 }
 
-/* ======================================================
-   📋 TARJETAS GENERALES
-====================================================== */
+
 ion-card {
   margin: 16px 0;
   border-radius: 12px;
@@ -224,9 +216,7 @@ ion-card-content {
   padding: 16px;
 }
 
-/* ======================================================
-   📝 FORMULARIOS
-====================================================== */
+
 ion-item {
   --padding-start: 12px;
   --padding-end: 12px;
@@ -262,9 +252,7 @@ ion-button[fill="clear"][color="danger"]:hover {
   --background: rgba(231, 76, 60, 0.1);
 }
 
-/* ======================================================
-   📱 RESPONSIVE
-====================================================== */
+
 @media (max-width: 768px) {
   .stat-number {
     font-size: 1.5rem;
@@ -305,9 +293,7 @@ ion-button[fill="clear"][color="danger"]:hover {
   }
 }
 
-/* ======================================================
-   🎨 ANIMACIONES
-====================================================== */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -323,9 +309,7 @@ ion-card {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* ======================================================
-   🔘 BOTONES DE ACCIÓN
-====================================================== */
+
 ion-button[slot="end"] {
   --padding-start: 8px;
   --padding-end: 8px;

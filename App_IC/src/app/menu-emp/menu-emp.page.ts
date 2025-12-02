@@ -31,9 +31,7 @@ export class MenuEMPPage implements OnInit {
     this.cargarDatosIniciales();
   }
 
-  /* ======================================================
-     🔄 Cargar Empresa y Servicios
-  ====================================================== */
+  
   cargarDatosIniciales() {
     const usuario = this.authService.getUser();
     if (!usuario?.id) {
@@ -43,13 +41,13 @@ export class MenuEMPPage implements OnInit {
 
     const idAdm = usuario.id;
 
-    // ✅ 1. Obtener empresa vinculada al admin
+    
     this.admEmpresaService.obtenerEmpresaPorAdm(idAdm).subscribe({
       next: (res) => {
         this.empresa = Array.isArray(res) ? res[0] : res;
         console.log('🏢 Empresa cargada:', this.empresa);
 
-        // ✅ 2. Obtener servicios asociados
+        
         if (this.empresa?.id_empresa) {
           this.cargarServicios(this.empresa.id_empresa);
         }
@@ -71,9 +69,7 @@ export class MenuEMPPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     🗑️ Eliminar Servicio (Recarga Automática)
-  ====================================================== */
+  
   async eliminarServicio(id: number) {
     const alerta = await this.alertCtrl.create({
       header: 'Confirmar eliminación',
@@ -104,9 +100,7 @@ export class MenuEMPPage implements OnInit {
     await alerta.present();
   }
 
-  /* ======================================================
-     ✏️ Editar Empresa
-  ====================================================== */
+  
   async editarEmpresa(empresa: any) {
     const alerta = await this.alertCtrl.create({
       header: 'Editar Empresa',
@@ -144,9 +138,7 @@ export class MenuEMPPage implements OnInit {
     await alerta.present();
   }
 
-  /* ======================================================
-     ✏️ Editar Servicio (Recarga Automática)
-  ====================================================== */
+  
   async editarServicio(servicio: any) {
     const alerta = await this.alertCtrl.create({
       header: 'Editar Servicio',
@@ -182,9 +174,7 @@ export class MenuEMPPage implements OnInit {
     await alerta.present();
   }
 
-  /* ======================================================
-     🔔 Toast Helper
-  ====================================================== */
+  
   async mostrarToast(message: string, color: string = 'primary') {
     const toast = await this.toastCtrl.create({
       message,
