@@ -57,9 +57,7 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
     if (this.map) this.map.remove();
   }
 
-  /* ======================================================
-     ✔ FIX LEAFLET ICONS 
-  ====================================================== */
+  
   private fixLeafletIcons() {
     const DefaultIcon = L.icon({
       iconRetinaUrl:
@@ -75,9 +73,7 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
     L.Marker.prototype.options.icon = DefaultIcon;
   }
 
-  /* ======================================================
-     📌 Cargar ruta desde backend
-  ====================================================== */
+  
   cargarRuta(idRuta: number) {
     this.cargando = true;
 
@@ -98,9 +94,7 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  /* ======================================================
-     🗺 Inicializar mapa
-  ====================================================== */
+  
   private initMap() {
     const coords = this.ruta.coordenadas;
 
@@ -125,9 +119,7 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
     }, 350);
   }
 
-  /* ======================================================
-     🛣 Dibujar ruta + marcadores inicio/fin
-  ====================================================== */
+  
   private mostrarRutaEnMapa() {
     if (!this.map || !this.ruta?.coordenadas?.length) return;
 
@@ -146,35 +138,29 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
       opacity: 0.9
     }).addTo(this.map);
 
-    // Punto inicio
+    
     L.marker(coords[0]).addTo(this.map).bindPopup("📍 Inicio").openPopup();
 
-    // Punto fin
+    
     L.marker(coords[coords.length - 1]).addTo(this.map).bindPopup("🏁 Fin");
 
     const bounds = L.latLngBounds(coords);
     this.map.fitBounds(bounds, { padding: [20, 20] });
   }
 
-  /* ======================================================
-     🔙 Volver
-  ====================================================== */
+  
   volver() {
     this.router.navigate(['/rutas-recomendadas']);
   }
 
-  /* ======================================================
-     🗺 Ver en mapa principal
-  ====================================================== */
+  
   verEnMapa() {
     this.router.navigate(['/menu'], {
       state: { rutaId: this.ruta.id_ruta }
     });
   }
 
-  /* ======================================================
-     📤 Compartir ruta
-  ====================================================== */
+  
   async compartirRuta() {
     const url = `${window.location.origin}/ruta-detalle/${this.ruta.id_ruta}`;
 
@@ -195,9 +181,7 @@ export class RutaDetallePage implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  /* ======================================================
-     🔔 Toast
-  ====================================================== */
+  
   async mostrarToast(msg: string, color: string) {
     const t = await this.toast.create({
       message: msg,

@@ -11,6 +11,6 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient()   // 👈 habilitamos HttpClient globalmente
+    provideHttpClient()   //  habilitamos HttpClient globalmente
   ],
 });

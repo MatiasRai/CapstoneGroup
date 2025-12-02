@@ -40,9 +40,7 @@ export class PerfilUsuarioPage implements OnInit {
     this.cargarResenasUsuario();
   }
 
-  /* ======================================================
-     📋 CARGAR DATOS DEL USUARIO
-  ====================================================== */
+  
   cargarPerfil() {
     const user = this.authService.getUser();
     if (!user) {
@@ -65,9 +63,7 @@ export class PerfilUsuarioPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     🔹 CARGAR DISCAPACIDADES
-  ====================================================== */
+  
   cargarDiscapacidades() {
     this.http.get(this.apiDiscapacidades).subscribe({
       next: (data: any) => {
@@ -80,9 +76,7 @@ export class PerfilUsuarioPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     🗺️ CARGAR RUTAS GUARDADAS (para estadísticas)
-  ====================================================== */
+  
   cargarRutasGuardadas() {
     const user = this.authService.getUser();
     if (!user) return;
@@ -91,7 +85,7 @@ export class PerfilUsuarioPage implements OnInit {
       next: async (rutas: any) => {
         this.rutasGuardadas = [];
         
-        // Cargar detalles de cada ruta
+        
         for (const ruta of rutas) {
           try {
             const rutaDetalle: any = await this.http.get(`${this.apiRutas}/${ruta.id_ruta}`).toPromise();
@@ -109,9 +103,7 @@ export class PerfilUsuarioPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     ⭐ CARGAR RESEÑAS DEL USUARIO
-  ====================================================== */
+  
   cargarResenasUsuario() {
     const user = this.authService.getUser();
     if (!user) return;
@@ -128,9 +120,7 @@ export class PerfilUsuarioPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     💾 GUARDAR CAMBIOS DEL PERFIL
-  ====================================================== */
+  
   guardarCambios() {
     if (!this.usuario.correo || !this.usuario.celular) {
       this.mostrarToast('⚠️ Por favor completa todos los campos.', 'warning');
@@ -157,9 +147,7 @@ export class PerfilUsuarioPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     🗑️ ELIMINAR RESEÑA
-  ====================================================== */
+  
   async eliminarResena(idResena: number) {
     const alert = await this.alertCtrl.create({
       header: '⚠️ Confirmar eliminación',
@@ -191,17 +179,13 @@ export class PerfilUsuarioPage implements OnInit {
     await alert.present();
   }
 
-  /* ======================================================
-     📊 CALCULAR DISTANCIA TOTAL DE RUTAS
-  ====================================================== */
+  
   calcularDistanciaTotal(): string {
     const total = this.rutasGuardadas.reduce((sum, ruta) => sum + (ruta.longitud_ruta || 0), 0);
     return total.toFixed(2);
   }
 
-  /* ======================================================
-     🔔 MOSTRAR TOAST
-  ====================================================== */
+  
   async mostrarToast(mensaje: string, color: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,

@@ -13,7 +13,7 @@
 
   <form (ngSubmit)="onRegistrar()" #formEmpresa="ngForm">
 
-    <!-- Nombre -->
+    
     <ion-item [class.invalid]="nombre.invalid && nombre.touched">
       <ion-label position="floating">Nombre de la Empresa *</ion-label>
       <ion-input
@@ -27,7 +27,7 @@
       El nombre es obligatorio.
     </div>
 
-    <!-- Dirección -->
+    
     <ion-item [class.invalid]="direccion.invalid && direccion.touched">
       <ion-label position="floating">Dirección *</ion-label>
       <ion-input
@@ -41,7 +41,7 @@
       La dirección es obligatoria.
     </div>
 
-    <!-- Teléfono chileno -->
+    
     <ion-item [class.invalid]="telefono.invalid && telefono.touched">
       <ion-label position="floating">Teléfono *</ion-label>
       <ion-input
@@ -58,7 +58,7 @@
       Teléfono inválido. Ej: +56912345678 o 912345678.
     </div>
 
-    <!-- Descripción -->
+    
     <ion-item [class.invalid]="descripcion.invalid && descripcion.touched">
       <ion-label position="floating">Descripción *</ion-label>
       <ion-input
@@ -73,7 +73,7 @@
       La descripción debe tener mínimo 10 caracteres.
     </div>
 
-    <!-- Horarios -->
+    
     <ion-item [class.invalid]="horarios.invalid && horarios.touched">
       <ion-label position="floating">Horarios *</ion-label>
       <ion-input
@@ -87,7 +87,7 @@
       Los horarios son obligatorios.
     </div>
 
-    <!-- Sitio Web opcional -->
+    
     <ion-item [class.invalid]="sitio_web.invalid && sitio_web.touched">
       <ion-label position="floating">Sitio Web (Opcional)</ion-label>
       <ion-input
@@ -101,7 +101,7 @@
       El sitio web no es válido. Ej: https://empresa.cl
     </div>
 
-    <!-- Correo -->
+    
     <ion-item [class.invalid]="correo.invalid && correo.touched">
       <ion-label position="floating">Correo *</ion-label>
       <ion-input
@@ -117,7 +117,7 @@
       El correo no es válido.
     </div>
 
-    <!-- Botón -->
+    
     <ion-button expand="block" type="submit" style="margin-top: 20px;"
                 [disabled]="formEmpresa.invalid">
       Registrar Empresa

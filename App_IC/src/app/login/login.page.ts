@@ -48,7 +48,7 @@ export class LoginPage {
     private router: Router
   ) {}
 
-  // ✅ Mostrar notificaciones
+  
   async presentToast(message: string, color: string) {
     const toast = await this.toastCtrl.create({
       message,
@@ -58,7 +58,7 @@ export class LoginPage {
     await toast.present();
   }
 
-  // ✅ Función principal de login
+  
   onLogin() {
     if (!this.credenciales.correo || !this.credenciales.contrasena) {
       this.presentToast('Completa todos los campos', 'warning');
@@ -72,15 +72,15 @@ export class LoginPage {
           return;
         }
 
-        // ✅ Guardar usuario correctamente en localStorage (clave unificada)
+        
         this.authService.login(res);
 
-        // 🟢 Verificación en consola
+        
         console.log('🟢 Usuario logeado:', res);
 
         this.presentToast(res.message || 'Login correcto', 'success');
 
-        // ✅ Redirección según rol
+        
         switch (res.role) {
           case 'adm_empresa':
             this.router.navigate(['/menu-emp']);

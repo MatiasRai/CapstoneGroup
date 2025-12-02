@@ -1,9 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 
-/* ======================================================
-   📌 OBTENER USUARIOS PAGINADOS (CORRECTO PARA IONIC)
-====================================================== */
+
 const getUsuariosPaginados = (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -44,9 +42,7 @@ const getUsuariosPaginados = (req, res) => {
   });
 };
 
-/* ======================================================
-   📌 Obtener todos los usuarios
-====================================================== */
+
 const getUsuarios = (req, res) => {
   db.query('SELECT * FROM usuario', (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -54,9 +50,7 @@ const getUsuarios = (req, res) => {
   });
 };
 
-/* ======================================================
-   📌 Obtener usuario por ID
-====================================================== */
+
 const getUsuarioById = (req, res) => {
   const { id } = req.params;
 
@@ -90,9 +84,7 @@ const getUsuarioById = (req, res) => {
   });
 };
 
-/* ======================================================
-   📌 Crear usuario
-====================================================== */
+
 const createUsuario = async (req, res) => {
   const { nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad } = req.body;
 
@@ -123,9 +115,7 @@ const createUsuario = async (req, res) => {
   }
 };
 
-/* ======================================================
-   📌 Actualizar usuario
-====================================================== */
+
 const updateUsuario = (req, res) => {
   const { id } = req.params;
   const { correo, celular, Discapacidades_id_discapacidad } = req.body;
@@ -174,9 +164,7 @@ const updateUsuario = (req, res) => {
   });
 };
 
-/* ======================================================
-   📌 Eliminar usuario
-====================================================== */
+
 const deleteUsuario = (req, res) => {
   const { id } = req.params;
 
@@ -186,9 +174,7 @@ const deleteUsuario = (req, res) => {
   });
 };
 
-/* ======================================================
-   📌 EXPORTACIONES (DEBEN IR AL FINAL)
-====================================================== */
+
 module.exports = {
   getUsuarios,
   getUsuarioById,

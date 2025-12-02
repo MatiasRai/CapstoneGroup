@@ -22,7 +22,7 @@ export class InfoAppPage {
   }
 
   irCrearRuta() {
-    this.router.navigate(['/menu']); // o la página donde creas rutas
+    this.router.navigate(['/menu']); 
   }
 }
 

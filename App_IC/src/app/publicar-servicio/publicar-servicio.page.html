@@ -13,7 +13,7 @@
 
   <form (ngSubmit)="registrarServicio()" #formServicio="ngForm">
 
-    <!-- NOMBRE -->
+    
     <ion-item [class.invalid]="nombre.invalid && nombre.touched">
       <ion-label position="floating">Nombre *</ion-label>
       <ion-input
@@ -29,7 +29,7 @@
       El nombre debe tener al menos 3 caracteres.
     </div>
 
-    <!-- DESCRIPCIÓN -->
+    
     <ion-item [class.invalid]="descripcion.invalid && descripcion.touched">
       <ion-label position="floating">Descripción *</ion-label>
       <ion-input
@@ -45,7 +45,7 @@
       La descripción debe tener mínimo 10 caracteres.
     </div>
 
-    <!-- COSTO -->
+    
     <ion-item [class.invalid]="costo.invalid && costo.touched">
       <ion-label position="floating">Costo (CLP) *</ion-label>
       <ion-input
@@ -61,7 +61,7 @@
       El costo debe ser un número mayor a 0.
     </div>
 
-    <!-- HORARIOS -->
+    
     <ion-item [class.invalid]="horario.invalid && horario.touched">
       <ion-label position="floating">Horarios *</ion-label>
       <ion-input
@@ -76,7 +76,7 @@
       El horario es obligatorio.
     </div>
 
-    <!-- DIRECCIÓN -->
+    
     <ion-item [class.invalid]="direccion.invalid && direccion.touched">
       <ion-label position="floating">Dirección *</ion-label>
       <ion-input
@@ -92,7 +92,7 @@
       La dirección debe tener mínimo 5 caracteres.
     </div>
 
-    <!-- NOMBRE LUGAR -->
+    
     <ion-item [class.invalid]="lugar.invalid && lugar.touched">
       <ion-label position="floating">Nombre del Lugar *</ion-label>
       <ion-input
@@ -107,7 +107,7 @@
       Debes ingresar el nombre del lugar.
     </div>
 
-    <!-- TIPO DISCAPACIDAD -->
+    
     <ion-item [class.invalid]="discapacidad.invalid && discapacidad.touched">
       <ion-label>Tipo de discapacidad *</ion-label>
       <ion-select
@@ -125,14 +125,14 @@
       Debes seleccionar un tipo de discapacidad.
     </div>
 
-    <!-- UBICACIÓN -->
+    
     <ion-button expand="block" color="medium" (click)="obtenerUbicacion()">
       📍 Usar mi ubicación actual
     </ion-button>
 
     <div id="map"></div>
 
-    <!-- BOTÓN -->
+    
     <ion-button expand="block" type="submit" color="success" [disabled]="formServicio.invalid">
       Registrar Servicio
     </ion-button>

@@ -1,14 +1,14 @@
 <ion-app>
-  <!-- 🔵 Encabezado superior (solo si hay sesión activa) -->
+  
   <ion-header *ngIf="currentUser">
     <ion-toolbar color="primary">
       
-      <!-- ☰ Botón del menú -->
+      
       <ion-buttons slot="start">
         <ion-menu-button autoHide="false"></ion-menu-button>
       </ion-buttons>
 
-      <!-- 👤 Nombre del usuario -->
+      
       <ion-title>
         👋 Bienvenido,
         <span
@@ -26,7 +26,7 @@
         </span>
       </ion-title>
 
-      <!-- 🔴 Botón de cerrar sesión -->
+      
       <ion-buttons slot="end">
         <ion-button color="light" (click)="logout()">
           <ion-icon slot="start" name="log-out"></ion-icon>
@@ -37,7 +37,7 @@
     </ion-toolbar>
   </ion-header>
 
-  <!-- 🔹 Menú lateral -->
+  
   <ion-split-pane when="md" contentId="main-content">
     <ion-menu contentId="main-content" type="overlay">
       
@@ -51,7 +51,7 @@
         <ion-list id="menu-list">
           <ion-list-header>Opciones</ion-list-header>
 
-          <!-- 🔸 Menú dinámico -->
+          
           <ion-menu-toggle auto-hide="false" *ngFor="let page of appPages">
             <ion-item
               [routerLink]="page.url"
@@ -67,7 +67,7 @@
           </ion-menu-toggle>
         </ion-list>
 
-        <!-- 🔹 Botón de cerrar sesión dentro del menú -->
+        
         <div *ngIf="currentUser" style="padding: 10px;">
           <ion-button expand="block" color="danger" (click)="logout()">
             <ion-icon slot="start" name="log-out"></ion-icon>
@@ -78,7 +78,7 @@
 
     </ion-menu>
 
-    <!-- 📱 Contenido principal -->
+    
     <ion-router-outlet id="main-content"></ion-router-outlet>
 
   </ion-split-pane>

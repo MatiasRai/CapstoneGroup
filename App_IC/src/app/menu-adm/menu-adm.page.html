@@ -9,12 +9,10 @@
 
 <ion-content class="ion-padding">
 
-  <!-- ======================================================
-       👤 USUARIOS
-  ====================================================== -->
+  
   <h2 class="section-title">👤 Usuarios</h2>
 
-  <!-- PAGINACIÓN USUARIOS -->
+  
   <div class="pagination-container">
     <ion-button fill="outline" (click)="usuariosAnterior()" [disabled]="usuarioPage === 1">
       ◀ Anterior
@@ -27,7 +25,7 @@
     </ion-button>
   </div>
 
-  <!-- LISTADO USUARIOS -->
+  
   <div *ngIf="usuarios.length > 0; else noUsuarios"
        [ngClass]="{ 'grid-desktop': !isMobile, 'grid-mobile': isMobile }">
 
@@ -54,12 +52,10 @@
   </ng-template>
 
 
-  <!-- ======================================================
-       🏢 EMPRESAS
-  ====================================================== -->
+  
   <h2 class="section-title">🏢 Empresas</h2>
 
-  <!-- PAGINACIÓN EMPRESAS -->
+  
   <div class="pagination-container">
     <ion-button fill="outline" (click)="empresasAnterior()" [disabled]="empresaPage === 1">
       ◀ Anterior
@@ -72,7 +68,7 @@
     </ion-button>
   </div>
 
-  <!-- LISTADO EMPRESAS -->
+  
   <div *ngIf="empresas.length > 0; else noEmpresas"
        [ngClass]="{ 'grid-desktop': !isMobile, 'grid-mobile': isMobile }">
 
@@ -93,7 +89,7 @@
         </p>
       </ion-card-content>
 
-      <!-- BOTONES -->
+      
       <div class="btn-group" [ngClass]="{ 'btn-mobile': isMobile }">
 
         <ion-button color="success" (click)="cambiarEstado(e.id_empresa, 'Aprobado')">

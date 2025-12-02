@@ -1,34 +1,28 @@
-/* ============================================================
-   ♿ ACCESIBILIDAD PARA DISCAPACIDAD VISUAL
-   - Colores aptos para daltonismo
-   - Mayor contraste WCAG AA+
-   - Bordes gruesos
-   - Tamaños de texto más grandes
-============================================================ */
 
-/* 🔴 Mensajes de Error (alto contraste) */
+
+
 .error-text,
 .error-msg {
-  color: #D32F2F; /* Rojo accesible */
-  font-size: 15px; /* Más grande */
+  color: #D32F2F; 
+  font-size: 15px; 
   font-weight: 600;
   margin: 6px 0 14px 10px;
 }
 
-/* 🔴 Campos con error */
+
 ion-item.invalid {
   --highlight-color-focused: #D32F2F;
   --highlight-color-invalid: #D32F2F;
   --border-color: #D32F2F !important;
 
-  border-left: 5px solid #D32F2F; /* Más grueso para mejor visibilidad */
-  background-color: #ffe6e6; /* Fondo tenue para diferenciar */
+  border-left: 5px solid #D32F2F; 
+  background-color: #ffe6e6; 
   transition: border-left 0.25s ease-in-out;
 }
 
-/* 🟢 Campos válidos (verde apto para daltonismo) */
+
 ion-item.valid {
-  --highlight-color-focused: #2E7D32; /* Verde accesible */
+  --highlight-color-focused: #2E7D32; 
   --border-color: #2E7D32 !important;
 
   border-left: 5px solid #2E7D32;
@@ -36,24 +30,22 @@ ion-item.valid {
   transition: border-left 0.25s ease-in-out;
 }
 
-/* 📦 Campos en general (más separación y tamaño accesible) */
+
 ion-item {
   margin-bottom: 12px;
-  font-size: 17px; /* Aumenta legibilidad */
+  font-size: 17px; 
 }
 
-/* Formularios más espaciosos */
+
 form {
   margin-bottom: 40px;
 }
 
-/* ============================================================
-   🌙 MODO OSCURO ACCESIBLE
-============================================================ */
+
 @media (prefers-color-scheme: dark) {
   .error-text,
   .error-msg {
-    color: #ff6b6b; /* Mejor contraste en dark */
+    color: #ff6b6b; 
   }
 
   ion-item.invalid {
@@ -67,32 +59,30 @@ form {
   }
 }
 
-/* ============================================================
-   ✋ ACCESIBILIDAD AVANZADA PARA BAJA VISIÓN
-============================================================ */
 
-/* Fuente global más grande */
+
+
 :host {
   font-size: 18px;
 }
 
-/* Placeholder más visibles */
+
 ion-input::part(native) {
   font-size: 18px;
 }
 
-/* Etiquetas más grandes */
+
 ion-label {
   font-size: 16px !important;
   font-weight: 600;
 }
 
-/* Botón más grande y con alto contraste */
+
 ion-button {
   font-size: 18px;
   height: 55px;
   --border-radius: 10px;
-  --background: #1a73e8; /* Azul accesible */
+  --background: #1a73e8; 
   --background-activated: #0f57b3;
   --background-hover: #1664cc;
   --color: white;

@@ -60,17 +60,15 @@ export class RegistroEmpresaPage {
     });
   }
 
-  // =========================================================
-  //  VALIDACIONES ACCESIBLES
-  // =========================================================
+  
   private validarCampos(): string | null {
 
-    // Teléfono chileno flexible (+569 / 569 / 9XXXXXXXX / XXXXXXXX)
+    
     const telRegex = /^(\+?56)?\s?9?\s?\d{8}$/;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // URL OPCIONAL → solo valida si se escribió
+    
     const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+\w{2,}(\/\S*)?$/;
 
     if (!this.empresa.nombre_empresa.trim())
@@ -88,19 +86,17 @@ export class RegistroEmpresaPage {
     if (!this.empresa.horarios.trim())
       return "Los horarios son obligatorios.";
 
-    // SITIO WEB OPCIONAL
+    
     if (this.empresa.sitio_web.trim().length > 0 && !urlRegex.test(this.empresa.sitio_web))
       return "El sitio web no tiene un formato válido.";
 
     if (!this.empresa.Correo.trim() || !emailRegex.test(this.empresa.Correo))
       return "Correo inválido.";
 
-    return null; // VALIDACIÓN OK
+    return null; 
   }
 
-  // =========================================================
-  //  ENVIAR REGISTRO
-  // =========================================================
+  
   onRegistrar() {
 
     if (!this.empresa.Adm_Empresa_id_adm_Empresa) {

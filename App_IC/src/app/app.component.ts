@@ -7,7 +7,7 @@ import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { AuthService } from './services/auth.service';
 
 addIcons(icons);
-// 🔹 Iconos
+
 import {
   logOut,
   logIn,
@@ -65,24 +65,24 @@ export class AppComponent implements OnInit {
   }
 
   // ==========================================
-  // 🔵 MENÚ DINÁMICO SEGÚN SESIÓN Y ROL
+  //  MENÚ DINÁMICO SEGÚN SESIÓN Y ROL
   // ==========================================
   actualizarMenu() {
 
-    // 🆕 Opción visible para TODOS
+    
     const infoApp = {
       title: 'Información de la App',
       url: '/info-app',
       icon: 'information-circle'
     };
 
-    // 👉 NO HAY SESIÓN INICIADA
+    //  NO HAY SESIÓN INICIADA
     if (!this.currentUser) {
       this.appPages = [
         { title: 'Login', url: '/login', icon: 'log-in' },
         { title: 'Registro Usuario', url: '/registro', icon: 'person-add' },
 
-        // 🔥 AGREGAMOS → Registro Admin Empresa
+        //  AGREGAMOS → Registro Admin Empresa
         { title: 'Registro Adm Empresa', url: '/registro-adm-empresa', icon: 'business' },
 
         infoApp
@@ -90,7 +90,7 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    // 👉 SESIÓN INICIADA
+    //  SESIÓN INICIADA
     switch (this.currentUser.role) {
 
       case 'adm_empresa':

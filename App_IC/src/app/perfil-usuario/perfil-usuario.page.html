@@ -9,26 +9,26 @@
 
 <ion-content class="ion-padding">
 
-  <!-- 👤 Información del Usuario -->
+  
   <ion-card *ngIf="!cargando">
     <ion-card-header>
       <ion-card-title>📋 Información Personal</ion-card-title>
     </ion-card-header>
 
     <ion-card-content>
-      <!-- Correo -->
+      
       <ion-item>
         <ion-label position="floating">Correo electrónico</ion-label>
         <ion-input [(ngModel)]="usuario.correo" type="email"></ion-input>
       </ion-item>
 
-      <!-- Celular -->
+      
       <ion-item>
         <ion-label position="floating">Celular</ion-label>
         <ion-input [(ngModel)]="usuario.celular" type="tel"></ion-input>
       </ion-item>
 
-      <!-- Discapacidad -->
+      
       <ion-item>
         <ion-label>Tipo de discapacidad</ion-label>
         <ion-select [(ngModel)]="usuario.Discapacidades_id_discapacidad">
@@ -38,7 +38,7 @@
         </ion-select>
       </ion-item>
 
-      <!-- Botón Guardar -->
+      
       <ion-button expand="block" color="success" (click)="guardarCambios()">
         <ion-icon slot="start" name="save"></ion-icon>
         Guardar Cambios
@@ -46,7 +46,7 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- 📊 Estadísticas del Usuario -->
+  
   <ion-card *ngIf="!cargando && rutasGuardadas.length > 0">
     <ion-card-header>
       <ion-card-title>📊 Mis Estadísticas</ion-card-title>
@@ -81,7 +81,7 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- ⭐ Mis Reseñas -->
+  
   <ion-card *ngIf="!cargando">
     <ion-card-header>
       <ion-card-title>⭐ Mis Reseñas a Servicios</ion-card-title>
@@ -91,18 +91,18 @@
     </ion-card-header>
 
     <ion-card-content>
-      <!-- Lista de reseñas -->
+      
       <div *ngIf="resenasUsuario.length > 0">
         <ion-list>
           <ion-item *ngFor="let resena of resenasUsuario" class="resena-item">
             <ion-label class="ion-text-wrap">
-              <!-- Nombre del servicio/lugar -->
+              
               <h2 class="resena-servicio">
                 <ion-icon name="business" color="primary"></ion-icon>
                 {{ resena.nombre_lugar || 'Servicio sin nombre' }}
               </h2>
 
-              <!-- Valoración con estrellas -->
+              
               <div class="resena-valoracion">
                 <ion-icon 
                   *ngFor="let star of [1,2,3,4,5]" 
@@ -113,19 +113,19 @@
                 <span class="valoracion-numero">{{ resena.valoracion }}/5</span>
               </div>
 
-              <!-- Comentario -->
+              
               <p class="resena-comentario">
                 <ion-icon name="chatbox" color="medium"></ion-icon>
                 "{{ resena.comentarios || 'Sin comentario' }}"
               </p>
 
-              <!-- Fecha -->
+              
               <p class="resena-fecha">
                 <ion-icon name="calendar" color="medium"></ion-icon>
                 {{ resena.fecha_resena | date:'dd/MM/yyyy' }}
               </p>
 
-              <!-- Información adicional del lugar -->
+              
               <div class="resena-info" *ngIf="resena.direccion_lugar || resena.nombre_empresa">
                 <p *ngIf="resena.direccion_lugar">
                   <ion-icon name="location" color="medium"></ion-icon>
@@ -138,7 +138,7 @@
               </div>
             </ion-label>
 
-            <!-- Botón de eliminar reseña -->
+            
             <ion-button slot="end" fill="clear" color="danger" (click)="eliminarResena(resena.id_resena)">
               <ion-icon slot="icon-only" name="trash"></ion-icon>
             </ion-button>
@@ -146,7 +146,7 @@
         </ion-list>
       </div>
 
-      <!-- Mensaje si no hay reseñas -->
+      
       <div *ngIf="resenasUsuario.length === 0" class="sin-reseñas">
         <ion-icon name="chatbox-outline" size="large" color="medium"></ion-icon>
         <p>Aún no has dejado reseñas en ningún servicio.</p>
@@ -155,7 +155,7 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Spinner de carga -->
+  
   <div *ngIf="cargando" class="loading-container">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando información...</p>

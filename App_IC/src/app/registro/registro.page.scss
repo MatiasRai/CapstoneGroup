@@ -1,6 +1,4 @@
-/* ============
-   ESTILO GENERAL
-   ============ */
+
 ion-item {
   --padding-start: 10px;
   --inner-padding-end: 10px;
@@ -11,39 +9,33 @@ ion-item {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* ============
-   TEXTOS FLOTANTES
-   ============ */
+
 ion-label {
-  font-size: 1.1rem; /* letras más grandes */
+  font-size: 1.1rem; 
   color: #2a2a2a;
 }
 
-/* ============
-   CAMPOS / INPUTS
-   ============ */
+
 ion-input, ion-select {
-  font-size: 1.15rem;  /* Tamaño del texto dentro del input */
+  font-size: 1.15rem;  
   color: #111;
 }
 
-/* ============
-   VALIDACIONES (ION-NOTE)
-   ============ */
+
 ion-note {
   display: block;
   margin-top: -8px;
   margin-left: 6px;
 
-  /* Tamaño más grande para accesibilidad */
+  
   font-size: 1.05rem;
 
-  /* Color más visible para discapacidad visual */
-  color: #d80000 !important;  /* Rojo accesible */
-  font-weight: 600;           /* Más grueso */
+  
+  color: #d80000 !important;  
+  font-weight: 600;           
 }
 
-/* Validación dentro del campo (cuando está dentro del ítem) */
+
 .validation-inside {
   font-size: 0.95rem;
   color: #d80000;
@@ -51,12 +43,10 @@ ion-note {
   margin-top: 4px;
 }
 
-/* ============
-   BOTÓN
-   ============ */
+
 ion-button {
   height: 55px;
-  font-size: 1.2rem;   /* Letra grande */
+  font-size: 1.2rem;   
   letter-spacing: 1px;
   font-weight: 700;
   border-radius: 12px;
@@ -66,9 +56,7 @@ ion-button[disabled] {
   opacity: 0.5;
 }
 
-/* ============
-   TÍTULO
-   ============ */
+
 h2 {
   font-size: 1.8rem;
   font-weight: 700;

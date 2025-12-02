@@ -33,9 +33,7 @@ export class RutasRecomendadasPage implements OnInit {
     this.cargarRutas();
   }
 
-  /* ======================================================
-     📍 CARGAR TODAS LAS RUTAS
-  ====================================================== */
+  
   cargarRutas() {
     this.cargando = true;
     
@@ -43,7 +41,7 @@ export class RutasRecomendadasPage implements OnInit {
       next: async (rutas: any) => {
         this.todasLasRutas = [];
         
-        // Cargar detalles de cada ruta
+        
         for (const ruta of rutas) {
           try {
             const rutaDetalle: any = await this.http.get(`${this.apiUrl}/${ruta.id_ruta}`).toPromise();
@@ -65,9 +63,7 @@ export class RutasRecomendadasPage implements OnInit {
     });
   }
 
-  /* ======================================================
-     🔍 FILTRAR RUTAS POR BÚSQUEDA
-  ====================================================== */
+  
   filtrarRutas() {
     const termino = this.searchTerm.toLowerCase().trim();
     
@@ -83,16 +79,12 @@ export class RutasRecomendadasPage implements OnInit {
     );
   }
 
-  /* ======================================================
-     👁️ VER DETALLE DE RUTA
-  ====================================================== */
+  
   verDetalle(idRuta: number) {
     this.router.navigate(['/ruta-detalle', idRuta]);
   }
 
-  /* ======================================================
-     📊 CALCULAR DISTANCIA TOTAL
-  ====================================================== */
+  
   calcularDistanciaTotal(): string {
     const total = this.todasLasRutas.reduce((sum, ruta) => 
       sum + (parseFloat(ruta.longitud_ruta) || 0), 0
@@ -100,17 +92,13 @@ export class RutasRecomendadasPage implements OnInit {
     return total.toFixed(2);
   }
 
-  /* ======================================================
-     👥 CONTAR USUARIOS ÚNICOS
-  ====================================================== */
+  
   contarUsuarios(): number {
     const usuarios = new Set(this.todasLasRutas.map(r => r.id_usuario));
     return usuarios.size;
   }
 
-  /* ======================================================
-     🔔 MOSTRAR TOAST
-  ====================================================== */
+  
   async mostrarToast(mensaje: string, color: string = 'primary') {
     const toast = await this.toastController.create({
       message: mensaje,
