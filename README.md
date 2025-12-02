@@ -41,7 +41,7 @@ Backend	Node.js / Express
 
 BD	MySQL
 
-Mapas	Leaflet + GPS HTML5
+Mapas	Leaflet
 
 Discord
 
@@ -115,11 +115,7 @@ Base de datos escalable para rutas, coordenadas y servicios.
 
 **Limitaciones**
 
-No se incorpora aún análisis de rutas en tiempo real.
-
 Falta integración de transporte público accesible.
-
-La recomendación automática de rutas aún no está implementada.
 
 # Instalación y Ejecución
 
@@ -150,13 +146,15 @@ ionic serve --external
 ```
 
 **4. Configurar backend**
-Puerto sugerido: 3000
-Archivo .env con:
 ```
-DB_HOST=localhost
-DB_USER=root
-DB_PASS=tu_clave
-DB_NAME=icmap
+const mysql = require('mysql');
+
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'prueba1'
+});
 ```
 
 # Conclusión
