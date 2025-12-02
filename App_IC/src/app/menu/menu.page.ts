@@ -21,6 +21,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   private defaultIcon!: L.Icon;
 
+  /** Íconos específicos para cada tipo de lugar */
+  private servicioIcons: { [key: string]: L.Icon } = {};
+
   currentLocation: [number, number] | null = null;
   private currentUserId: number | null = null;
   private host = window.location.hostname;
@@ -69,9 +72,18 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/rutas-recomendadas']);
   }
 
+  irALogin() {
+    this.router.navigate(['/login']);
+  }
+
+  irARegistro() {
+    this.router.navigate(['/registro']);
+  }
+
   // ───────────────── CICLO DE VIDA ─────────────────
   ngOnInit() {
     this.loadCurrentUser();
+    this.initServiceIcons();        // ← inicializamos los íconos personalizados
     this.getCurrentPosition();
     this.cargarServiciosDisponibles();
   }
@@ -128,7 +140,8 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.serviciosDisponibles.forEach(servicio => {
       if (servicio.latitud && servicio.longitud) {
-        const marker = L.marker([servicio.latitud, servicio.longitud])
+        const icon = this.getIconForServicio(servicio);
+        const marker = L.marker([servicio.latitud, servicio.longitud], { icon })
           .addTo(this.map);
 
         marker.on('click', () => {
@@ -345,6 +358,68 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     if (this.currentLocation) {
       this.addCurrentLocationMarker();
     }
+  }
+
+  // ───────────────── ÍCONOS PERSONALIZADOS DE SERVICIOS ─────────────────
+  /** Crea un icono Leaflet a partir de una imagen en assets */
+  private createServiceIcon(iconUrl: string): L.Icon {
+    return L.icon({
+      iconUrl,
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -30],
+      className: 'servicio-marker-icon'
+    });
+  }
+
+  /** Inicializa el diccionario de iconos según tipo de categoría */
+  private initServiceIcons() {
+    this.servicioIcons['restaurante']      = this.createServiceIcon('assets/icon/restaurante.png');
+    this.servicioIcons['agencia']          = this.createServiceIcon('assets/icon/agencia.jpg');
+    this.servicioIcons['transporte']       = this.createServiceIcon('assets/icon/transporte.png');
+    this.servicioIcons['parque']           = this.createServiceIcon('assets/icon/parque.jpg');
+    this.servicioIcons['museo']            = this.createServiceIcon('assets/icon/museo.png');
+    this.servicioIcons['plaza']            = this.createServiceIcon('assets/icon/plaza.png');
+    this.servicioIcons['hotel']            = this.createServiceIcon('assets/icon/hotel.png');
+    this.servicioIcons['mall']             = this.createServiceIcon('assets/icon/mall.jpeg');
+    this.servicioIcons['playa']            = this.createServiceIcon('assets/icon/playa.png');
+    this.servicioIcons['salud']            = this.createServiceIcon('assets/icon/salud.png');
+    this.servicioIcons['biblioteca']       = this.createServiceIcon('assets/icon/biblioteca.png');
+    this.servicioIcons['aeropuerto']       = this.createServiceIcon('assets/icon/aeropuerto.png');
+    this.servicioIcons['puerto']           = this.createServiceIcon('assets/icon/puerto.png');
+    this.servicioIcons['teatro']           = this.createServiceIcon('assets/icon/teatro.png');
+    this.servicioIcons['gimnasio']         = this.createServiceIcon('assets/icon/gimnasio.png');
+  }
+
+  /** Devuelve el icono correspondiente a la categoría del servicio */
+  private getIconForServicio(servicio: any): L.Icon {
+    const categoria: string = (servicio.categoria_lugar || '').toLowerCase();
+
+    if (categoria.includes('restaurante'))        return this.servicioIcons['restaurante']  || this.defaultIcon;
+    if (categoria.includes('agencia'))            return this.servicioIcons['agencia']      || this.defaultIcon;
+    if (categoria.includes('transporte'))         return this.servicioIcons['transporte']   || this.defaultIcon;
+    if (categoria.includes('parque'))             return this.servicioIcons['parque']       || this.defaultIcon;
+    if (categoria.includes('museo'))              return this.servicioIcons['museo']        || this.defaultIcon;
+    if (categoria.includes('plaza'))              return this.servicioIcons['plaza']        || this.defaultIcon;
+    if (categoria.includes('hotel'))              return this.servicioIcons['hotel']        || this.defaultIcon;
+    if (categoria.includes('centro comercial') ||
+        categoria.includes('mall'))               return this.servicioIcons['mall']         || this.defaultIcon;
+    if (categoria.includes('playa'))              return this.servicioIcons['playa']        || this.defaultIcon;
+    if (categoria.includes('centro de salud') ||
+        categoria.includes('clínica') ||
+        categoria.includes('clinica'))            return this.servicioIcons['salud']        || this.defaultIcon;
+    if (categoria.includes('biblioteca'))         return this.servicioIcons['biblioteca']   || this.defaultIcon;
+    if (categoria.includes('terminal aéreo') ||
+        categoria.includes('terminal aereo') ||
+        categoria.includes('aeropuerto'))         return this.servicioIcons['aeropuerto']   || this.defaultIcon;
+    if (categoria.includes('terminal marítimo') ||
+        categoria.includes('terminal maritimo') ||
+        categoria.includes('puerto'))             return this.servicioIcons['puerto']       || this.defaultIcon;
+    if (categoria.includes('teatro'))             return this.servicioIcons['teatro']       || this.defaultIcon;
+    if (categoria.includes('gimnasio'))           return this.servicioIcons['gimnasio']     || this.defaultIcon;
+
+    // por si aparece alguna categoría nueva
+    return this.defaultIcon;
   }
 
   // ───────────────── GRABAR RUTA ─────────────────
@@ -687,7 +762,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
       this.rutasPolylines.push(polyline);
 
-      const startMarker = L.marker(coords[0])
+      L.marker(coords[0])
         .addTo(this.map)
         .bindPopup(`
           <b>🚩 ${ruta.nombre_ruta}</b><br>
@@ -695,7 +770,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      const endMarker = L.marker(coords[coords.length - 1])
+      L.marker(coords[coords.length - 1])
         .addTo(this.map)
         .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
     });
@@ -736,7 +811,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
       this.rutasPolylines.push(polyline);
 
-      const startMarker = L.marker(coords[0])
+      L.marker(coords[0])
         .addTo(this.map)
         .bindPopup(`
           <b>🌍 ${ruta.nombre_ruta}</b><br>
@@ -745,7 +820,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      const endMarker = L.marker(coords[coords.length - 1])
+      L.marker(coords[coords.length - 1])
         .addTo(this.map)
         .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
     });
@@ -764,14 +839,6 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ───────────────── MENÚ RUTAS / ACCIONES ─────────────────
-  irALogin() {
-    this.router.navigate(['/login']);
-  }
-
-  irARegistro() {
-    this.router.navigate(['/registro']);
-  }
-
   async verMisRutas() {
     if (!this.isUserLoggedIn) {
       const alert = await this.alertController.create({
@@ -982,7 +1049,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
   async cargarRutaEnMapa(idRuta: number, esPublica: boolean = false) {
     const rutas = esPublica ? this.rutasPublicas : this.rutasGuardadas;
-    const ruta = rutas.find(r => r.id_ruta === idRuta);
+    const ruta = rutas.find((r: any) => r.id_ruta === idRuta);
     if (!ruta) return;
 
     this.limpiarRutasDelMapa();
@@ -1043,7 +1110,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     return deg * (Math.PI / 180);
   }
 
-  // 🔹 Ahora todos los marcadores usan el mismo icono por fiabilidad
+  // 🔹 Ahora todos los marcadores de ruta usan el mismo icono por fiabilidad
   private createColoredIcon(color: string): L.Icon {
     return this.defaultIcon || (L.Marker.prototype.options.icon as L.Icon);
   }
