@@ -1,13 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <!-- ✅ Menú hamburguesa siempre visible -->
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>📍 Rutas y Servicios Accesibles</ion-title>
     
     <ion-buttons slot="end">
-      <!-- ✅ Solo botones de funcionalidad, Login/Registro están en el menú -->
       <ion-button *ngIf="isUserLoggedIn" (click)="getCurrentPosition()">
         <ion-icon slot="icon-only" name="locate"></ion-icon>
       </ion-button>
