@@ -14,11 +14,15 @@ import { ToastController, AlertController } from '@ionic/angular';
   imports: [CommonModule, FormsModule, HttpClientModule, ...IONIC_IMPORTS],
 })
 export class PerfilUsuarioPage implements OnInit {
+
   usuario: any = {};
   discapacidades: any[] = [];
   rutasGuardadas: any[] = [];
   resenasUsuario: any[] = [];
   cargando = false;
+
+  fontSize: number = 16;
+  isHighContrast: boolean = false;
 
   private baseHost = window.location.hostname;
   private apiUsuarios = `http://${this.baseHost}:3000/api/v1/usuarios`;
@@ -38,13 +42,63 @@ export class PerfilUsuarioPage implements OnInit {
     this.cargarDiscapacidades();
     this.cargarRutasGuardadas();
     this.cargarResenasUsuario();
+    this.cargarAccesibilidad();
   }
 
-  
+  cargarAccesibilidad() {
+    const user = this.authService.getUser();
+    if (!user) return;
+
+    this.fontSize = user.font_size ?? 16;
+    this.isHighContrast = user.high_contrast == 1;
+
+    this.authService.applyAccessibilitySettings();
+  }
+
+  guardarAccesibilidad() {
+    const user = this.authService.getUser();
+    if (!user) return;
+
+    this.http.put(
+      `${this.apiUsuarios}/${user.id}/accesibilidad`,
+      {
+        font_size: this.fontSize,
+        high_contrast: this.isHighContrast ? 1 : 0
+      }
+    ).subscribe(() => {
+      const updated = {
+        ...user,
+        font_size: this.fontSize,
+        high_contrast: this.isHighContrast ? 1 : 0
+      };
+
+      this.authService.login(updated);
+    });
+  }
+
+  changeFontSize(event: any) {
+    const size = event.detail.value;
+    this.fontSize = size;
+
+    document.documentElement.style.setProperty('--app-font-size', size + 'px');
+
+    this.guardarAccesibilidad();
+  }
+
+  toggleContrast() {
+    if (this.isHighContrast) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+
+    this.guardarAccesibilidad();
+  }
+
   cargarPerfil() {
     const user = this.authService.getUser();
     if (!user) {
-      this.mostrarToast('⚠️ No se encontró usuario logueado', 'warning');
+      this.mostrarToast('No se encontró usuario logueado', 'warning');
       return;
     }
 
@@ -53,30 +107,23 @@ export class PerfilUsuarioPage implements OnInit {
       next: (data: any) => {
         this.usuario = data;
         this.cargando = false;
-        console.log('✅ Perfil cargado:', this.usuario);
       },
-      error: (err) => {
-        console.error('❌ Error al obtener perfil:', err);
-        this.mostrarToast('❌ Error al cargar perfil', 'danger');
+      error: () => {
+        this.mostrarToast('Error al cargar perfil', 'danger');
         this.cargando = false;
       }
     });
   }
 
-  
   cargarDiscapacidades() {
     this.http.get(this.apiDiscapacidades).subscribe({
       next: (data: any) => {
         this.discapacidades = data;
-        console.log('✅ Discapacidades cargadas:', this.discapacidades.length);
       },
-      error: (err) => {
-        console.error('❌ Error al cargar discapacidades:', err);
-      }
+      error: () => {}
     });
   }
 
-  
   cargarRutasGuardadas() {
     const user = this.authService.getUser();
     if (!user) return;
@@ -84,26 +131,17 @@ export class PerfilUsuarioPage implements OnInit {
     this.http.get(`${this.apiRutas}/usuario/${user.id}`).subscribe({
       next: async (rutas: any) => {
         this.rutasGuardadas = [];
-        
-        
         for (const ruta of rutas) {
           try {
             const rutaDetalle: any = await this.http.get(`${this.apiRutas}/${ruta.id_ruta}`).toPromise();
             this.rutasGuardadas.push(rutaDetalle);
-          } catch (err) {
-            console.error('Error cargando ruta:', err);
-          }
+          } catch {}
         }
-        
-        console.log('✅ Rutas cargadas:', this.rutasGuardadas.length);
       },
-      error: (err) => {
-        console.error('❌ Error al cargar rutas:', err);
-      }
+      error: () => {}
     });
   }
 
-  
   cargarResenasUsuario() {
     const user = this.authService.getUser();
     if (!user) return;
@@ -111,19 +149,16 @@ export class PerfilUsuarioPage implements OnInit {
     this.http.get(`${this.apiResenas}/usuario/${user.id}`).subscribe({
       next: (data: any) => {
         this.resenasUsuario = Array.isArray(data) ? data : [];
-        console.log('✅ Reseñas cargadas:', this.resenasUsuario.length);
       },
-      error: (err) => {
-        console.error('❌ Error al cargar reseñas:', err);
+      error: () => {
         this.resenasUsuario = [];
       }
     });
   }
 
-  
   guardarCambios() {
     if (!this.usuario.correo || !this.usuario.celular) {
-      this.mostrarToast('⚠️ Por favor completa todos los campos.', 'warning');
+      this.mostrarToast('Completa todos los campos.', 'warning');
       return;
     }
 
@@ -138,37 +173,31 @@ export class PerfilUsuarioPage implements OnInit {
 
     this.http.put(`${this.apiUsuarios}/${user.id}`, payload).subscribe({
       next: () => {
-        this.mostrarToast('✅ Perfil actualizado correctamente.', 'success');
+        this.mostrarToast('Perfil actualizado.', 'success');
       },
-      error: (err) => {
-        console.error('❌ Error al actualizar perfil:', err);
-        this.mostrarToast('❌ Error al actualizar perfil.', 'danger');
+      error: () => {
+        this.mostrarToast('Error al actualizar.', 'danger');
       }
     });
   }
 
-  
   async eliminarResena(idResena: number) {
     const alert = await this.alertCtrl.create({
-      header: '⚠️ Confirmar eliminación',
-      message: '¿Estás seguro de que deseas eliminar esta reseña?<br><br>Esta acción no se puede deshacer.',
+      header: 'Confirmar eliminación',
+      message: '¿Eliminar esta reseña?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
+        { text: 'Cancelar', role: 'cancel' },
         {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
             this.http.delete(`${this.apiResenas}/${idResena}`).subscribe({
               next: () => {
-                this.mostrarToast('✅ Reseña eliminada correctamente', 'success');
-                this.cargarResenasUsuario(); // Recargar lista
+                this.mostrarToast('Reseña eliminada', 'success');
+                this.cargarResenasUsuario();
               },
-              error: (err) => {
-                console.error('❌ Error al eliminar reseña:', err);
-                this.mostrarToast('❌ Error al eliminar reseña', 'danger');
+              error: () => {
+                this.mostrarToast('Error al eliminar', 'danger');
               }
             });
           }
@@ -179,13 +208,11 @@ export class PerfilUsuarioPage implements OnInit {
     await alert.present();
   }
 
-  
   calcularDistanciaTotal(): string {
     const total = this.rutasGuardadas.reduce((sum, ruta) => sum + (ruta.longitud_ruta || 0), 0);
     return total.toFixed(2);
   }
 
-  
   async mostrarToast(mensaje: string, color: string) {
     const toast = await this.toastCtrl.create({
       message: mensaje,

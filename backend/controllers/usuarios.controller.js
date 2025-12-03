@@ -1,7 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 
-
 const getUsuariosPaginados = (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -18,13 +17,11 @@ const getUsuariosPaginados = (req, res) => {
 
   db.query(queryData, [limit, offset], (err, rows) => {
     if (err) {
-      console.error("❌ Error SQL en getUsuariosPaginados:", err.sqlMessage);
       return res.status(500).json({ error: "Error al obtener usuarios paginados" });
     }
 
     db.query(queryTotal, (err2, totalRows) => {
       if (err2) {
-        console.error("❌ Error SQL al contar usuarios:", err2.sqlMessage);
         return res.status(500).json({ error: "Error al contar usuarios" });
       }
 
@@ -42,14 +39,12 @@ const getUsuariosPaginados = (req, res) => {
   });
 };
 
-
 const getUsuarios = (req, res) => {
   db.query('SELECT * FROM usuario', (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 };
-
 
 const getUsuarioById = (req, res) => {
   const { id } = req.params;
@@ -62,6 +57,8 @@ const getUsuarioById = (req, res) => {
       u.celular,
       u.foto_perfil,
       u.Discapacidades_id_discapacidad,
+      u.font_size,
+      u.high_contrast,
       d.tipo_discapacidad AS nombre_discapacidad,
       d.descripcion AS descripcion_discapacidad
     FROM usuario u
@@ -72,7 +69,6 @@ const getUsuarioById = (req, res) => {
 
   db.query(query, [id], (err, result) => {
     if (err) {
-      console.error('❌ Error SQL en getUsuarioById:', err.sqlMessage);
       return res.status(500).json({ error: 'Error al obtener usuario' });
     }
 
@@ -83,7 +79,6 @@ const getUsuarioById = (req, res) => {
     res.json(result[0]);
   });
 };
-
 
 const createUsuario = async (req, res) => {
   const { nombre, correo, contrasena, celular, foto_perfil, Discapacidades_id_discapacidad } = req.body;
@@ -105,16 +100,14 @@ const createUsuario = async (req, res) => {
           celular,
           foto_perfil,
           Discapacidades_id_discapacidad,
-          message: '✅ Usuario registrado correctamente'
+          message: 'Usuario registrado correctamente'
         });
       }
     );
   } catch (error) {
-    console.error('❌ Error al registrar usuario:', error);
-    res.status(500).json({ error: '❌ Error al registrar usuario' });
+    res.status(500).json({ error: 'Error al registrar usuario' });
   }
 };
-
 
 const updateUsuario = (req, res) => {
   const { id } = req.params;
@@ -148,7 +141,6 @@ const updateUsuario = (req, res) => {
 
   db.query(query, values, (err, result) => {
     if (err) {
-      console.error('❌ Error SQL en updateUsuario:', err.sqlMessage);
       return res.status(500).json({ error: 'Error al actualizar usuario' });
     }
 
@@ -157,23 +149,40 @@ const updateUsuario = (req, res) => {
     }
 
     res.json({
-      message: '✅ Usuario actualizado correctamente',
+      message: 'Usuario actualizado correctamente',
       id_usuario: id,
       actualizado: { correo, celular, Discapacidades_id_discapacidad }
     });
   });
 };
 
-
 const deleteUsuario = (req, res) => {
   const { id } = req.params;
 
   db.query('DELETE FROM usuario WHERE id_usuario = ?', [id], (err) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: '✅ Usuario eliminado correctamente' });
+    res.json({ message: 'Usuario eliminado correctamente' });
   });
 };
 
+const actualizarAccesibilidad = (req, res) => {
+  const { id } = req.params;
+  const { font_size, high_contrast } = req.body;
+
+  const query = `
+    UPDATE usuario 
+    SET font_size = ?, high_contrast = ?
+    WHERE id_usuario = ?
+  `;
+
+  db.query(query, [font_size, high_contrast, id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error al actualizar accesibilidad' });
+    }
+
+    res.json({ message: 'Accesibilidad actualizada correctamente' });
+  });
+};
 
 module.exports = {
   getUsuarios,
@@ -181,5 +190,6 @@ module.exports = {
   createUsuario,
   updateUsuario,
   deleteUsuario,
-  getUsuariosPaginados
+  getUsuariosPaginados,
+  actualizarAccesibilidad
 };

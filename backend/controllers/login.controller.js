@@ -1,7 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto'); // para MD5
-
+const crypto = require('crypto');
 
 function isBcryptHash(str) {
   return typeof str === 'string' && /^\$2[aby]\$/.test(str);
@@ -11,7 +10,6 @@ const login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
   try {
-    
     db.query('SELECT * FROM adm_empresa WHERE correo = ?', [correo], async (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
 
@@ -32,17 +30,17 @@ const login = async (req, res) => {
         }
 
         if (match) {
-          console.log('✅ Login correcto (adm_empresa), ID:', admEmpresa.id_adm_Empresa);
           return res.json({
             role: 'adm_empresa',
             id: admEmpresa.id_adm_Empresa,
             correo: admEmpresa.correo,
-            message: '✅ Login correcto (Administrador de Empresa, migrado si era MD5)'
+            font_size: 16,
+            high_contrast: 0,
+            message: 'Login correcto'
           });
         }
       }
 
-      
       db.query('SELECT * FROM usuario WHERE correo = ?', [correo], async (err2, rows2) => {
         if (err2) return res.status(500).json({ error: err2.message });
 
@@ -63,17 +61,17 @@ const login = async (req, res) => {
           }
 
           if (match) {
-            console.log('✅ Login correcto (usuario), ID:', usuario.id_usuario);
             return res.json({
               role: 'usuario',
               id: usuario.id_usuario,
               correo: usuario.correo,
-              message: '✅ Login correcto (Usuario, migrado si era MD5)'
+              font_size: usuario.font_size,
+              high_contrast: usuario.high_contrast,
+              message: 'Login correcto'
             });
           }
         }
 
-        
         db.query('SELECT * FROM adm WHERE Correo = ?', [correo], async (err3, rows3) => {
           if (err3) return res.status(500).json({ error: err3.message });
 
@@ -81,7 +79,6 @@ const login = async (req, res) => {
             const adm = rows3[0];
             let match = false;
 
-            
             if (isBcryptHash(adm.Contrasena)) {
               match = await bcrypt.compare(contrasena, adm.Contrasena);
             } else {
@@ -95,24 +92,23 @@ const login = async (req, res) => {
             }
 
             if (match) {
-              console.log('✅ Login correcto (adm), ID:', adm.id_admin);
               return res.json({
                 role: 'adm',
                 id: adm.id_admin,
                 correo: adm.Correo,
-                message: '✅ Login correcto (Administrador del Sistema, migrado si era MD5)'
+                font_size: 16,
+                high_contrast: 0,
+                message: 'Login correcto'
               });
             }
           }
 
-          
           return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
         });
       });
     });
   } catch (error) {
-    console.error('❌ Error en el servidor:', error);
-    res.status(500).json({ error: '❌ Error en el servidor' });
+    res.status(500).json({ error: 'Error en el servidor' });
   }
 };
 

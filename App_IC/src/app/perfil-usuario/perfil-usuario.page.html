@@ -9,26 +9,23 @@
 
 <ion-content class="ion-padding">
 
-  
   <ion-card *ngIf="!cargando">
     <ion-card-header>
       <ion-card-title>📋 Información Personal</ion-card-title>
     </ion-card-header>
 
     <ion-card-content>
-      
+
       <ion-item>
         <ion-label position="floating">Correo electrónico</ion-label>
         <ion-input [(ngModel)]="usuario.correo" type="email"></ion-input>
       </ion-item>
 
-      
       <ion-item>
         <ion-label position="floating">Celular</ion-label>
         <ion-input [(ngModel)]="usuario.celular" type="tel"></ion-input>
       </ion-item>
 
-      
       <ion-item>
         <ion-label>Tipo de discapacidad</ion-label>
         <ion-select [(ngModel)]="usuario.Discapacidades_id_discapacidad">
@@ -38,23 +35,56 @@
         </ion-select>
       </ion-item>
 
-      
       <ion-button expand="block" color="success" (click)="guardarCambios()">
         <ion-icon slot="start" name="save"></ion-icon>
         Guardar Cambios
       </ion-button>
+
     </ion-card-content>
   </ion-card>
 
-  
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>♿ Accesibilidad</ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+
+      <ion-item>
+        <ion-label>Tamaño del texto</ion-label>
+      </ion-item>
+
+      <ion-item>
+        <ion-range
+          min="10"
+          max="30"
+          step="1"
+          [(ngModel)]="fontSize"
+          (ionChange)="changeFontSize($event)"
+        >
+          <ion-icon slot="start" name="remove"></ion-icon>
+          <ion-icon slot="end" name="add"></ion-icon>
+        </ion-range>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Alto contraste</ion-label>
+        <ion-toggle [(ngModel)]="isHighContrast" (ionChange)="toggleContrast()"></ion-toggle>
+      </ion-item>
+
+    </ion-card-content>
+  </ion-card>
+
   <ion-card *ngIf="!cargando && rutasGuardadas.length > 0">
     <ion-card-header>
       <ion-card-title>📊 Mis Estadísticas</ion-card-title>
       <ion-card-subtitle>Tu actividad en la plataforma</ion-card-subtitle>
     </ion-card-header>
+
     <ion-card-content>
       <ion-grid>
         <ion-row>
+
           <ion-col size="4">
             <div class="stat-box">
               <ion-icon name="map" color="primary" class="stat-icon"></ion-icon>
@@ -62,6 +92,7 @@
               <p class="stat-label">Rutas creadas</p>
             </div>
           </ion-col>
+
           <ion-col size="4">
             <div class="stat-box">
               <ion-icon name="navigate" color="success" class="stat-icon"></ion-icon>
@@ -69,6 +100,7 @@
               <p class="stat-label">km recorridos</p>
             </div>
           </ion-col>
+
           <ion-col size="4">
             <div class="stat-box">
               <ion-icon name="star" color="warning" class="stat-icon"></ion-icon>
@@ -76,56 +108,54 @@
               <p class="stat-label">Reseñas</p>
             </div>
           </ion-col>
+
         </ion-row>
       </ion-grid>
     </ion-card-content>
+
   </ion-card>
 
-  
   <ion-card *ngIf="!cargando">
     <ion-card-header>
       <ion-card-title>⭐ Mis Reseñas a Servicios</ion-card-title>
       <ion-card-subtitle>
-        {{ resenasUsuario.length > 0 ? resenasUsuario.length + ' reseña(s) realizadas' : 'Aún no has dejado reseñas' }}
+        {{ resenasUsuario.length > 0 ? resenasUsuario.length + ' reseña(s)' : 'Aún no has dejado reseñas' }}
       </ion-card-subtitle>
     </ion-card-header>
 
     <ion-card-content>
-      
+
       <div *ngIf="resenasUsuario.length > 0">
         <ion-list>
+
           <ion-item *ngFor="let resena of resenasUsuario" class="resena-item">
             <ion-label class="ion-text-wrap">
-              
+
               <h2 class="resena-servicio">
                 <ion-icon name="business" color="primary"></ion-icon>
                 {{ resena.nombre_lugar || 'Servicio sin nombre' }}
               </h2>
 
-              
               <div class="resena-valoracion">
-                <ion-icon 
-                  *ngFor="let star of [1,2,3,4,5]" 
+                <ion-icon
+                  *ngFor="let star of [1,2,3,4,5]"
                   [name]="star <= resena.valoracion ? 'star' : 'star-outline'"
                   [color]="star <= resena.valoracion ? 'warning' : 'medium'"
-                  class="star-icon">
-                </ion-icon>
+                  class="star-icon"
+                ></ion-icon>
                 <span class="valoracion-numero">{{ resena.valoracion }}/5</span>
               </div>
 
-              
               <p class="resena-comentario">
                 <ion-icon name="chatbox" color="medium"></ion-icon>
                 "{{ resena.comentarios || 'Sin comentario' }}"
               </p>
 
-              
               <p class="resena-fecha">
                 <ion-icon name="calendar" color="medium"></ion-icon>
                 {{ resena.fecha_resena | date:'dd/MM/yyyy' }}
               </p>
 
-              
               <div class="resena-info" *ngIf="resena.direccion_lugar || resena.nombre_empresa">
                 <p *ngIf="resena.direccion_lugar">
                   <ion-icon name="location" color="medium"></ion-icon>
@@ -136,26 +166,27 @@
                   {{ resena.nombre_empresa }}
                 </p>
               </div>
+
             </ion-label>
 
-            
             <ion-button slot="end" fill="clear" color="danger" (click)="eliminarResena(resena.id_resena)">
               <ion-icon slot="icon-only" name="trash"></ion-icon>
             </ion-button>
+
           </ion-item>
+
         </ion-list>
       </div>
 
-      
       <div *ngIf="resenasUsuario.length === 0" class="sin-reseñas">
         <ion-icon name="chatbox-outline" size="large" color="medium"></ion-icon>
-        <p>Aún no has dejado reseñas en ningún servicio.</p>
-        <p class="hint">Explora servicios en el menú principal y comparte tu experiencia.</p>
+        <p>Aún no has dejado reseñas...</p>
+        <p class="hint">Explora servicios y comparte tu experiencia.</p>
       </div>
+
     </ion-card-content>
   </ion-card>
 
-  
   <div *ngIf="cargando" class="loading-container">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando información...</p>

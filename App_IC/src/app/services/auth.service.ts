@@ -9,12 +9,22 @@ export class AuthService {
   private userSubject = new BehaviorSubject<any>(this.getUserFromStorage());
   user$ = this.userSubject.asObservable();
 
-  constructor() {}
+  constructor() {
+    this.applyAccessibilitySettings();
+  }
 
   login(user: any) {
-    console.log('💾 Guardando usuario:', user);
-    localStorage.setItem(this.LS_KEY, JSON.stringify(user));
-    this.userSubject.next(user); // 👈 asegura refresco inmediato
+    const userData = {
+      id: user.id,
+      correo: user.correo,
+      role: user.role,
+      font_size: user.font_size ?? 16,
+      high_contrast: user.high_contrast ?? 0
+    };
+
+    localStorage.setItem(this.LS_KEY, JSON.stringify(userData));
+    this.userSubject.next(userData);
+    this.applyAccessibilitySettings();
   }
 
   getUser() {
@@ -26,9 +36,27 @@ export class AuthService {
     return data ? JSON.parse(data) : null;
   }
 
+  applyAccessibilitySettings() {
+    const user = this.getUser();
+    if (!user) return;
+
+    const fontSize = user.font_size ?? 16;
+    const highContrast = user.high_contrast ?? 0;
+
+    document.documentElement.style.setProperty('--app-font-size', fontSize + 'px');
+
+    if (highContrast === 1) {
+      document.body.classList.add('high-contrast');
+    } else {
+      document.body.classList.remove('high-contrast');
+    }
+  }
+
   logout() {
     localStorage.removeItem(this.LS_KEY);
     this.userSubject.next(null);
+    document.documentElement.style.setProperty('--app-font-size', '16px');
+    document.body.classList.remove('high-contrast');
     window.location.href = '/login';
   }
 

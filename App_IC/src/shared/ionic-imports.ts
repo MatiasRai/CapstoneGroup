@@ -31,7 +31,9 @@ import {
   IonRouterOutlet,
   IonSpinner,
   IonText,
-  IonTextarea  // ⬅️ AGREGAR ESTA LÍNEA
+  IonTextarea,
+  IonToggle,
+  IonRange
 } from '@ionic/angular/standalone';
 
 export const IONIC_IMPORTS = [
@@ -67,5 +69,7 @@ export const IONIC_IMPORTS = [
   IonRouterOutlet,
   IonSpinner,
   IonText,
-  IonTextarea  // ⬅️ AGREGAR ESTA LÍNEA
+  IonTextarea,
+  IonToggle,
+  IonRange
 ];

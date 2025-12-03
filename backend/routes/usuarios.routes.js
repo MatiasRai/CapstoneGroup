@@ -7,27 +7,16 @@ const {
   createUsuario,
   updateUsuario,
   deleteUsuario,
-  getUsuariosPaginados 
+  getUsuariosPaginados,
+  actualizarAccesibilidad
 } = require('../controllers/usuarios.controller');
 
-
 router.get('/paginados', getUsuariosPaginados);
-
-
-
-
 router.get('/', getUsuarios);
-
-
 router.get('/:id', getUsuarioById);
-
-
 router.post('/', createUsuario);
-
-
+router.put('/:id/accesibilidad', actualizarAccesibilidad);
 router.put('/:id', updateUsuario);
-
-
 router.delete('/:id', deleteUsuario);
 
 module.exports = router;
