@@ -61,14 +61,33 @@ const login = async (req, res) => {
           }
 
           if (match) {
-            return res.json({
-              role: 'usuario',
-              id: usuario.id_usuario,
-              correo: usuario.correo,
-              font_size: usuario.font_size,
-              high_contrast: usuario.high_contrast,
-              message: 'Login correcto'
+            // Obtener información de discapacidad
+            const queryDiscapacidad = `
+              SELECT d.id_discapacidad, d.tipo_discapacidad 
+              FROM discapacidades d 
+              WHERE d.id_discapacidad = ?
+            `;
+            
+            db.query(queryDiscapacidad, [usuario.Discapacidades_id_discapacidad], (errDisc, discRows) => {
+              let discapacidadInfo = null;
+              if (!errDisc && discRows && discRows.length > 0) {
+                discapacidadInfo = {
+                  id_discapacidad: discRows[0].id_discapacidad,
+                  tipo_discapacidad: discRows[0].tipo_discapacidad
+                };
+              }
+              
+              return res.json({
+                role: 'usuario',
+                id: usuario.id_usuario,
+                correo: usuario.correo,
+                font_size: usuario.font_size,
+                high_contrast: usuario.high_contrast,
+                discapacidad: discapacidadInfo,
+                message: 'Login correcto'
+              });
             });
+            return; // Salir para evitar continuar
           }
         }
 

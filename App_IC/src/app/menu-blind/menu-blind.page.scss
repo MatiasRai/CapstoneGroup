@@ -1,0 +1,213 @@
+// Estilos para menu-blind - Accesibilidad visual
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  
+  ion-spinner {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+  }
+  
+  h2 {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+  
+  p {
+    font-size: 20px;
+    color: #666;
+  }
+}
+
+.instrucciones-card {
+  margin: 20px 0;
+  
+  .instrucciones-contenido {
+    text-align: center;
+    
+    .icono-grande {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+    
+    h2 {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
+    .lista-instrucciones {
+      text-align: left;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        font-size: 20px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        strong {
+          font-weight: bold;
+          color: #fff;
+        }
+      }
+    }
+  }
+}
+
+.servicios-lista {
+  .titulo-servicios {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 20px 0;
+    text-align: center;
+    color: var(--ion-color-primary);
+  }
+}
+
+.servicio-card {
+  margin: 20px 0;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 3px solid var(--ion-color-primary);
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  ion-card-header {
+    position: relative;
+    padding: 25px;
+    
+    .servicio-numero {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--ion-color-primary);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .servicio-titulo {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding-right: 60px;
+    }
+    
+    .servicio-precio {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--ion-color-success);
+    }
+  }
+  
+  ion-card-content {
+    padding: 20px 25px;
+    
+    .servicio-info {
+      .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 18px;
+        
+        ion-icon {
+          font-size: 24px;
+          margin-right: 12px;
+          color: var(--ion-color-primary);
+        }
+        
+        span {
+          flex: 1;
+        }
+      }
+    }
+    
+    .tap-hint {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+.sin-resultados {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 30px;
+  
+  .icono-grande {
+    font-size: 100px;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+  
+  h2 {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 15px 0;
+  }
+  
+  p {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 25px;
+  }
+  
+  ion-button {
+    font-size: 18px;
+    --padding-start: 30px;
+    --padding-end: 30px;
+    height: 50px;
+  }
+}
+
+// Alto contraste y tamaños grandes para accesibilidad
+ion-content {
+  --background: #fff;
+  color: #000;
+  font-size: 18px;
+}
+
+ion-card {
+  --background: #f5f5f5;
+  color: #000;
+}
+
+ion-button {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  height: 55px;
+  font-size: 18px;
+  font-weight: bold;
+}
