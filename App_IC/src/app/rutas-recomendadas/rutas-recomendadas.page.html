@@ -29,7 +29,7 @@
   
   <div *ngIf="!cargando && rutasFiltradas.length > 0" class="rutas-grid">
     <ion-card 
-      *ngFor="let ruta of rutasFiltradas" 
+      *ngFor="let ruta of rutasPaginadas" 
       class="ruta-card"
       (click)="verDetalle(ruta.id_ruta)">
       
@@ -88,6 +88,43 @@
     <ion-icon name="map-outline" size="large"></ion-icon>
     <h2>No se encontraron rutas</h2>
     <p>Intenta con otro término de búsqueda</p>
+  </div>
+
+  <!-- ======= PAGINACIÓN ======= -->
+  <div *ngIf="!cargando && rutasFiltradas.length > 0" class="pagination-container">
+    <div class="pagination-info">
+      <p>Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, rutasFiltradas.length) }} de {{ rutasFiltradas.length }} rutas</p>
+    </div>
+    
+    <div class="pagination-controls">
+      <!-- Botón Anterior -->
+      <ion-button 
+        fill="clear" 
+        size="small"
+        [disabled]="currentPage === 1"
+        (click)="irAPaginaAnterior()">
+        <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+      </ion-button>
+
+      <!-- Números de página -->
+      <ion-button 
+        *ngFor="let page of getPaginasVisibles()"
+        [fill]="page === currentPage ? 'solid' : 'outline'"
+        size="small"
+        [color]="page === currentPage ? 'primary' : 'medium'"
+        (click)="irAPagina(page)">
+        {{ page }}
+      </ion-button>
+
+      <!-- Botón Siguiente -->
+      <ion-button 
+        fill="clear" 
+        size="small"
+        [disabled]="currentPage === totalPages"
+        (click)="irAPaginaSiguiente()">
+        <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 
   
