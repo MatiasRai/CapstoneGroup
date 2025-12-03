@@ -334,7 +334,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   private addCurrentLocationMarker(): void {
     if (!this.currentLocation || !this.map) return;
 
-    const icon = this.createColoredIcon('blue');
+    const icon = this.createUserLocationIcon();
 
     if (this.currentMarker) {
       this.map.removeLayer(this.currentMarker);
@@ -342,11 +342,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.currentMarker = L.marker(this.currentLocation, { icon })
       .addTo(this.map)
-      .bindPopup(`
-        <b>📍 Tu ubicación GPS</b><br>
-        <small>Lat: ${this.currentLocation[0].toFixed(6)}</small><br>
-        <small>Lng: ${this.currentLocation[1].toFixed(6)}</small>
-      `)
+      .bindPopup(`<b>Tu</b>`)
       .openPopup();
   }
 
@@ -1160,6 +1156,45 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   // 🔹 Ahora todos los marcadores de ruta usan el mismo icono por fiabilidad
   private createColoredIcon(color: string): L.Icon {
     return this.defaultIcon || (L.Marker.prototype.options.icon as L.Icon);
+  }
+
+  private createUserLocationIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'user-location-icon',
+      html: `
+        <div style="position: relative;">
+          <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <!-- Círculo exterior (borde blanco) -->
+            <circle cx="20" cy="20" r="18" fill="#fff" stroke="#2196F3" stroke-width="2"/>
+            <!-- Círculo interior azul -->
+            <circle cx="20" cy="20" r="15" fill="#2196F3"/>
+            <!-- Icono de persona -->
+            <g fill="#fff">
+              <!-- Cabeza -->
+              <circle cx="20" cy="15" r="4"/>
+              <!-- Cuerpo -->
+              <path d="M 20 19 Q 15 19 13 25 L 13 28 L 27 28 L 27 25 Q 25 19 20 19 Z"/>
+            </g>
+          </svg>
+          <!-- Punto central pulsante -->
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border: 2px solid #2196F3;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+          "></div>
+        </div>
+      `,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
+    });
   }
 
   async showToast(message: string, color: string) {
