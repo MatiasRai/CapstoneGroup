@@ -11,19 +11,15 @@
 
 <ion-content>
 
-  
   <div *ngIf="cargando" class="loading-container">
     <ion-spinner name="crescent" color="primary"></ion-spinner>
     <p>Cargando ruta...</p>
   </div>
 
-  
   <div *ngIf="!cargando && ruta">
 
-    
-    <div id="map" class="mapa-detalle"></div>
+    <div id="map-detalle" class="mapa-detalle"></div>
 
-    
     <ion-card class="info-card">
       <ion-card-header>
         <ion-card-title>{{ ruta.nombre_ruta }}</ion-card-title>
@@ -38,7 +34,6 @@
           {{ ruta.descripcion_ruta }}
         </p>
 
-        
         <div class="stats-grid">
           <div class="stat-box">
             <ion-icon name="flag" color="primary"></ion-icon>
@@ -65,7 +60,6 @@
           </div>
         </div>
 
-        
         <div class="acciones">
           <ion-button expand="block" color="primary" (click)="verEnMapa()">
             <ion-icon slot="start" name="map"></ion-icon>
@@ -80,7 +74,6 @@
       </ion-card-content>
     </ion-card>
 
-    
     <ion-card class="creador-card">
       <ion-card-header>
         <ion-card-title>Sobre el creador</ion-card-title>
@@ -98,7 +91,6 @@
 
   </div>
 
-  
   <div *ngIf="!cargando && !ruta" class="error-container">
     <ion-icon name="alert-circle" size="large" color="danger"></ion-icon>
     <h2>No se pudo cargar la ruta</h2>
