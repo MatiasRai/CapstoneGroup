@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" aria-label="Volver al menú principal">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Menú Accesible - Discapacidad Visual</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="detenerVoz()" aria-label="Detener voz">
+        <ion-icon slot="icon-only" name="volume-mute"></ion-icon>
+      </ion-button>
+      <ion-button (click)="recargarServicios()" aria-label="Recargar servicios">
+        <ion-icon slot="icon-only" name="refresh"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Mensaje de carga -->
+  <div *ngIf="cargando" class="loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <h2>Cargando servicios accesibles...</h2>
+    <p>Por favor espera</p>
+  </div>
+
+  <!-- Instrucciones -->
+  <ion-card *ngIf="!cargando" color="primary" class="instrucciones-card">
+    <ion-card-content>
+      <div class="instrucciones-contenido">
+        <ion-icon name="information-circle" class="icono-grande"></ion-icon>
+        <h2>Instrucciones de Uso</h2>
+        <ul class="lista-instrucciones">
+          <li><strong>1 Toque:</strong> Escuchar nombre y precio</li>
+          <li><strong>2 Toques:</strong> Escuchar información completa</li>
+          <li><strong>Botón superior derecho:</strong> Detener voz</li>
+        </ul>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de servicios -->
+  <div *ngIf="!cargando && servicios.length > 0" class="servicios-lista">
+    <h2 class="titulo-servicios">{{ servicios.length }} Servicios Disponibles</h2>
+    
+    <ion-card 
+      *ngFor="let servicio of servicios; let i = index" 
+      class="servicio-card"
+      (click)="onServicioTap(servicio)"
+      [attr.aria-label]="'Servicio ' + (i + 1) + ': ' + servicio.nombre_servicio">
+      
+      <ion-card-header>
+        <div class="servicio-numero">{{ i + 1 }}</div>
+        <ion-card-title class="servicio-titulo">
+          {{ servicio.nombre_servicio }}
+        </ion-card-title>
+        <ion-card-subtitle class="servicio-precio">
+          ${{ formatearPrecio(servicio.costo_servicio) }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="servicio-info">
+          <div class="info-item">
+            <ion-icon name="business"></ion-icon>
+            <span>{{ servicio.nombre_empresa || 'Empresa no especificada' }}</span>
+          </div>
+          <div class="info-item">
+            <ion-icon name="location"></ion-icon>
+            <span>{{ servicio.nombre_lugar || 'Lugar no especificado' }}</span>
+          </div>
+          <div class="info-item" *ngIf="servicio.resenas && servicio.resenas.length > 0">
+            <ion-icon name="star"></ion-icon>
+            <span>{{ calcularPromedioValoracion(servicio.resenas) }} / 5</span>
+          </div>
+        </div>
+        
+        <p class="tap-hint">Toca para escuchar información</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Sin resultados -->
+  <div *ngIf="!cargando && servicios.length === 0" class="sin-resultados">
+    <ion-icon name="eye-off" class="icono-grande"></ion-icon>
+    <h2>No hay servicios disponibles</h2>
+    <p>No se encontraron servicios adaptados para discapacidad visual en este momento.</p>
+    <ion-button color="primary" (click)="recargarServicios()">
+      <ion-icon slot="start" name="refresh"></ion-icon>
+      Recargar
+    </ion-button>
+  </div>
+
+</ion-content>

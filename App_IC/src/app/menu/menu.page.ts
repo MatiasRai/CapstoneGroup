@@ -60,6 +60,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   private mapUpdateThrottle: number = 1000;
 
   isUserLoggedIn: boolean = false;
+  tieneDiscapacidadVisual: boolean = false;
 
   constructor(
     private platform: Platform,
@@ -75,6 +76,10 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   // ───────────────── NAVEGACIÓN ─────────────────
   irARutasRecomendadas() {
     this.router.navigate(['/rutas-recomendadas']);
+  }
+
+  irAMenuBlind() {
+    this.router.navigate(['/menu-blind']);
   }
 
   irALogin() {
@@ -110,6 +115,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       const user = JSON.parse(userStr);
       this.currentUserId = user.id;
       this.isUserLoggedIn = true;
+      this.tieneDiscapacidadVisual = this.authService.tieneDiscapacidadVisual();
 
       if (this.currentUserId) {
         this.cargarRutasGuardadas();
@@ -117,6 +123,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       }
     } else {
       this.isUserLoggedIn = false;
+      this.tieneDiscapacidadVisual = false;
       this.cargarRutasPublicas();
     }
   }

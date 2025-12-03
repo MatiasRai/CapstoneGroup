@@ -19,7 +19,8 @@ export class AuthService {
       correo: user.correo,
       role: user.role,
       font_size: user.font_size ?? 16,
-      high_contrast: user.high_contrast ?? 0
+      high_contrast: user.high_contrast ?? 0,
+      discapacidad: user.discapacidad ?? null
     };
 
     localStorage.setItem(this.LS_KEY, JSON.stringify(userData));
@@ -62,5 +63,13 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getUser();
+  }
+
+  tieneDiscapacidadVisual(): boolean {
+    const user = this.getUser();
+    if (!user || !user.discapacidad) return false;
+    
+    const tipoDiscapacidad = user.discapacidad.tipo_discapacidad || '';
+    return tipoDiscapacidad.toLowerCase().includes('visual');
   }
 }

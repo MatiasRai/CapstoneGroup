@@ -421,7 +421,6 @@ ion-card ion-card-content p {
   line-height: 1.5 !important;
 }
 
-
 .rutas-recomendadas-card {
   margin: 16px 0;
   border-radius: 16px;
@@ -468,6 +467,34 @@ ion-card ion-card-content p {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+// Estilos para el botón de acceso al menú blind
+.menu-blind-card {
+  margin: 16px 0;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border: 3px solid #fff;
+  animation: fadeInScale 0.4s ease-in-out;
+  
+  ion-card-content {
+    padding: 20px;
+  }
+
+  ion-icon[name="eye-off"] {
+    filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3));
+  }
+
+  ion-button {
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    letter-spacing: 1px;
+    
+    &:active {
+      transform: scale(0.98);
+    }
   }
 }
 

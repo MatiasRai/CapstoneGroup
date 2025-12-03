@@ -106,10 +106,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./ruta-detalle/ruta-detalle.page').then(m => m.RutaDetallePage)
   },
-
-  
+  {
+    path: 'menu-blind',
+    loadComponent: () => import('./menu-blind/menu-blind.page').then( m => m.MenuBlindPage)
+  },
   {
     path: '**',
     redirectTo: 'menu'
   }
+
 ];
