@@ -82,6 +82,54 @@
     </ion-card-content>
   </ion-card>
 
+  <!-- 🔍 FILTRO POR TIPO DE DISCAPACIDAD -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="filter" style="vertical-align: middle;"></ion-icon>
+        Filtrar Servicios por Discapacidad
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>Tipo de Discapacidad</ion-label>
+        <ion-select 
+          [(ngModel)]="discapacidadSeleccionada" 
+          (ionChange)="filtrarPorDiscapacidad()"
+          interface="action-sheet"
+          placeholder="Todos los servicios">
+          <ion-select-option [value]="null">Todos los servicios</ion-select-option>
+          <ion-select-option 
+            *ngFor="let tipo of tiposDiscapacidad" 
+            [value]="tipo.id_discapacidad">
+            {{ tipo.nombre_discapacidad }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <!-- Botón para limpiar filtro -->
+      <ion-button 
+        *ngIf="discapacidadSeleccionada !== null"
+        expand="block" 
+        fill="outline" 
+        color="medium"
+        (click)="limpiarFiltro()"
+        style="margin-top: 10px;">
+        <ion-icon slot="start" name="close-circle"></ion-icon>
+        Limpiar Filtro
+      </ion-button>
+
+      <ion-note color="medium" style="display: block; margin-top: 10px; font-size: 12px;">
+        <span *ngIf="discapacidadSeleccionada === null">
+          ℹ️ Selecciona un tipo de discapacidad para ver solo los servicios adaptados en el mapa
+        </span>
+        <span *ngIf="discapacidadSeleccionada !== null">
+          ✅ Mostrando {{ serviciosFiltrados.length }} servicio(s) filtrado(s)
+        </span>
+      </ion-note>
+    </ion-card-content>
+  </ion-card>
+
   <ion-card color="warning" *ngIf="!currentLocation">
     <ion-card-content>
       <p style="margin: 0; font-size: 12px; text-align: center;">

@@ -48,8 +48,13 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
   // Servicios disponibles
   serviciosDisponibles: any[] = [];
+  serviciosFiltrados: any[] = [];
   serviciosMarkers: L.Marker[] = [];
   servicioSeleccionado: any = null;
+
+  // Filtro de discapacidades
+  tiposDiscapacidad: any[] = [];
+  discapacidadSeleccionada: number | null = null;
 
   private lastMapUpdate: number = 0;
   private mapUpdateThrottle: number = 1000;
@@ -85,6 +90,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.loadCurrentUser();
     this.initServiceIcons();        // ← inicializamos los íconos personalizados
     this.getCurrentPosition();
+    this.cargarTiposDiscapacidad();
     this.cargarServiciosDisponibles();
   }
 
@@ -116,10 +122,23 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ───────────────── SERVICIOS EN MAPA ─────────────────
+  cargarTiposDiscapacidad() {
+    this.http.get(`${this.apiUrl}/discapacidades/tipos`).subscribe({
+      next: (tipos: any) => {
+        this.tiposDiscapacidad = tipos;
+        console.log('♿ Tipos de discapacidad cargados:', this.tiposDiscapacidad.length);
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar tipos de discapacidad:', err);
+      }
+    });
+  }
+
   cargarServiciosDisponibles() {
     this.admEmpresaService.obtenerTodosLosServicios().subscribe({
       next: (servicios: any[]) => {
         this.serviciosDisponibles = servicios.filter(s => s.latitud && s.longitud);
+        this.serviciosFiltrados = [...this.serviciosDisponibles];
         console.log('🧩 Servicios cargados:', this.serviciosDisponibles.length);
         if (this.map) {
           this.mostrarServiciosEnMapa();
@@ -131,6 +150,27 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  filtrarPorDiscapacidad() {
+    if (this.discapacidadSeleccionada === null) {
+      // Mostrar todos los servicios
+      this.serviciosFiltrados = [...this.serviciosDisponibles];
+    } else {
+      // Filtrar por tipo de discapacidad
+      this.serviciosFiltrados = this.serviciosDisponibles.filter(
+        s => s.id_discapacidad === this.discapacidadSeleccionada
+      );
+    }
+    console.log('🔍 Servicios filtrados:', this.serviciosFiltrados.length);
+    this.mostrarServiciosEnMapa();
+  }
+
+  limpiarFiltro() {
+    this.discapacidadSeleccionada = null;
+    this.serviciosFiltrados = [...this.serviciosDisponibles];
+    this.mostrarServiciosEnMapa();
+    this.showToast('✨ Filtro limpiado - Mostrando todos los servicios', 'success');
+  }
+
   private mostrarServiciosEnMapa() {
     if (!this.map) return;
 
@@ -138,7 +178,7 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     this.serviciosMarkers.forEach(m => this.map.removeLayer(m));
     this.serviciosMarkers = [];
 
-    this.serviciosDisponibles.forEach(servicio => {
+    this.serviciosFiltrados.forEach(servicio => {
       if (servicio.latitud && servicio.longitud) {
         const icon = this.getIconForServicio(servicio);
         const marker = L.marker([servicio.latitud, servicio.longitud], { icon })
