@@ -193,9 +193,18 @@ export class RutaDetallePage implements OnInit, OnDestroy {
       opacity: 0.9
     }).addTo(this.map);
 
-    L.marker(coords[0]).addTo(this.map).bindPopup("📍 Inicio").openPopup();
+    // Marcador de inicio con ícono de persona (verde)
+    const startIcon = this.createStartIcon();
+    L.marker(coords[0], { icon: startIcon })
+      .addTo(this.map)
+      .bindPopup("<b>Inicio</b>")
+      .openPopup();
 
-    L.marker(coords[coords.length - 1]).addTo(this.map).bindPopup("🏁 Fin");
+    // Marcador de fin con bandera roja
+    const endIcon = this.createEndIcon();
+    L.marker(coords[coords.length - 1], { icon: endIcon })
+      .addTo(this.map)
+      .bindPopup("<b>Fin</b>");
 
     const bounds = L.latLngBounds(coords);
     this.map.fitBounds(bounds, { padding: [20, 20] });
@@ -238,5 +247,55 @@ export class RutaDetallePage implements OnInit, OnDestroy {
       duration: 1800
     });
     t.present();
+  }
+
+  // ───────────────── ICONOS PERSONALIZADOS ─────────────────
+  private createStartIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'user-location-icon',
+      html: `
+        <div style="position: relative;">
+          <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <!-- Círculo exterior (borde blanco) -->
+            <circle cx="20" cy="20" r="18" fill="#fff" stroke="#4CAF50" stroke-width="2"/>
+            <!-- Círculo interior verde -->
+            <circle cx="20" cy="20" r="15" fill="#4CAF50"/>
+            <!-- Icono de persona -->
+            <g fill="#fff">
+              <!-- Cabeza -->
+              <circle cx="20" cy="15" r="4"/>
+              <!-- Cuerpo -->
+              <path d="M 20 19 Q 15 19 13 25 L 13 28 L 27 28 L 27 25 Q 25 19 20 19 Z"/>
+            </g>
+          </svg>
+        </div>
+      `,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -40]
+    });
+  }
+
+  private createEndIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'end-flag-icon',
+      html: `
+        <div style="position: relative;">
+          <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+            <!-- Poste de la bandera -->
+            <rect x="18" y="5" width="4" height="45" fill="#333"/>
+            <!-- Base del poste -->
+            <ellipse cx="20" cy="48" rx="8" ry="3" fill="#333" opacity="0.5"/>
+            <!-- Bandera roja -->
+            <path d="M 22 8 L 38 15 L 22 22 Z" fill="#F44336" stroke="#C62828" stroke-width="1"/>
+            <!-- Brillo en la bandera -->
+            <path d="M 22 8 L 30 12 L 22 16 Z" fill="#FF5252" opacity="0.6"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [40, 50],
+      iconAnchor: [20, 50],
+      popupAnchor: [0, -50]
+    });
   }
 }
