@@ -22,8 +22,7 @@ import {
   navigateCircle,
   apps,
   eye,
-  informationCircle,
-  arrowBack
+  informationCircle
 } from 'ionicons/icons';
 
 @Component({
@@ -58,39 +57,48 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+
+    // ======================================
+    // APLICAR ACCESIBILIDAD APENAS INICIA APP
+    // ======================================
+
+    const savedSize = localStorage.getItem('fontSize');
+    if (savedSize) {
+      document.documentElement.style.setProperty('--app-font-size', savedSize + 'px');
+    }
+
+    const savedContrast = localStorage.getItem('contrast');
+    if (savedContrast === '1') {
+      document.body.classList.add('high-contrast');
+    }
+
+    // ======================================
+    // ESCUCHAR SESIÓN Y ACTUALIZAR MENÚ
+    // ======================================
     this.authService.user$.subscribe(user => {
       this.currentUser = user;
       this.actualizarMenu();
     });
   }
 
-  // ==========================================
-  //  MENÚ DINÁMICO SEGÚN SESIÓN Y ROL
-  // ==========================================
   actualizarMenu() {
 
-    
     const infoApp = {
       title: 'Información de la App',
       url: '/info-app',
       icon: 'information-circle'
     };
 
-    //  NO HAY SESIÓN INICIADA
     if (!this.currentUser) {
       this.appPages = [
         { title: 'Login', url: '/login', icon: 'log-in' },
         { title: 'Registro Usuario', url: '/registro', icon: 'person-add' },
-
-        //  AGREGAMOS → Registro Admin Empresa
         { title: 'Registro Adm Empresa', url: '/registro-adm-empresa', icon: 'business' },
-
         infoApp
       ];
       return;
     }
 
-    //  SESIÓN INICIADA
     switch (this.currentUser.role) {
 
       case 'adm_empresa':
