@@ -9,6 +9,7 @@ import {
   IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 
+import { ToastController } from '@ionic/angular';   // 👈 NUEVO
 import { UsuarioService } from '../services/usuario.service';
 import { Router } from '@angular/router';
 
@@ -40,7 +41,8 @@ export class RegistroPage implements OnInit {
 
   constructor(
     private usuarioService: UsuarioService,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController      // 👈 NUEVO
   ) {}
 
   ngOnInit() {
@@ -54,28 +56,52 @@ export class RegistroPage implements OnInit {
     });
   }
 
-  
   onFileSelected(event: any) {
     const file = event.target.files?.[0];
     this.fotoFile = file ?? null;
-
-    
     this.usuario.foto_perfil = this.fotoFile ? this.fotoFile.name : '';
   }
 
-  
+  // 🔔 Toast reutilizable
+  private async mostrarToast(
+    header: string,
+    message: string,
+    color: 'success' | 'danger' | 'warning' | 'primary' = 'primary'
+  ) {
+    const toast = await this.toastController.create({
+      header,
+      message,
+      color,
+      duration: 2500,
+      position: 'top',
+      icon: color === 'success' ? 'checkmark-circle' : 'alert-circle'
+    });
+
+    await toast.present();
+  }
+
+  // 👇 Ahora sin alert(), solo toasts bonitos
   onRegistrar() {
     this.usuarioService.registrarUsuario(this.usuario).subscribe({
-      next: (res: any) => {
-        alert('Usuario registrado exitosamente');
+      next: async (res: any) => {
         console.log('Usuario creado:', res);
 
-        
+        await this.mostrarToast(
+          'Registro exitoso 🎉',
+          'Tu cuenta se creó correctamente. Ahora puedes iniciar sesión.',
+          'success'
+        );
+
         this.router.navigate(['/login']);
       },
-      error: (err) => {
+      error: async (err) => {
         console.error('Error al registrar usuario:', err);
-        alert('❌ Error al registrar usuario');
+
+        await this.mostrarToast(
+          'Error al registrar',
+          'No se pudo crear la cuenta. Inténtalo nuevamente.',
+          'danger'
+        );
       }
     });
   }
