@@ -293,3 +293,90 @@ ion-card-content {
     font-size: 60px;
   }
 }
+
+
+/* =========================================
+   🔢 PAGINACIÓN
+   ========================================= */
+.pagination-container {
+  margin: 30px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pagination-info {
+  text-align: center;
+  margin-bottom: 15px;
+  
+  p {
+    font-size: 0.95rem;
+    color: #555;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  ion-button {
+    --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    min-width: 40px;
+    height: 40px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &[fill="solid"] {
+      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scale(1.1);
+    }
+
+    &[fill="outline"] {
+      --border-color: #667eea;
+      --color: #667eea;
+
+      &:hover:not([disabled]) {
+        --background: rgba(102, 126, 234, 0.1);
+        transform: scale(1.05);
+      }
+    }
+
+    &[fill="clear"] {
+      --color: #667eea;
+      
+      &:hover:not([disabled]) {
+        --background: rgba(102, 126, 234, 0.15);
+        transform: scale(1.1);
+      }
+    }
+
+    &[disabled] {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* Responsive Pagination */
+@media (max-width: 600px) {
+  .pagination-controls {
+    gap: 4px;
+    
+    ion-button {
+      min-width: 36px;
+      height: 36px;
+      font-size: 0.85rem;
+    }
+  }
+  
+  .pagination-info p {
+    font-size: 0.85rem;
+  }
+}

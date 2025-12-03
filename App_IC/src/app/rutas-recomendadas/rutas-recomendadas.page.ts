@@ -17,8 +17,17 @@ export class RutasRecomendadasPage implements OnInit {
   
   todasLasRutas: any[] = [];
   rutasFiltradas: any[] = [];
+  rutasPaginadas: any[] = [];
   searchTerm: string = '';
   cargando: boolean = true;
+
+  // Paginación
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
+
+  // Exponer Math para usar en el template
+  Math = Math;
 
   private host = window.location.hostname;
   private apiUrl = `http://${this.host}:3000/api/v1/rutas`;
@@ -52,6 +61,7 @@ export class RutasRecomendadasPage implements OnInit {
         }
         
         this.rutasFiltradas = [...this.todasLasRutas];
+        this.calcularPaginacion();
         this.cargando = false;
         console.log('✅ Rutas cargadas:', this.todasLasRutas.length);
       },
@@ -69,14 +79,78 @@ export class RutasRecomendadasPage implements OnInit {
     
     if (!termino) {
       this.rutasFiltradas = [...this.todasLasRutas];
-      return;
+    } else {
+      this.rutasFiltradas = this.todasLasRutas.filter(ruta => 
+        ruta.nombre_ruta?.toLowerCase().includes(termino) ||
+        ruta.descripcion_ruta?.toLowerCase().includes(termino) ||
+        ruta.usuario_nombre?.toLowerCase().includes(termino)
+      );
     }
+    
+    // Resetear a la primera página después de filtrar
+    this.currentPage = 1;
+    this.calcularPaginacion();
+  }
 
-    this.rutasFiltradas = this.todasLasRutas.filter(ruta => 
-      ruta.nombre_ruta?.toLowerCase().includes(termino) ||
-      ruta.descripcion_ruta?.toLowerCase().includes(termino) ||
-      ruta.usuario_nombre?.toLowerCase().includes(termino)
-    );
+  // ───────────────── PAGINACIÓN ─────────────────
+  calcularPaginacion() {
+    this.totalPages = Math.ceil(this.rutasFiltradas.length / this.itemsPerPage);
+    this.actualizarRutasPaginadas();
+  }
+
+  actualizarRutasPaginadas() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.rutasPaginadas = this.rutasFiltradas.slice(startIndex, endIndex);
+  }
+
+  irAPaginaAnterior() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.actualizarRutasPaginadas();
+      this.scrollToTop();
+    }
+  }
+
+  irAPaginaSiguiente() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.actualizarRutasPaginadas();
+      this.scrollToTop();
+    }
+  }
+
+  irAPagina(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.actualizarRutasPaginadas();
+      this.scrollToTop();
+    }
+  }
+
+  getPaginasVisibles(): number[] {
+    const paginas: number[] = [];
+    const maxPaginasVisibles = 5;
+    
+    let inicio = Math.max(1, this.currentPage - Math.floor(maxPaginasVisibles / 2));
+    let fin = Math.min(this.totalPages, inicio + maxPaginasVisibles - 1);
+    
+    if (fin - inicio < maxPaginasVisibles - 1) {
+      inicio = Math.max(1, fin - maxPaginasVisibles + 1);
+    }
+    
+    for (let i = inicio; i <= fin; i++) {
+      paginas.push(i);
+    }
+    
+    return paginas;
+  }
+
+  scrollToTop() {
+    const content = document.querySelector('ion-content');
+    if (content) {
+      content.scrollToTop(400);
+    }
   }
 
   
