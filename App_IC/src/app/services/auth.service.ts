@@ -72,4 +72,17 @@ export class AuthService {
     const tipoDiscapacidad = user.discapacidad.tipo_discapacidad || '';
     return tipoDiscapacidad.toLowerCase().includes('visual');
   }
+
+  // Temporal para compartir datos de navegación de ruta
+  private rutaNavegacionTemporal: any = null;
+
+  setRutaNavegacion(ruta: any) {
+    this.rutaNavegacionTemporal = ruta;
+  }
+
+  getRutaNavegacion() {
+    const ruta = this.rutaNavegacionTemporal;
+    this.rutaNavegacionTemporal = null; // Limpiar después de obtener
+    return ruta;
+  }
 }
