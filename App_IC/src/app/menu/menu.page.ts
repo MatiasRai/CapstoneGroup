@@ -62,6 +62,20 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
   isUserLoggedIn: boolean = false;
   tieneDiscapacidadVisual: boolean = false;
 
+  // Navegación de ruta
+  navegacionActiva: boolean = false;
+  navegacionFinalizada: boolean = false;
+  rutaNavegacion: any = null;
+  rutaNavegacionPolyline: L.Polyline | null = null;
+  puntoInicioMarker: L.Marker | null = null;
+  puntoFinMarker: L.Marker | null = null;
+  distanciaAlInicio: number = 0;
+  distanciaRecorrida: number = 0;
+  proximoPunto: number = 0;
+  private readonly UMBRAL_CERCA_PUNTO = 0.02; // ~20 metros
+  private readonly UMBRAL_DESVIACION = 0.05; // ~50 metros
+  private synthesis: SpeechSynthesis;
+
   constructor(
     private platform: Platform,
     private http: HttpClient,
@@ -71,7 +85,9 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private admEmpresaService: AdmEmpresaService,
     private authService: AuthService
-  ) {}
+  ) {
+    this.synthesis = window.speechSynthesis;
+  }
 
   // ───────────────── NAVEGACIÓN ─────────────────
   irARutasRecomendadas() {
@@ -104,8 +120,14 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => this.initMap(), 100);
   }
 
+  ionViewWillEnter() {
+    // Verificar navegación cada vez que se entra a la página
+    this.verificarNavegacion();
+  }
+
   ngOnDestroy() {
     this.stopRecording();
+    this.limpiarNavegacion();
   }
 
   // ───────────────── USUARIO / SESIÓN ─────────────────
@@ -263,6 +285,12 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
           if (this.map) {
             this.map.setView(this.currentLocation, 15);
             this.addCurrentLocationMarker();
+          }
+
+          // Verificar navegación si está activa
+          if (this.navegacionActiva) {
+            this.calcularDistanciaAlInicio();
+            this.verificarProgresion();
           }
 
           this.showToast('✅ GPS conectado correctamente', 'success');
@@ -519,19 +547,36 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
             duration: 0.5
           });
 
-          this.watchId = navigator.geolocation.watchPosition(
-            (pos) => {
-              if (this.isRecording) {
-                this.updateRecording(pos);
+          // Si no hay seguimiento activo, iniciarlo
+          if (this.watchId === null) {
+            this.watchId = navigator.geolocation.watchPosition(
+              (pos) => {
+                if (this.isRecording) {
+                  this.updateRecording(pos);
+                }
+                
+                // Actualizar ubicación actual para navegación
+                this.currentLocation = [pos.coords.latitude, pos.coords.longitude];
+                
+                // Actualizar marcador
+                if (this.currentMarker) {
+                  this.currentMarker.setLatLng(this.currentLocation);
+                }
+                
+                // Verificar progresión de navegación si está activa
+                if (this.navegacionActiva) {
+                  this.calcularDistanciaAlInicio();
+                  this.verificarProgresion();
+                }
+              },
+              (error) => console.error('❌ Error tracking:', error),
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 2000
               }
-            },
-            (error) => console.error('❌ Error tracking:', error),
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 2000
-            }
-          );
+            );
+          }
 
           this.recordingInterval = setInterval(() => {
             if (this.isRecording) {
@@ -627,7 +672,8 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.isRecording = false;
 
-    if (this.watchId !== null) {
+    // Solo detener el watchPosition si no está navegando
+    if (this.watchId !== null && !this.navegacionActiva) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
     }
@@ -1272,6 +1318,342 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
       iconAnchor: [20, 50],
       popupAnchor: [0, -50]
     });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // ───────────────── NAVEGACIÓN DE RUTA ─────────────────
+  // ═══════════════════════════════════════════════════════════
+
+  verificarNavegacion() {
+    console.log('🔍 Verificando navegación...');
+    
+    // Obtener ruta del servicio
+    const rutaData = this.authService.getRutaNavegacion();
+    
+    if (rutaData) {
+      console.log('✅ Ruta recibida desde servicio:', rutaData);
+      this.rutaNavegacion = rutaData;
+      
+      setTimeout(() => {
+        this.iniciarNavegacionRuta();
+      }, 1500);
+    } else {
+      console.log('ℹ️ No hay ruta para navegar');
+    }
+  }
+
+  iniciarNavegacionRuta() {
+    console.log('🚀 Iniciando navegación de ruta...');
+    
+    if (!this.rutaNavegacion || !this.rutaNavegacion.coordenadas || this.rutaNavegacion.coordenadas.length === 0) {
+      console.error('❌ Datos de ruta no válidos');
+      this.showToast('No se puede iniciar la navegación. Datos de ruta no válidos.', 'warning');
+      return;
+    }
+
+    if (!this.map) {
+      console.error('❌ Mapa no está inicializado');
+      this.showToast('Esperando que el mapa se cargue...', 'warning');
+      setTimeout(() => this.iniciarNavegacionRuta(), 1000);
+      return;
+    }
+
+    // Limpiar marcadores anteriores de navegación
+    if (this.rutaNavegacionPolyline) {
+      this.map.removeLayer(this.rutaNavegacionPolyline);
+      this.rutaNavegacionPolyline = null;
+    }
+    if (this.puntoInicioMarker) {
+      this.map.removeLayer(this.puntoInicioMarker);
+      this.puntoInicioMarker = null;
+    }
+    if (this.puntoFinMarker) {
+      this.map.removeLayer(this.puntoFinMarker);
+      this.puntoFinMarker = null;
+    }
+
+    this.navegacionActiva = true;
+    this.navegacionFinalizada = false;
+    this.proximoPunto = 0;
+    this.distanciaRecorrida = 0;
+
+    // Dibujar la ruta en el mapa
+    const coordenadas = this.rutaNavegacion.coordenadas.map((c: any) => [c.latitud, c.longitud] as [number, number]);
+    
+    console.log('📍 Dibujando ruta con', coordenadas.length, 'puntos');
+    
+    this.rutaNavegacionPolyline = L.polyline(coordenadas, {
+      color: '#2196F3',
+      weight: 6,
+      opacity: 0.8
+    }).addTo(this.map);
+
+    // Marcar punto de inicio
+    const inicio = coordenadas[0];
+    this.puntoInicioMarker = L.marker(inicio, {
+      icon: this.createStartIcon()
+    }).addTo(this.map);
+    this.puntoInicioMarker.bindPopup('<b>Punto de Inicio</b><br>Acércate aquí para comenzar');
+
+    // Marcar punto final
+    const fin = coordenadas[coordenadas.length - 1];
+    this.puntoFinMarker = L.marker(fin, {
+      icon: this.createEndIcon()
+    }).addTo(this.map);
+    this.puntoFinMarker.bindPopup('<b>Destino Final</b>');
+
+    // Ajustar mapa para mostrar toda la ruta
+    this.map.fitBounds(this.rutaNavegacionPolyline.getBounds(), { padding: [50, 50] });
+
+    // Calcular distancia al punto de inicio
+    if (this.currentLocation) {
+      this.calcularDistanciaAlInicio();
+    }
+
+    // Iniciar seguimiento GPS en tiempo real
+    this.iniciarSeguimientoNavegacion();
+
+    // Anunciar inicio
+    this.hablar(`Navegación iniciada hacia ${this.rutaNavegacion.nombre}. Acércate al punto de inicio para comenzar.`);
+  }
+
+  iniciarSeguimientoNavegacion() {
+    if (this.watchId !== null) {
+      console.log('⚠️ Ya hay un seguimiento GPS activo');
+      return;
+    }
+
+    console.log('🛰️ Iniciando seguimiento GPS para navegación...');
+
+    this.watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const newLocation: [number, number] = [position.coords.latitude, position.coords.longitude];
+        
+        console.log('📍 Nueva posición:', newLocation);
+        
+        // Actualizar ubicación actual
+        this.currentLocation = newLocation;
+        
+        // Actualizar marcador de ubicación en el mapa
+        if (this.currentMarker) {
+          this.currentMarker.setLatLng(newLocation);
+        } else {
+          this.addCurrentLocationMarker();
+        }
+        
+        // Centrar mapa en la ubicación actual
+        if (this.navegacionActiva && this.map) {
+          this.map.setView(newLocation, 17, { animate: true });
+        }
+        
+        // Verificar progresión de navegación
+        if (this.navegacionActiva) {
+          this.calcularDistanciaAlInicio();
+          this.verificarProgresion();
+        }
+
+        // Si también está grabando, actualizar grabación
+        if (this.isRecording) {
+          this.updateRecording(position);
+        }
+      },
+      (error) => {
+        console.error('❌ Error en seguimiento GPS:', error);
+        this.showToast('Error al obtener ubicación GPS', 'danger');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 2000
+      }
+    );
+  }
+
+  detenerSeguimientoNavegacion() {
+    if (this.watchId !== null) {
+      console.log('🛑 Deteniendo seguimiento GPS');
+      navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+    }
+  }
+
+  calcularDistanciaAlInicio() {
+    if (!this.currentLocation || !this.rutaNavegacion || !this.rutaNavegacion.coordenadas[0]) {
+      return;
+    }
+
+    const inicio = this.rutaNavegacion.coordenadas[0];
+    this.distanciaAlInicio = this.calculateDistance(
+      this.currentLocation[0],
+      this.currentLocation[1],
+      inicio.latitud,
+      inicio.longitud
+    );
+
+    // Si está cerca del inicio, comenzar navegación
+    if (this.distanciaAlInicio < this.UMBRAL_CERCA_PUNTO && this.proximoPunto === 0) {
+      this.hablar('Has llegado al punto de inicio. Sigue la ruta marcada.');
+      this.proximoPunto = 1;
+    }
+  }
+
+  verificarProgresion() {
+    if (!this.navegacionActiva || !this.currentLocation || !this.rutaNavegacion || this.navegacionFinalizada) {
+      return;
+    }
+
+    const coordenadas = this.rutaNavegacion.coordenadas;
+    
+    if (this.proximoPunto >= coordenadas.length) {
+      // Llegó al final - marcar como finalizada para evitar múltiples llamadas
+      this.navegacionFinalizada = true;
+      this.finalizarNavegacion();
+      return;
+    }
+
+    const puntoActual = coordenadas[this.proximoPunto];
+    const distancia = this.calculateDistance(
+      this.currentLocation[0],
+      this.currentLocation[1],
+      puntoActual.latitud,
+      puntoActual.longitud
+    );
+
+    // Verificar si alcanzó el próximo punto
+    if (distancia < this.UMBRAL_CERCA_PUNTO) {
+      this.proximoPunto++;
+      
+      if (this.proximoPunto >= coordenadas.length) {
+        this.finalizarNavegacion();
+      } else {
+        const porcentaje = Math.round((this.proximoPunto / coordenadas.length) * 100);
+        if (porcentaje % 25 === 0) {
+          this.hablar(`Vas por buen camino. ${porcentaje}% completado.`);
+        }
+      }
+    } else {
+      // Verificar desviación
+      this.verificarDesviacion();
+    }
+  }
+
+  verificarDesviacion() {
+    if (!this.navegacionActiva || !this.currentLocation || !this.rutaNavegacion) {
+      return;
+    }
+
+    const coordenadas = this.rutaNavegacion.coordenadas;
+    let distanciaMinima = Infinity;
+
+    // Encontrar el punto más cercano de la ruta
+    for (let i = this.proximoPunto; i < coordenadas.length; i++) {
+      const punto = coordenadas[i];
+      const distancia = this.calculateDistance(
+        this.currentLocation[0],
+        this.currentLocation[1],
+        punto.latitud,
+        punto.longitud
+      );
+      
+      if (distancia < distanciaMinima) {
+        distanciaMinima = distancia;
+      }
+    }
+
+    // Si se desvió mucho
+    if (distanciaMinima > this.UMBRAL_DESVIACION) {
+      this.hablar('Te has desviado de la ruta. Intenta regresar al camino marcado.');
+    }
+  }
+
+  async finalizarNavegacion() {
+    const nombreRuta = this.rutaNavegacion.nombre;
+    
+    // Anunciar finalización
+    this.hablar(`Has llegado a tu destino: ${nombreRuta}. Navegación finalizada.`);
+    
+    // Mostrar alerta de finalización
+    const alert = await this.alertController.create({
+      header: '🎉 ¡Ruta Finalizada!',
+      message: `Has completado exitosamente la ruta:<br><b>${nombreRuta}</b>`,
+      buttons: [
+        {
+          text: 'Aceptar',
+          handler: () => {
+            // Limpiar todo después de cerrar el alert
+            this.limpiarNavegacion();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async detenerNavegacion() {
+    const alert = await this.alertController.create({
+      header: 'Detener Navegación',
+      message: '¿Estás seguro de que quieres detener la navegación?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Detener',
+          handler: () => {
+            this.limpiarNavegacion();
+            this.showToast('Navegación detenida', 'primary');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  limpiarNavegacion() {
+    console.log('🧹 Limpiando navegación...');
+    
+    this.navegacionActiva = false;
+    this.navegacionFinalizada = false;
+    this.rutaNavegacion = null;
+    this.proximoPunto = 0;
+    this.distanciaRecorrida = 0;
+    this.distanciaAlInicio = 0;
+
+    // Detener seguimiento GPS si no está grabando
+    if (!this.isRecording) {
+      this.detenerSeguimientoNavegacion();
+    }
+
+    if (this.rutaNavegacionPolyline) {
+      this.map.removeLayer(this.rutaNavegacionPolyline);
+      this.rutaNavegacionPolyline = null;
+    }
+
+    if (this.puntoInicioMarker) {
+      this.map.removeLayer(this.puntoInicioMarker);
+      this.puntoInicioMarker = null;
+    }
+
+    if (this.puntoFinMarker) {
+      this.map.removeLayer(this.puntoFinMarker);
+      this.puntoFinMarker = null;
+    }
+
+    this.synthesis.cancel();
+  }
+
+  private hablar(texto: string) {
+    if (!this.synthesis) return;
+
+    this.synthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(texto);
+    utterance.lang = 'es-ES';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    this.synthesis.speak(utterance);
   }
 }
 

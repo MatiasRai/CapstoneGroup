@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IONIC_IMPORTS } from 'src/shared/ionic-imports';
 import { ToastController } from '@ionic/angular';
+import { AuthService } from '../services/auth.service';
 import * as L from 'leaflet';
 
 @Component({
@@ -31,7 +32,8 @@ export class RutaDetallePage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private toast: ToastController
+    private toast: ToastController,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -214,10 +216,20 @@ export class RutaDetallePage implements OnInit, OnDestroy {
     this.router.navigate(['/rutas-recomendadas']);
   }
 
-  verEnMapa() {
-    this.router.navigate(['/menu'], {
-      state: { rutaId: this.ruta.id_ruta }
-    });
+  iniciarRuta() {
+    const rutaData = {
+      id: this.ruta.id_ruta,
+      nombre: this.ruta.nombre_ruta,
+      coordenadas: this.ruta.coordenadas
+    };
+    
+    console.log('📤 Enviando ruta para navegación:', rutaData);
+    
+    // Guardar en el servicio
+    this.authService.setRutaNavegacion(rutaData);
+    
+    // Navegar al menú
+    this.router.navigate(['/menu']);
   }
 
   async compartirRuta() {
