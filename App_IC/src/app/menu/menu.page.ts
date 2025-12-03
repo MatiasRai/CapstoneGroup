@@ -798,17 +798,21 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
       this.rutasPolylines.push(polyline);
 
-      L.marker(coords[0])
+      // Marcador de inicio con ícono de persona
+      const startIcon = this.createStartIcon();
+      L.marker(coords[0], { icon: startIcon })
         .addTo(this.map)
         .bindPopup(`
-          <b>🚩 ${ruta.nombre_ruta}</b><br>
+          <b>${ruta.nombre_ruta}</b><br>
           ${ruta.descripcion_ruta || ''}<br>
           <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      L.marker(coords[coords.length - 1])
+      // Marcador de fin con bandera roja
+      const endIcon = this.createEndIcon();
+      L.marker(coords[coords.length - 1], { icon: endIcon })
         .addTo(this.map)
-        .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
+        .bindPopup(`<b>Fin: ${ruta.nombre_ruta}</b>`);
     });
 
     if (this.rutasPolylines.length > 0) {
@@ -847,18 +851,22 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
       this.rutasPolylines.push(polyline);
 
-      L.marker(coords[0])
+      // Marcador de inicio con ícono de persona
+      const startIcon = this.createStartIcon();
+      L.marker(coords[0], { icon: startIcon })
         .addTo(this.map)
         .bindPopup(`
-          <b>🌍 ${ruta.nombre_ruta}</b><br>
+          <b>${ruta.nombre_ruta}</b><br>
           <small>👤 Por: ${ruta.usuario_nombre || 'Usuario'}</small><br>
           ${ruta.descripcion_ruta || ''}<br>
           <small>📏 ${ruta.longitud_ruta} km | ${coords.length} puntos</small>
         `);
 
-      L.marker(coords[coords.length - 1])
+      // Marcador de fin con bandera roja
+      const endIcon = this.createEndIcon();
+      L.marker(coords[coords.length - 1], { icon: endIcon })
         .addTo(this.map)
-        .bindPopup(`<b>🏁 ${ruta.nombre_ruta}</b>`);
+        .bindPopup(`<b>Fin: ${ruta.nombre_ruta}</b>`);
     });
 
     if (this.rutasPolylines.length > 0) {
@@ -1107,19 +1115,23 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.rutasPolylines.push(polyline);
 
-    const startMarker = L.marker(coords[0])
+    // Marcador de inicio con ícono de persona
+    const startIcon = this.createStartIcon();
+    const startMarker = L.marker(coords[0], { icon: startIcon })
       .addTo(this.map)
       .bindPopup(`
-        <b>${esPublica ? '🌍' : '🚩'} Inicio: ${ruta.nombre_ruta}</b><br>
+        <b>Inicio: ${ruta.nombre_ruta}</b><br>
         ${esPublica ? `<small>👤 Por: ${ruta.usuario_nombre || 'Usuario'}</small><br>` : ''}
         ${ruta.descripcion_ruta || ''}<br>
         <small>📏 Distancia total: ${ruta.longitud_ruta} km</small><br>
         <small>📍 Puntos GPS: ${coords.length}</small>
       `);
 
-    const endMarker = L.marker(coords[coords.length - 1])
+    // Marcador de fin con bandera roja
+    const endIcon = this.createEndIcon();
+    const endMarker = L.marker(coords[coords.length - 1], { icon: endIcon })
       .addTo(this.map)
-      .bindPopup(`<b>🏁 Fin: ${ruta.nombre_ruta}</b>`);
+      .bindPopup(`<b>Fin: ${ruta.nombre_ruta}</b>`);
 
     startMarker.openPopup();
 
@@ -1204,4 +1216,55 @@ export class MenuPage implements OnInit, AfterViewInit, OnDestroy {
     const total = this.rutasGuardadas.reduce((sum, ruta) => sum + (ruta.longitud_ruta || 0), 0);
     return total.toFixed(2);
   }
+
+  // ───────────────── ICONOS PERSONALIZADOS PARA RUTAS ─────────────────
+  private createStartIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'start-route-icon',
+      html: `
+        <div style="position: relative;">
+          <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <!-- Círculo exterior (borde blanco) -->
+            <circle cx="20" cy="20" r="18" fill="#fff" stroke="#4CAF50" stroke-width="2"/>
+            <!-- Círculo interior verde -->
+            <circle cx="20" cy="20" r="15" fill="#4CAF50"/>
+            <!-- Icono de persona -->
+            <g fill="#fff">
+              <!-- Cabeza -->
+              <circle cx="20" cy="15" r="4"/>
+              <!-- Cuerpo -->
+              <path d="M 20 19 Q 15 19 13 25 L 13 28 L 27 28 L 27 25 Q 25 19 20 19 Z"/>
+            </g>
+          </svg>
+        </div>
+      `,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -40]
+    });
+  }
+
+  private createEndIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'end-route-icon',
+      html: `
+        <div style="position: relative;">
+          <svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+            <!-- Poste de la bandera -->
+            <rect x="18" y="5" width="4" height="45" fill="#333"/>
+            <!-- Base del poste -->
+            <ellipse cx="20" cy="48" rx="8" ry="3" fill="#333" opacity="0.5"/>
+            <!-- Bandera roja -->
+            <path d="M 22 8 L 38 15 L 22 22 Z" fill="#F44336" stroke="#C62828" stroke-width="1"/>
+            <!-- Brillo en la bandera -->
+            <path d="M 22 8 L 30 12 L 22 16 Z" fill="#FF5252" opacity="0.6"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [40, 50],
+      iconAnchor: [20, 50],
+      popupAnchor: [0, -50]
+    });
+  }
 }
+

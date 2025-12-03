@@ -119,3 +119,52 @@ ion-card-subtitle {
     font-size: 48px;
   }
 }
+
+/* =========================================
+   📍 ICONOS PERSONALIZADOS DE RUTA
+   ========================================= */
+.user-location-icon,
+.end-flag-icon {
+  background: transparent !important;
+  border: none !important;
+  
+  svg {
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+  }
+}
+
+/* Animación para el ícono de inicio */
+.user-location-icon {
+  animation: bounceIn 0.6s ease-out;
+}
+
+/* Animación para el ícono de fin */
+.end-flag-icon {
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0) translateY(-50px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
