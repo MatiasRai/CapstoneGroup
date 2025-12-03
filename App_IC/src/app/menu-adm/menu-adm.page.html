@@ -83,8 +83,8 @@
 
         <p><strong>Estado:</strong>
           <span class="estado-tag"
-                [ngClass]="(e.estado || 'Pendiente').toLowerCase()">
-            {{ e.estado || 'Pendiente' }}
+                [ngClass]="(e.Estado || e.estado || 'pendiente').toLowerCase()">
+            {{ e.Estado || e.estado || 'Pendiente' }}
           </span>
         </p>
       </ion-card-content>
