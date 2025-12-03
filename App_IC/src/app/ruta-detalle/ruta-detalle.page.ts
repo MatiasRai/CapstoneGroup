@@ -21,7 +21,8 @@ export class RutaDetallePage implements OnInit, OnDestroy {
   private map: L.Map | null = null;
   private routePolyline: L.Polyline | null = null;
   private mapInitialized = false;
-  private readonly mapId = 'map-detalle'; // ID único para este mapa
+  private readonly mapId = 'map-detalle';
+  private timeouts: any[] = [];
 
   private host = window.location.hostname;
   private apiUrl = `http://${this.host}:3000/api/v1/rutas`;
@@ -49,22 +50,30 @@ export class RutaDetallePage implements OnInit, OnDestroy {
 
   ionViewDidEnter() {
     if (this.ruta?.coordenadas?.length > 0 && !this.mapInitialized) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         this.initMap();
       }, 100);
+      this.timeouts.push(timeout);
     }
   }
 
   ionViewWillLeave() {
-    this.destroyMap();
+    this.clearTimeouts();
   }
 
   ngOnDestroy() {
+    this.clearTimeouts();
     this.destroyMap();
+  }
+
+  private clearTimeouts() {
+    this.timeouts.forEach(t => clearTimeout(t));
+    this.timeouts = [];
   }
 
   private destroyMap() {
     if (this.map) {
+      this.map.off();
       this.map.remove();
       this.map = null;
       this.mapInitialized = false;
@@ -73,7 +82,6 @@ export class RutaDetallePage implements OnInit, OnDestroy {
 
     const container = document.getElementById(this.mapId);
     if (container) {
-      container.innerHTML = '';
       (container as any)._leaflet_id = null;
     }
   }
@@ -102,9 +110,10 @@ export class RutaDetallePage implements OnInit, OnDestroy {
         this.cargando = false;
 
         if (!this.mapInitialized && this.ruta.coordenadas?.length > 0) {
-          setTimeout(() => {
+          const timeout = setTimeout(() => {
             this.initMap();
           }, 200);
+          this.timeouts.push(timeout);
         }
       },
       error: () => {
@@ -126,9 +135,6 @@ export class RutaDetallePage implements OnInit, OnDestroy {
     if (this.map) {
       this.destroyMap();
     }
-
-    container.innerHTML = '';
-    (container as any)._leaflet_id = null;
 
     const coords = this.ruta.coordenadas;
 
@@ -156,12 +162,13 @@ export class RutaDetallePage implements OnInit, OnDestroy {
 
       this.mapInitialized = true;
 
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         if (this.map) {
           this.map.invalidateSize();
           this.mostrarRutaEnMapa();
         }
       }, 100);
+      this.timeouts.push(timeout);
     } catch (error) {
       console.error('❌ Error al inicializar mapa:', error);
       this.mapInitialized = false;
